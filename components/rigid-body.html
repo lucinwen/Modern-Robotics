@@ -1,0 +1,22 @@
+<div id="dof-rigid-body">
+  <div class="viz-row" role="group" aria-label="选择运动条件">
+    <button class="btn" type="button" data-mode="plane" aria-pressed="true">书平放在桌面</button>
+    <button class="btn" type="button" data-mode="space" aria-pressed="false">书拿到空中</button>
+    <button class="btn" type="button" data-mode="hinge" aria-pressed="false">装上铰链的门</button>
+  </div>
+  <svg class="dof-scene" role="img" aria-labelledby="dof-scene-title dof-scene-desc">
+    <title id="dof-scene-title">刚体在不同约束下的运动</title>
+    <desc id="dof-scene-desc">通过位置和角度滑条，观察平面物体的三个独立参数、空间物体的六个独立参数，以及铰链门的一个角度。</desc>
+    <g class="scene-content"></g>
+  </svg>
+  <div class="dof-status" aria-live="polite"><span class="dof-count">独立参数：3 个</span><span class="text-small dof-view">俯视 · 同一面始终朝上</span></div>
+  <div class="viz-controls dof-controls">
+    <label class="form-label" data-parameter="x"><span class="dof-control-heading"><span>左右位置 x</span><output class="tabular-nums" for="dof-x">0.00 m</output></span><input class="form-range" id="dof-x" type="range" min="-1.2" max="1.2" step="0.01" value="0" aria-label="左右位置x"></label>
+    <label class="form-label" data-parameter="y"><span class="dof-control-heading"><span>前后位置 y</span><output class="tabular-nums" for="dof-y">0.00 m</output></span><input class="form-range" id="dof-y" type="range" min="-0.9" max="0.9" step="0.01" value="0" aria-label="前后位置y"></label>
+    <label class="form-label" data-parameter="z" hidden><span class="dof-control-heading"><span>上下位置 z</span><output class="tabular-nums" for="dof-z">1.40 m</output></span><input class="form-range" id="dof-z" type="range" min="1.1" max="2.2" step="0.01" value="1.4" aria-label="上下位置z"></label>
+    <label class="form-label" data-parameter="roll" hidden><span class="dof-control-heading"><span>滚转角</span><output class="tabular-nums" for="dof-roll">0°</output></span><input class="form-range" id="dof-roll" type="range" min="-180" max="180" step="1" value="0" aria-label="滚转角"></label>
+    <label class="form-label" data-parameter="pitch" hidden><span class="dof-control-heading"><span>俯仰角</span><output class="tabular-nums" for="dof-pitch">0°</output></span><input class="form-range" id="dof-pitch" type="range" min="-70" max="70" step="1" value="0" aria-label="俯仰角"></label>
+    <label class="form-label" data-parameter="yaw"><span class="dof-control-heading"><span class="dof-yaw-label">平面内转动</span><output class="tabular-nums" for="dof-yaw">20°</output></span><input class="form-range" id="dof-yaw" type="range" min="-180" max="180" step="1" value="20" aria-label="转向角"></label>
+    <label class="form-label" data-parameter="open" hidden><span class="dof-control-heading"><span>门的开合角度</span><output class="tabular-nums" for="dof-open">75°</output></span><input class="form-range" id="dof-open" type="range" min="0" max="110" step="1" value="75" aria-label="门的开合角度"></label>
+  </div>
+</div>

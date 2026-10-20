@@ -1,0 +1,21 @@
+<div id="dof-cspace-explorer">
+  <div class="dof-cspace-panels">
+    <figure>
+      <figcaption>实际机械臂 · 基座固定</figcaption>
+      <svg id="dof-cspace-arm" class="dof-cspace-svg" role="img" aria-label="两个转动关节组成的平面机械臂，改变两个角度可改变整条机械臂的摆法。"></svg>
+    </figure>
+    <figure>
+      <figcaption>构型空间 · 所有角度组合</figcaption>
+      <svg id="dof-cspace-torus" class="dof-cspace-svg" role="img" aria-label="环面表面代表两个关节所有角度组合，每个点对应机械臂的一种摆法。"></svg>
+    </figure>
+  </div>
+  <div class="viz-controls">
+    <label class="form-label" for="dof-cspace-angle-one">关节 1 的角度 <output id="dof-cspace-value-one" class="tabular-nums">40°</output>
+      <input class="form-range" id="dof-cspace-angle-one" type="range" min="0" max="360" step="1" value="40" aria-label="关节1相对水平线的角度，单位度">
+    </label>
+    <label class="form-label" for="dof-cspace-angle-two">关节 2 的角度 <output id="dof-cspace-value-two" class="tabular-nums">60°</output>
+      <input class="form-range" id="dof-cspace-angle-two" type="range" min="0" max="360" step="1" value="60" aria-label="关节2相对第一根杆延伸方向的角度，单位度">
+    </label>
+  </div>
+  <div id="dof-cspace-status" class="dof-cspace-status text-small" aria-live="polite">两个独立角度 · 一个点对应一种摆法</div>
+</div>

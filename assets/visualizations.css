@@ -1,0 +1,43 @@
+/* rigid-body */
+#dof-rigid-body { color: var(--foreground); display: grid; gap: 12px; }
+  #dof-rigid-body .dof-scene { display: block; width: 100%; height: 330px; }
+  #dof-rigid-body .dof-scene text { fill: var(--foreground); font-size: 12px; font-weight: 400; }
+  #dof-rigid-body .dof-status { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 20px; }
+  #dof-rigid-body .dof-control-heading { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px; }
+  #dof-rigid-body [hidden] { display: none !important; }
+  #dof-rigid-body .dof-grid-line { stroke: var(--border); stroke-width: 1; fill: none; }
+  #dof-rigid-body .dof-axis { stroke: var(--muted-foreground); stroke-width: 1.2; fill: none; }
+  #dof-rigid-body .dof-edge { stroke: var(--foreground); stroke-opacity: .65; stroke-width: 1.25; }
+  #dof-rigid-body .dof-cover { fill: color-mix(in srgb, var(--viz-series-1) 28%, var(--background)); }
+  #dof-rigid-body .dof-side { fill: color-mix(in srgb, var(--viz-series-1) 12%, var(--background)); }
+  #dof-rigid-body .dof-back { fill: color-mix(in srgb, var(--viz-series-1) 42%, var(--background)); }
+  #dof-rigid-body .dof-direction { fill: var(--viz-series-1); stroke: var(--foreground); stroke-width: .6; }
+  #dof-rigid-body .dof-origin { fill: var(--foreground); }
+  @media (max-width: 420px) { #dof-rigid-body .dof-scene { height: 300px; } }
+
+/* three-points */
+#dof-three-points { display: grid; gap: 12px; color: var(--foreground); }
+    #dof-three-points .dof3-stage { min-width: 0; }
+    #dof-three-points .dof3-fieldhead { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
+    #dof-three-points .dof3-picture { display: block; width: 100%; overflow: visible; }
+    #dof-three-points .dof3-picture text { fill: var(--foreground); font-family: inherit; font-weight: 400; }
+    #dof-three-points .dof3-picture .dof3-label { paint-order: stroke; stroke: var(--background); stroke-width: 4px; stroke-linejoin: round; }
+    #dof-three-points [hidden] { display: none !important; }
+
+/* configuration-space */
+#dof-cspace-explorer { display: grid; gap: 16px; color: var(--foreground); }
+    #dof-cspace-explorer .dof-cspace-panels { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    #dof-cspace-explorer figure { min-width: 0; margin: 0; }
+    #dof-cspace-explorer figcaption { margin-bottom: 8px; font-weight: 500; }
+    #dof-cspace-explorer .dof-cspace-svg { width: 100%; display: block; overflow: visible; }
+    #dof-cspace-explorer .dof-cspace-svg text { fill: var(--foreground); font-family: inherit; font-size: var(--font-size-base); font-weight: 400; }
+    #dof-cspace-explorer .dof-cspace-svg .direct-label { paint-order: stroke; stroke: var(--background); stroke-width: 4px; stroke-linejoin: round; }
+    #dof-cspace-explorer .dof-cspace-status { color: var(--muted-foreground); }
+    @media (max-width: 560px) { #dof-cspace-explorer .dof-cspace-panels { grid-template-columns: 1fr; } }
+
+/* Stack paired views within a narrow article column as well as on mobile. */
+#dof-cspace-explorer { container-type: inline-size; container-name: dof-cspace; }
+@container dof-cspace (max-width: 560px) {
+  #dof-cspace-explorer .dof-cspace-panels { grid-template-columns: 1fr; }
+}
+

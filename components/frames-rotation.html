@@ -1,0 +1,25 @@
+<div id="mr-frames-rotation" class="mr-frame-widget">
+  <div class="mr-frame-split">
+    <figure class="mr-frame-figure">
+      <figcaption>世界系 w 固定 · 物体系 b 随物体转动</figcaption>
+      <svg class="mr-frame-svg" data-frame-scene role="img" aria-label="三维右手坐标系：灰色世界坐标轴固定，三根彩色物体单位轴随姿态角旋转。"></svg>
+      <div class="mr-frame-legend"><span><i class="mr-axis-swatch mr-axis-x"></i>x_b · 第 1 列</span><span><i class="mr-axis-swatch mr-axis-y"></i>y_b · 第 2 列</span><span><i class="mr-axis-swatch mr-axis-z"></i>z_b · 第 3 列</span></div>
+    </figure>
+    <div class="mr-frame-numbers">
+      <div data-rotation-matrix class="mr-matrix-holder"></div>
+      <details class="mr-frame-check">
+        <summary>旋转矩阵核对</summary>
+        <div data-rotation-check class="mr-matrix-holder mr-matrix-small"></div>
+        <output aria-live="off" data-rotation-det class="mr-frame-value"></output>
+        <output aria-live="off" data-rotation-error class="mr-frame-value text-small"></output>
+      </details>
+    </div>
+  </div>
+  <div class="viz-controls">
+    <label class="form-label" for="mr-frame-roll">滚转角 roll <output aria-live="off" class="tabular-nums" data-frame-value="roll">0°</output><input class="form-range" id="mr-frame-roll" data-frame-angle="roll" type="range" min="-180" max="180" step="1" value="0"></label>
+    <label class="form-label" for="mr-frame-pitch">俯仰角 pitch <output aria-live="off" class="tabular-nums" data-frame-value="pitch">0°</output><input class="form-range" id="mr-frame-pitch" data-frame-angle="pitch" type="range" min="-80" max="80" step="1" value="0"></label>
+    <label class="form-label" for="mr-frame-yaw">转向角 yaw <output aria-live="off" class="tabular-nums" data-frame-value="yaw">35°</output><input class="form-range" id="mr-frame-yaw" data-frame-angle="yaw" type="range" min="-180" max="180" step="1" value="35"></label>
+  </div>
+  <div class="mr-frame-formula">R_w_b = Rz(yaw) Ry(pitch) Rx(roll) · b → w</div>
+  <div class="mr-frame-status text-small" data-frame-status aria-live="polite">右手系 · 列向量约定 · 两个原点重合</div>
+</div>

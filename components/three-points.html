@@ -1,0 +1,32 @@
+<div id="dof-three-points" class="dof3-root">
+  <h3>三个点确定刚体</h3>
+  <div class="viz-row" role="group" aria-label="选择确定刚体的步骤">
+    <button class="btn" type="button" aria-pressed="true" data-dof3-stage="0">① 放好 A</button>
+    <button class="btn" type="button" aria-pressed="false" data-dof3-stage="1">② 确定 B</button>
+    <button class="btn" type="button" aria-pressed="false" data-dof3-stage="2">③ 确定 C</button>
+  </div>
+  <div id="dof3-status" aria-live="polite">本步新增 3 个参数：A 的位置。</div>
+  <svg class="dof3-picture" role="img" aria-labelledby="dof3-title dof3-description">
+    <title id="dof3-title">三角刚板上的三个非共线点</title>
+    <desc id="dof3-description">依次确定 A 的三个位置参数、B 在球面上的两个方向参数、C 绕 AB 的一个旋转参数。三角板的三条边长度始终不变。</desc>
+    <g id="dof3-drawing"></g>
+  </svg>
+  <div class="dof3-stage" data-dof3-panel="0">
+    <div class="viz-controls">
+      <label class="form-label" for="dof3-ax"><span class="dof3-fieldhead"><span>A 的左右位置 x</span><output class="tabular-nums" id="dof3-ax-value">0.00 m</output></span><input class="form-range" id="dof3-ax" type="range" min="-0.6" max="0.6" step="0.01" value="0"></label>
+      <label class="form-label" for="dof3-ay"><span class="dof3-fieldhead"><span>A 的前后位置 y</span><output class="tabular-nums" id="dof3-ay-value">0.00 m</output></span><input class="form-range" id="dof3-ay" type="range" min="-0.6" max="0.6" step="0.01" value="0"></label>
+      <label class="form-label" for="dof3-az"><span class="dof3-fieldhead"><span>A 的上下位置 z</span><output class="tabular-nums" id="dof3-az-value">0.00 m</output></span><input class="form-range" id="dof3-az" type="range" min="-0.6" max="0.6" step="0.01" value="0"></label>
+    </div>
+  </div>
+  <div class="dof3-stage" data-dof3-panel="1" hidden>
+    <div class="viz-controls">
+      <label class="form-label" for="dof3-longitude"><span class="dof3-fieldhead"><span>B 的方向角 ①</span><output class="tabular-nums" id="dof3-longitude-value">−20°</output></span><input class="form-range" id="dof3-longitude" type="range" min="-180" max="180" step="1" value="-20"></label>
+      <label class="form-label" for="dof3-latitude"><span class="dof3-fieldhead"><span>B 的方向角 ②</span><output class="tabular-nums" id="dof3-latitude-value">20°</output></span><input class="form-range" id="dof3-latitude" type="range" min="-70" max="70" step="1" value="20"></label>
+    </div>
+  </div>
+  <div class="dof3-stage" data-dof3-panel="2" hidden>
+    <div class="viz-controls">
+      <label class="form-label" for="dof3-spin"><span class="dof3-fieldhead"><span>C 绕 AB 的角度</span><output class="tabular-nums" id="dof3-spin-value">−40°</output></span><input class="form-range" id="dof3-spin" type="range" min="-180" max="180" step="1" value="-40"></label>
+    </div>
+  </div>
+</div>

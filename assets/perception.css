@@ -1,0 +1,24 @@
+#day1-point-cloud{display:grid;gap:1rem;color:var(--foreground);min-width:0;container-type:inline-size;container-name:day1-perception}
+#day1-point-cloud .perception-topline{display:flex;flex-wrap:wrap;justify-content:space-between;gap:.5rem}
+#day1-point-cloud .perception-topline span,#day1-point-cloud .perception-caption{color:var(--muted-foreground);font-size:.85rem}
+#day1-point-cloud .perception-panels{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+#day1-point-cloud h4{margin:0 0 .5rem;font-size:1rem;font-weight:500}
+#day1-point-cloud .perception-scene{display:block;width:100%;height:280px;overflow:visible}
+#day1-point-cloud .perception-scene text{fill:var(--foreground);font:12px sans-serif}
+#day1-point-cloud .perception-legend,#day1-point-cloud .perception-options{display:flex;flex-wrap:wrap;gap:.6rem 1.3rem;align-items:center;font-size:.85rem}
+#day1-point-cloud .perception-legend span,#day1-point-cloud .perception-options label{display:inline-flex;align-items:center;gap:.4rem;min-height:28px}
+#day1-point-cloud .perception-options input[type="checkbox"]{accent-color:var(--viz-series-1)}
+#day1-point-cloud .perception-legend i{display:inline-block;width:10px;height:10px}
+#day1-point-cloud .perception-reference{border:1px solid var(--muted-foreground);border-radius:50%}
+#day1-point-cloud .perception-measured{background:var(--viz-series-1);border-radius:50%}
+#day1-point-cloud .perception-link{border-top:1px dashed var(--viz-series-2);height:0!important;width:17px!important}
+#day1-point-cloud .perception-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+#day1-point-cloud output{float:right;font-variant-numeric:tabular-nums}
+#day1-point-cloud .perception-values{margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.8rem 1.3rem}
+#day1-point-cloud .perception-values div{min-width:0}
+#day1-point-cloud dt{font-size:.8rem;color:var(--muted-foreground)}
+#day1-point-cloud dd{margin:.2rem 0 0;font-variant-numeric:tabular-nums;font-size:1rem}
+#day1-point-cloud .perception-announcement{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@container day1-perception (max-width:620px){#day1-point-cloud .perception-panels,#day1-point-cloud .perception-controls{grid-template-columns:1fr}#day1-point-cloud .perception-scene{height:265px}}
+@media(max-width:620px){#day1-point-cloud .perception-panels,#day1-point-cloud .perception-controls{grid-template-columns:1fr}#day1-point-cloud .perception-scene{height:265px}}
+@media(pointer:coarse){#day1-point-cloud .perception-options label{min-height:44px}}

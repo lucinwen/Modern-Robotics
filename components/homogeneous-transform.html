@@ -1,0 +1,43 @@
+<div id="mr-homogeneous-transform" class="mr-frame-widget">
+  <div class="viz-row" role="group" aria-label="齐次变换的模式">
+    <button class="btn" type="button" data-transform-mode="single" aria-pressed="true">相机 → 世界</button>
+    <button class="btn" type="button" data-transform-mode="chain" aria-pressed="false">相机 → 底座 → 世界</button>
+  </div>
+  <div class="mr-frame-split">
+    <figure class="mr-frame-figure">
+      <figcaption data-transform-scene-caption>世界系 w 与相机系 c</figcaption>
+      <svg class="mr-frame-svg mr-transform-svg" data-transform-scene role="img" aria-label="三维坐标变换：相机坐标系中的点经旋转和平移，表达为世界坐标。"></svg>
+      <div class="mr-frame-legend"><span>灰色：w 世界系</span><span>彩色：c 相机系</span><span data-transform-base-legend hidden>虚线：b 底座系</span></div>
+    </figure>
+    <div class="mr-frame-numbers">
+      <div data-transform-matrix class="mr-matrix-holder"></div>
+      <div class="mr-frame-formula" data-transform-equation>p_w = R_w_c p_c + t_w_c</div>
+      <output aria-live="off" class="mr-frame-value tabular-nums" data-transform-point></output>
+      <output aria-live="off" class="mr-frame-value tabular-nums" data-transform-inverse></output>
+      <output aria-live="off" class="mr-frame-value text-small" data-transform-error></output>
+    </div>
+  </div>
+  <div data-transform-controls="single">
+    <div class="viz-controls">
+      <label class="form-label" for="mr-transform-yaw">相机绕 z 的角度 <output aria-live="off" class="tabular-nums" data-transform-value="yaw">40°</output><input class="form-range" id="mr-transform-yaw" data-transform-input="yaw" type="range" min="-180" max="180" step="1" value="40"></label>
+      <label class="form-label" for="mr-transform-tx">相机原点 t_x <output aria-live="off" class="tabular-nums" data-transform-value="tx">0.80 m</output><input class="form-range" id="mr-transform-tx" data-transform-input="tx" type="range" min="-1" max="1.5" step="0.05" value="0.8"></label>
+      <label class="form-label" for="mr-transform-ty">相机原点 t_y <output aria-live="off" class="tabular-nums" data-transform-value="ty">0.40 m</output><input class="form-range" id="mr-transform-ty" data-transform-input="ty" type="range" min="-1" max="1.5" step="0.05" value="0.4"></label>
+      <label class="form-label" for="mr-transform-tz">相机原点 t_z <output aria-live="off" class="tabular-nums" data-transform-value="tz">0.50 m</output><input class="form-range" id="mr-transform-tz" data-transform-input="tz" type="range" min="0" max="1.5" step="0.05" value="0.5"></label>
+    </div>
+    <div class="viz-row" role="group" aria-label="观察点的数值计算步骤">
+      <button class="btn" type="button" data-transform-step="rotation" aria-pressed="false">① 看旋转项 R p_c</button>
+      <button class="btn" type="button" data-transform-step="translation" aria-pressed="true">② 再加平移 t</button>
+    </div>
+    <output aria-live="off" class="mr-frame-value text-small" data-transform-step-value></output>
+  </div>
+  <div data-transform-controls="chain" hidden>
+    <div class="viz-controls">
+      <label class="form-label" for="mr-transform-base-yaw">底座相对世界的转角 <output aria-live="off" class="tabular-nums" data-transform-value="baseYaw">30°</output><input class="form-range" id="mr-transform-base-yaw" data-transform-input="baseYaw" type="range" min="-180" max="180" step="1" value="30"></label>
+      <label class="form-label" for="mr-transform-camera-offset">相机沿底座 x 轴的偏移 <output aria-live="off" class="tabular-nums" data-transform-value="cameraOffset">0.70 m</output><input class="form-range" id="mr-transform-camera-offset" data-transform-input="cameraOffset" type="range" min="0" max="1.5" step="0.05" value="0.7"></label>
+    </div>
+    <div class="mr-frame-formula">T_w_c = T_w_b T_b_c · c → b → w</div>
+    <div class="mr-frame-matrix-pair"><div data-transform-base-matrix class="mr-matrix-holder mr-matrix-small"></div><div data-transform-camera-matrix class="mr-matrix-holder mr-matrix-small"></div></div>
+    <output aria-live="off" class="mr-frame-value text-small" data-transform-chain-point></output>
+  </div>
+  <div class="mr-frame-status text-small" data-transform-status aria-live="polite">固定相机点 p_c = (0.70, 0.35, 0.50) m · 齐次末项为 1</div>
+</div>

@@ -1,0 +1,17 @@
+#mr-workspace { display: grid; gap: 16px; color: var(--foreground); }
+#mr-workspace [hidden] { display: none !important; }
+#mr-workspace .ws-scene { display: block; width: 100%; height: 370px; }
+#mr-workspace .ws-scene text { font-size: 12px; font-family: inherit; fill: var(--foreground); }
+#mr-workspace .ws-scene .ws-direct-label { paint-order: stroke; stroke: var(--background); stroke-width: 4px; stroke-linejoin: round; }
+#mr-workspace .ws-legend { display: flex; flex-wrap: wrap; gap: 8px 20px; }
+#mr-workspace .ws-legend span { display: inline-flex; align-items: center; gap: 7px; }
+#mr-workspace .ws-legend i { display: inline-block; width: 11px; height: 11px; box-sizing: border-box; }
+#mr-workspace .ws-area-key { background: color-mix(in srgb, var(--viz-series-1) 18%, transparent); }
+#mr-workspace .ws-tip-key { border-radius: 50%; background: var(--viz-series-1); }
+#mr-workspace .ws-target-key { border: 2px solid var(--viz-series-2); transform: rotate(45deg); }
+#mr-workspace .ws-results { margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px 24px; }
+#mr-workspace .ws-results div { min-width: 0; }
+#mr-workspace .ws-results dt { margin: 0 0 4px; color: var(--muted-foreground); }
+#mr-workspace .ws-results dd { margin: 0; overflow-wrap: anywhere; }
+#mr-workspace .ws-assumptions { color: var(--muted-foreground); }
+@media (max-width: 420px) { #mr-workspace .ws-scene { height: 310px; } }

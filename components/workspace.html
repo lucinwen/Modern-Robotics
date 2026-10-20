@@ -1,0 +1,35 @@
+<div id="mr-workspace">
+  <div class="viz-row" role="group" aria-label="选择任务要求">
+    <button class="btn" type="button" data-ws-mode="position" aria-pressed="true">只要求末端位置</button>
+    <button class="btn" type="button" data-ws-mode="pose" aria-pressed="false">再加一个朝向要求</button>
+  </div>
+  <div class="ws-legend text-small">
+    <span><i class="ws-area-key" aria-hidden="true"></i>位置可达域</span>
+    <span><i class="ws-tip-key" aria-hidden="true"></i>当前末端</span>
+    <span><i class="ws-target-key" aria-hidden="true"></i>目标</span>
+  </div>
+  <svg class="ws-scene" role="img" aria-labelledby="ws-title ws-description">
+    <title id="ws-title">两关节机械臂的位置工作空间</title>
+    <desc id="ws-description">两根长度分别为一米和零点七米的杆，固定基座、关节可转满一圈。可达的末端位置形成内半径零点三米、外半径一点七米的圆环。目标位置和当前末端分别标记。</desc>
+  </svg>
+  <div class="viz-controls">
+    <label class="form-label" for="ws-target-x">目标位置 x <output class="tabular-nums" id="ws-target-x-value">1.00 m</output><input class="form-range" id="ws-target-x" type="range" min="-2" max="2" step="0.01" value="1"></label>
+    <label class="form-label" for="ws-target-y">目标位置 y <output class="tabular-nums" id="ws-target-y-value">0.80 m</output><input class="form-range" id="ws-target-y" type="range" min="-2" max="2" step="0.01" value="0.8"></label>
+    <label class="form-label" for="ws-q1">关节 1 的角度 <output class="tabular-nums" id="ws-q1-value">35.0°</output><input class="form-range" id="ws-q1" type="range" min="-180" max="180" step="0.1" value="35"></label>
+    <label class="form-label" for="ws-q2">关节 2 的角度 <output class="tabular-nums" id="ws-q2-value">80.0°</output><input class="form-range" id="ws-q2" type="range" min="-180" max="180" step="0.1" value="80"></label>
+    <label class="form-label" for="ws-phi" data-ws-pose hidden>目标朝向（相对 +x）<output class="tabular-nums" id="ws-phi-value">0°</output><input class="form-range" id="ws-phi" type="range" min="-180" max="180" step="1" value="0"></label>
+  </div>
+  <div class="viz-row" role="group" aria-label="到达目标位置的两种关节组合">
+    <button class="btn" type="button" data-ws-solve="0">到达位置 · 解 1</button>
+    <button class="btn" type="button" data-ws-solve="1">到达位置 · 解 2</button>
+    <button class="btn" type="button" data-ws-current-heading hidden>将目标朝向设为当前朝向</button>
+  </div>
+  <dl class="ws-results" aria-live="polite">
+    <div><dt>目标位置</dt><dd id="ws-reach-result">位于可达域内</dd></div>
+    <div><dt>当前末端</dt><dd id="ws-current-result">尚未到达目标位置</dd></div>
+    <div><dt>当前坐标</dt><dd class="tabular-nums" id="ws-coordinates">（0.52, 1.21）m</dd></div>
+    <div data-ws-pose hidden><dt>位置与朝向同时满足</dt><dd id="ws-pose-result">—</dd></div>
+  </dl>
+  <div class="ws-assumptions text-small">2 个关节 · 2 个自由度 · 固定基座 · 无关节限位与障碍；本图只检查静态几何，不规划运动路径。</div>
+  <div class="text-small" data-ws-pose hidden>本演示到位容差：位置 0.01 m，朝向 1°。箭头沿第二根杆的延伸方向。</div>
+</div>

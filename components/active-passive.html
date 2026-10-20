@@ -1,0 +1,18 @@
+<div id="mr-active-passive" class="mr-frame-widget">
+  <div class="mr-frame-pair">
+    <figure class="mr-frame-figure">
+      <figcaption>主动旋转 · 坐标轴固定，点移动</figcaption>
+      <svg class="mr-frame-svg" data-active-scene role="img" aria-label="固定世界坐标系中，点从原位置沿圆弧旋转到新位置。"></svg>
+      <div class="mr-frame-formula">p′_w = R(θ) p_w</div>
+      <output aria-live="off" class="mr-frame-value tabular-nums" data-active-value></output>
+    </figure>
+    <figure class="mr-frame-figure">
+      <figcaption>被动换坐标 · 点固定，坐标轴旋转</figcaption>
+      <svg class="mr-frame-svg" data-passive-scene role="img" aria-label="同一个世界点保持原位，物体坐标轴旋转，虚线显示点在新坐标系中的坐标分量。"></svg>
+      <div class="mr-frame-formula">p_b = R_w_bᵀ p_w</div>
+      <output aria-live="off" class="mr-frame-value tabular-nums" data-passive-value></output>
+    </figure>
+  </div>
+  <label class="form-label" for="mr-active-passive-angle">同一个角度 θ <output aria-live="off" class="tabular-nums" data-active-angle-value>45°</output><input class="form-range" id="mr-active-passive-angle" type="range" min="-180" max="180" step="1" value="45"></label>
+  <div class="mr-frame-status text-small" data-active-status aria-live="polite">起始点 p_w = (1.00, 0.50) · 俯视，+z 指向屏幕外</div>
+</div>

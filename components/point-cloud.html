@@ -1,0 +1,19 @@
+<section id="day1-point-cloud" class="perception-explorer" aria-label="合成点云与坐标配准演示">
+  <div class="perception-topline"><strong>合成杯子点云</strong><span>合成示意 · 非传感器实测</span></div>
+  <div class="perception-panels">
+    <div><h4>相机局部坐标 C</h4><svg class="perception-scene" data-scene="camera" role="img" aria-label="杯子采样点在相机局部坐标系中的表示"></svg></div>
+    <div><h4>变换到世界坐标 W</h4><svg class="perception-scene" data-scene="world" role="img" aria-label="估计外参变换后的测量点与世界参考模型对比"></svg></div>
+  </div>
+  <div class="perception-legend"><span><i class="perception-reference"></i>合成参考模型</span><span><i class="perception-measured"></i>测量点</span><span><i class="perception-link"></i>已知对应关系</span></div>
+  <div class="viz-row" role="group" aria-label="选择相机外参示例"><button type="button" class="btn" data-perception-preset="wrong">外参误差示例</button><button type="button" class="btn" data-perception-preset="true">按示意真值对齐</button></div>
+  <div class="perception-controls">
+    <label class="form-label" for="perception-yaw">估计相机 yaw <output for="perception-yaw" data-value="yaw" aria-live="off">−20°</output><input id="perception-yaw" class="form-range" type="range" min="-40" max="90" step="1" value="-20" data-perception="yaw"></label>
+    <label class="form-label" for="perception-tx">估计相机 x 平移 <output for="perception-tx" data-value="tx" aria-live="off">−0.20 m</output><input id="perception-tx" class="form-range" type="range" min="-0.5" max="1.4" step="0.01" value="-0.2" data-perception="tx"></label>
+  </div>
+  <div class="perception-options"><label><input type="checkbox" data-perception="noise" checked>合成测量噪声</label><label><input type="checkbox" data-perception="occlusion">遮挡部分采样点</label></div>
+  <dl class="perception-values" aria-live="off"><div><dt>当前测量点数</dt><dd data-metric="count">—</dd></div><div><dt>对齐误差（均方根）</dt><dd data-metric="alignment">—</dd></div><div><dt>测量噪声（均方根）</dt><dd data-metric="noise">—</dd></div><div><dt>物体抓取姿态</dt><dd>未求解 · 未执行</dd></div></dl>
+  <div class="perception-caption">误差数值描述点的整体偏差大小；数值越小，整体偏差越小。</div>
+  <div class="perception-caption">示意真值：yaw = 30°，t = (0.65, −0.65, 0.20) m；仅调 yaw 和 x，其余外参固定。</div>
+  <div class="perception-caption">C、W 均采用 z 向上的示意坐标；对应关系已知。使用已知示意真值对齐，不自动估计未知位姿。</div>
+  <div class="perception-announcement" data-perception-announcement role="status" aria-live="polite" aria-atomic="true"></div>
+</section>

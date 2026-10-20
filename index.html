@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f8f7">
+  <meta name="description" content="Day 1 机器人空间基础：从刚体自由度到坐标系、旋转矩阵、齐次变换、点云配准与门通行。面向初学者的中文讲解与交互可视化。">
+  <title>Day 01 · 看懂空间与运动 | Modern Robotics 学习手记</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/site.css">
+  <link rel="stylesheet" href="assets/visualizations.css">
+  <link rel="stylesheet" href="assets/frames.css">
+  <link rel="stylesheet" href="assets/workspace.css">
+  <link rel="stylesheet" href="assets/perception.css">
+  <link rel="stylesheet" href="assets/rooms.css">
+  <script src="assets/site.js" defer></script>
+  <script src="assets/visualizations.js" defer></script>
+  <script src="assets/frames.js" defer></script>
+  <script src="assets/workspace.js" defer></script>
+  <script src="assets/perception.js" defer></script>
+  <script src="assets/rooms.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">跳到教程正文</a>
+<header class="site-header">
+  <a class="brand" href="#start" aria-label="Modern Robotics 学习手记首页"><span class="brand-monogram">MR<span>.</span></span><span class="brand-name">Modern Robotics<small>可视化学习手记</small></span></a>
+  <div class="header-actions"><span class="edition">DAY 01 / 空间基础</span><a href="https://github.com/venividici/-Modern-Robotics" target="_blank" rel="noopener noreferrer">GitHub 仓库 <span aria-hidden="true">↗</span></a><button class="btn theme-toggle" id="theme-toggle" type="button" aria-label="切换明暗主题">切换主题</button></div>
+</header>
+<div class="page-shell">
+  <aside class="sidebar" aria-label="学习导航">
+    <div class="sidebar-intro"><span class="eyebrow">学习路线</span><strong>第一天，建立空间直觉。</strong></div>
+    <nav class="lesson-nav" aria-label="本页目录">
+      <a href="#start" class="is-current" aria-current="location"><span>00</span> 从这里开始</a>
+      <a href="#rigid-body"><span>01</span> 自由度：怎么摆</a>
+      <a href="#configuration-space"><span>02</span> 三种“空间”</a>
+      <a href="#frames"><span>03</span> 坐标系与旋转矩阵</a>
+      <a href="#active-passive"><span>04</span> 转动，还是换坐标</a>
+      <a href="#transforms"><span>05</span> 位姿与坐标变换</a>
+      <a href="#perception"><span>06</span> 相机如何看见空间</a>
+      <a href="#room-validation"><span>07</span> 机器人真的能过门吗</a>
+      <a href="#practice"><span>08</span> 亲手解释与记录</a>
+      <a href="#sources"><span>↗</span> 对应课程与来源</a>
+    </nav>
+    <div class="sidebar-note"><span class="small-label">这一页怎么用</span><p>每次学一小节。<br>先观察，改一个参数，<br>再用自己的话解释。</p><a href="https://github.com/venividici/14plan/blob/main/DAILY/day-01.md" target="_blank" rel="noopener noreferrer">查看原 Day 1 计划 ↗</a></div>
+  </aside>
+  <main id="main">
+    <section id="start" class="hero lesson-section" data-nav>
+      <div class="eyebrow">MODERN ROBOTICS / 第一天</div>
+      <h1>看懂空间，<br><span>再理解运动。</span></h1>
+      <p class="hero-lead">从一本书的摆放，到机器人找到隔壁房间里的杯子。把 Day 1 的抽象概念，拆成可以观察、可以操作的小问题。</p>
+      <div class="lesson-meta"><span>2026.10.20</span><span>6 个指定短片 + MIT 讲义选读</span><span>9 个交互演示</span></div>
+      <a class="start-link" href="#rigid-body">从第一幅图开始 <span aria-hidden="true">↓</span></a>
+      <div class="opening-question"><span class="small-label">贯穿今天的一个问题</span><p>“机器人，去隔壁房间拿一个杯子。”</p><span>杯子在哪里？坐标相对谁？手够得到吗？门能过去吗？看见了就能抓住吗？</span></div>
+      <div class="reading-guide"><h2>不需要先学完线性代数</h2><p>遇到一个新词，先看它在图里对应什么。看到公式时，先问它的<strong>输入是什么、输出是什么、坐标相对谁</strong>。一节中只改一个滑条，猜一猜结果再拖动。</p><p>本教程统一采用<strong>米、右手坐标系、列向量</strong>。像 <code>(1, 2, 0)</code> 这样的三个数，按顺序表示 x、y、z；纸面上横着写只是为了方便阅读。</p><details><summary>“点、向量、矩阵”还陌生？先看这 3 句话</summary><ul><li><strong>点的位置</strong>：从选定原点出发，沿三根轴分别走多远。</li><li><strong>向量</strong>：带方向和长度的箭头，例如“向右移动 1 米”；坐标表通常也写成一列数。</li><li><strong>矩阵</strong>：按行列排列的数字表。本页里的旋转矩阵，记录三根新坐标轴分别指向哪里。它怎样作用于一个点，会在第 3 节拆开。</li></ul></details></div>
+      <p class="source-note">课程范围依据 <a href="https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/DAILY/day-01.md" target="_blank" rel="noopener noreferrer">Day 1 计划</a>。教程依据指定短片的官方转写与 MIT 在线讲义整理；来源与原视频入口见页末。</p>
+    </section>
+
+    <section id="rigid-body" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>01</span> 对应 P4 · 2.1</div>
+      <h2>自由度：描述一种摆法，<br class="desktop-break">最少要几个独立的数？</h2>
+      <p>把一本合上的硬壳书看成不会变形的整体。移动和转动时，书上任意两点的距离保持不变，这就是<strong>刚体</strong>。它现在摆在哪里、朝哪个方向，合起来描述它的<strong>构型</strong>。</p>
+      <div class="key-idea"><strong>自由度</strong><p>在一个构型附近，描述它允许的摆法，最少需要的独立连续参数个数。先用下面的动作体会“独立”。</p></div>
+      <div class="try-this"><span>动手看</span><p>先选“书平放在桌面”，依次动三个滑条；再选“书拿到空中”，比较改变位置与改变朝向。最后看看铰链门只剩哪一种动作。</p></div>
+      <figure class="interactive-figure"><div id="dof-rigid-body">
+  <div class="viz-row" role="group" aria-label="选择运动条件">
+    <button class="btn" type="button" data-mode="plane" aria-pressed="true">书平放在桌面</button>
+    <button class="btn" type="button" data-mode="space" aria-pressed="false">书拿到空中</button>
+    <button class="btn" type="button" data-mode="hinge" aria-pressed="false">装上铰链的门</button>
+  </div>
+  <svg class="dof-scene" role="img" aria-labelledby="dof-scene-title dof-scene-desc">
+    <title id="dof-scene-title">刚体在不同约束下的运动</title>
+    <desc id="dof-scene-desc">通过位置和角度滑条，观察平面物体的三个独立参数、空间物体的六个独立参数，以及铰链门的一个角度。</desc>
+    <g class="scene-content"></g>
+  </svg>
+  <div class="dof-status" aria-live="polite"><span class="dof-count">独立参数：3 个</span><span class="text-small dof-view">俯视 · 同一面始终朝上</span></div>
+  <div class="viz-controls dof-controls">
+    <label class="form-label" data-parameter="x"><span class="dof-control-heading"><span>左右位置 x</span><output class="tabular-nums" for="dof-x">0.00 m</output></span><input class="form-range" id="dof-x" type="range" min="-1.2" max="1.2" step="0.01" value="0" aria-label="左右位置x"></label>
+    <label class="form-label" data-parameter="y"><span class="dof-control-heading"><span>前后位置 y</span><output class="tabular-nums" for="dof-y">0.00 m</output></span><input class="form-range" id="dof-y" type="range" min="-0.9" max="0.9" step="0.01" value="0" aria-label="前后位置y"></label>
+    <label class="form-label" data-parameter="z" hidden><span class="dof-control-heading"><span>上下位置 z</span><output class="tabular-nums" for="dof-z">1.40 m</output></span><input class="form-range" id="dof-z" type="range" min="1.1" max="2.2" step="0.01" value="1.4" aria-label="上下位置z"></label>
+    <label class="form-label" data-parameter="roll" hidden><span class="dof-control-heading"><span>滚转角</span><output class="tabular-nums" for="dof-roll">0°</output></span><input class="form-range" id="dof-roll" type="range" min="-180" max="180" step="1" value="0" aria-label="滚转角"></label>
+    <label class="form-label" data-parameter="pitch" hidden><span class="dof-control-heading"><span>俯仰角</span><output class="tabular-nums" for="dof-pitch">0°</output></span><input class="form-range" id="dof-pitch" type="range" min="-70" max="70" step="1" value="0" aria-label="俯仰角"></label>
+    <label class="form-label" data-parameter="yaw"><span class="dof-control-heading"><span class="dof-yaw-label">平面内转动</span><output class="tabular-nums" for="dof-yaw">20°</output></span><input class="form-range" id="dof-yaw" type="range" min="-180" max="180" step="1" value="20" aria-label="转向角"></label>
+    <label class="form-label" data-parameter="open" hidden><span class="dof-control-heading"><span>门的开合角度</span><output class="tabular-nums" for="dof-open">75°</output></span><input class="form-range" id="dof-open" type="range" min="0" max="110" step="1" value="75" aria-label="门的开合角度"></label>
+  </div>
+</div><figcaption>保持形状不变，改变运动条件，就会改变需要的独立参数个数。</figcaption></figure>
+      <div class="explain-grid three"><div><span class="concept-number">3</span><h3>始终平放的书</h3><p>左右位置、前后位置、平面内转角。同一面始终朝上，不抬起、不倾斜。</p></div><div><span class="concept-number">6</span><h3>自由放在空中的书</h3><p>3 个位置参数 + 3 个朝向参数。位置固定时，书仍然可以转动。</p></div><div><span class="concept-number">1</span><h3>被铰链固定的门</h3><p>一个开合角度就能描述它的摆法。铰链对运动施加了约束。</p></div></div>
+      <p><strong>左右合起来只算 1 个自由度。</strong>同一个 x 数值变大、变小，就能描述两个方向。“独立”意味着你能只改 x，保持另外几个参数不变。自由度也不等于机器人有几个电机、几个关节。</p>
+      <div id="three-points" class="subsection-anchor"><h3>视频为什么突然画了球面和圆周？</h3><p>它在证明为什么一共需要 6 个数。把三个标记点 A、B、C 放在一块硬三角板上；三条边长度固定，而且三点不在同一直线上。</p></div>
+      <div class="try-this"><span>动手看</span><p>依次选“放好 A”“确定 B”“确定 C”。每一步都保留前一步的位置，再观察新增的选择。</p></div>
+      <figure class="interactive-figure"><div id="dof-three-points" class="dof3-root">
+  <h3>三个点确定刚体</h3>
+  <div class="viz-row" role="group" aria-label="选择确定刚体的步骤">
+    <button class="btn" type="button" aria-pressed="true" data-dof3-stage="0">① 放好 A</button>
+    <button class="btn" type="button" aria-pressed="false" data-dof3-stage="1">② 确定 B</button>
+    <button class="btn" type="button" aria-pressed="false" data-dof3-stage="2">③ 确定 C</button>
+  </div>
+  <div id="dof3-status" aria-live="polite">本步新增 3 个参数：A 的位置。</div>
+  <svg class="dof3-picture" role="img" aria-labelledby="dof3-title dof3-description">
+    <title id="dof3-title">三角刚板上的三个非共线点</title>
+    <desc id="dof3-description">依次确定 A 的三个位置参数、B 在球面上的两个方向参数、C 绕 AB 的一个旋转参数。三角板的三条边长度始终不变。</desc>
+    <g id="dof3-drawing"></g>
+  </svg>
+  <div class="dof3-stage" data-dof3-panel="0">
+    <div class="viz-controls">
+      <label class="form-label" for="dof3-ax"><span class="dof3-fieldhead"><span>A 的左右位置 x</span><output class="tabular-nums" id="dof3-ax-value">0.00 m</output></span><input class="form-range" id="dof3-ax" type="range" min="-0.6" max="0.6" step="0.01" value="0"></label>
+      <label class="form-label" for="dof3-ay"><span class="dof3-fieldhead"><span>A 的前后位置 y</span><output class="tabular-nums" id="dof3-ay-value">0.00 m</output></span><input class="form-range" id="dof3-ay" type="range" min="-0.6" max="0.6" step="0.01" value="0"></label>
+      <label class="form-label" for="dof3-az"><span class="dof3-fieldhead"><span>A 的上下位置 z</span><output class="tabular-nums" id="dof3-az-value">0.00 m</output></span><input class="form-range" id="dof3-az" type="range" min="-0.6" max="0.6" step="0.01" value="0"></label>
+    </div>
+  </div>
+  <div class="dof3-stage" data-dof3-panel="1" hidden>
+    <div class="viz-controls">
+      <label class="form-label" for="dof3-longitude"><span class="dof3-fieldhead"><span>B 的方向角 ①</span><output class="tabular-nums" id="dof3-longitude-value">−20°</output></span><input class="form-range" id="dof3-longitude" type="range" min="-180" max="180" step="1" value="-20"></label>
+      <label class="form-label" for="dof3-latitude"><span class="dof3-fieldhead"><span>B 的方向角 ②</span><output class="tabular-nums" id="dof3-latitude-value">20°</output></span><input class="form-range" id="dof3-latitude" type="range" min="-70" max="70" step="1" value="20"></label>
+    </div>
+  </div>
+  <div class="dof3-stage" data-dof3-panel="2" hidden>
+    <div class="viz-controls">
+      <label class="form-label" for="dof3-spin"><span class="dof3-fieldhead"><span>C 绕 AB 的角度</span><output class="tabular-nums" id="dof3-spin-value">−40°</output></span><input class="form-range" id="dof3-spin" type="range" min="-180" max="180" step="1" value="-40"></label>
+    </div>
+  </div>
+</div><figcaption>这里的 3、2、1 是三步分别新增的参数；三角板始终不变形。</figcaption></figure>
+      <ol class="reasoning-steps"><li><strong>A 放在哪里：3 个数。</strong>左右、前后、上下确定一个空间位置。</li><li><strong>B 放在哪里：再用 2 个数。</strong>AB 的长度固定，B 只能在以 A 为球心的球面上选位置。像用经度、纬度定位一个地点。</li><li><strong>C 放在哪里：再用 1 个数。</strong>A、B 都固定后，三角板还能绕 AB 翻转。C 走的是一个圆周，一个角度就能确定它。</li></ol>
+      <div class="formula" role="math" aria-label="三加二加一等于六">3 + 2 + 1 = 6</div>
+      <p>只固定 A 时，<strong>整个刚体还剩 3 个旋转自由度</strong>；“确定 B 新增 2 个参数”并没有把绕 AB 的翻转也确定下来。<code>3 + 2 + 1</code> 和 <code>3 个平移 + 3 个旋转</code> 是对同一组自由度的两种数法。</p>
+      <details class="self-check"><summary>停一下，自己解释：书的中心不动，还能改变摆法吗？</summary><p>可以改变朝向。空间中的中心位置确定后仍有 3 个旋转自由度；若书被限制始终平放桌上，则只剩平面内转动这 1 个自由度。</p></details>
+      <p class="source-note">来源：<a href="#source-p4">P4 官方转写</a>、<a href="https://hades.mech.northwestern.edu/images/2/25/MR-v2.pdf" target="_blank" rel="noopener noreferrer">Modern Robotics §2.1</a>。</p>
+    </section>
+
+    <section id="configuration-space" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>02</span> 对应 P4 与 P9 · 2.5</div>
+      <h2>三种“空间”，在回答三个问题</h2>
+      <p>“空间”在这里经常指<strong>一组可能取值的集合</strong>。先想一条底座固定、只有两个转动关节的机械臂：只要知道两个关节角度，就知道整条机械臂怎么摆。</p>
+      <h3>构型空间：机器人所有可能的摆法</h3>
+      <p>下面环面上的<strong>一个点记录两个关节角度</strong>，对应一整条机械臂的摆法。它的坐标含义是关节角，不是末端在房间里的 x、y、z。</p>
+      <div class="try-this"><span>动手看</span><p>先只改第一个角度，再只改第二个。观察环面上的点沿不同方向变化；把角度分别拉到 0° 和 360°，看机械臂是否回到同一种摆法。</p></div>
+      <figure class="interactive-figure"><div id="dof-cspace-explorer">
+  <div class="dof-cspace-panels">
+    <figure>
+      <figcaption>实际机械臂 · 基座固定</figcaption>
+      <svg id="dof-cspace-arm" class="dof-cspace-svg" role="img" aria-label="两个转动关节组成的平面机械臂，改变两个角度可改变整条机械臂的摆法。"></svg>
+    </figure>
+    <figure>
+      <figcaption>构型空间 · 所有角度组合</figcaption>
+      <svg id="dof-cspace-torus" class="dof-cspace-svg" role="img" aria-label="环面表面代表两个关节所有角度组合，每个点对应机械臂的一种摆法。"></svg>
+    </figure>
+  </div>
+  <div class="viz-controls">
+    <label class="form-label" for="dof-cspace-angle-one">关节 1 的角度 <output id="dof-cspace-value-one" class="tabular-nums">40°</output>
+      <input class="form-range" id="dof-cspace-angle-one" type="range" min="0" max="360" step="1" value="40" aria-label="关节1相对水平线的角度，单位度">
+    </label>
+    <label class="form-label" for="dof-cspace-angle-two">关节 2 的角度 <output id="dof-cspace-value-two" class="tabular-nums">60°</output>
+      <input class="form-range" id="dof-cspace-angle-two" type="range" min="0" max="360" step="1" value="60" aria-label="关节2相对第一根杆延伸方向的角度，单位度">
+    </label>
+  </div>
+  <div id="dof-cspace-status" class="dof-cspace-status text-small" aria-live="polite">两个独立角度 · 一个点对应一种摆法</div>
+</div><figcaption>两个关节都可转满一圈、忽略碰撞和限位时，构型空间可以画成二维环面。</figcaption></figure>
+      <p>环面只需要两个参数定位，因此<strong>表面是二维的</strong>，即使我们把它画在三维场景里。理解到这里已经够用；不用先研究它的拓扑证明。</p>
+      <h3>任务空间：你用什么量描述“要做成什么”</h3>
+      <p>如果任务是让笔尖到纸上某一点，可以用 <code>(x, y)</code> 描述目标；在这个平面任务中，若还要求笔在纸面内保持一个朝向，就加一个角度。任务空间由任务需要的描述决定。</p>
+      <h3>工作空间：这台机器人末端实际能到哪里</h3>
+      <p>同一个目标可能落在长机械臂的可达范围内，却落在短机械臂的可达范围外。下面显示的是<strong>末端位置工作空间</strong>；它不自动包含所有朝向都能达到的保证。</p>
+      <div class="try-this"><span>动手看</span><p>先把目标拖到圆环之外，再拖回内部。分开看“目标是否可达”和“当前末端是否已经到位”；然后为任务加上末端朝向要求。</p></div>
+      <figure class="interactive-figure"><div id="mr-workspace">
+  <div class="viz-row" role="group" aria-label="选择任务要求">
+    <button class="btn" type="button" data-ws-mode="position" aria-pressed="true">只要求末端位置</button>
+    <button class="btn" type="button" data-ws-mode="pose" aria-pressed="false">再加一个朝向要求</button>
+  </div>
+  <div class="ws-legend text-small">
+    <span><i class="ws-area-key" aria-hidden="true"></i>位置可达域</span>
+    <span><i class="ws-tip-key" aria-hidden="true"></i>当前末端</span>
+    <span><i class="ws-target-key" aria-hidden="true"></i>目标</span>
+  </div>
+  <svg class="ws-scene" role="img" aria-labelledby="ws-title ws-description">
+    <title id="ws-title">两关节机械臂的位置工作空间</title>
+    <desc id="ws-description">两根长度分别为一米和零点七米的杆，固定基座、关节可转满一圈。可达的末端位置形成内半径零点三米、外半径一点七米的圆环。目标位置和当前末端分别标记。</desc>
+  </svg>
+  <div class="viz-controls">
+    <label class="form-label" for="ws-target-x">目标位置 x <output class="tabular-nums" id="ws-target-x-value">1.00 m</output><input class="form-range" id="ws-target-x" type="range" min="-2" max="2" step="0.01" value="1"></label>
+    <label class="form-label" for="ws-target-y">目标位置 y <output class="tabular-nums" id="ws-target-y-value">0.80 m</output><input class="form-range" id="ws-target-y" type="range" min="-2" max="2" step="0.01" value="0.8"></label>
+    <label class="form-label" for="ws-q1">关节 1 的角度 <output class="tabular-nums" id="ws-q1-value">35.0°</output><input class="form-range" id="ws-q1" type="range" min="-180" max="180" step="0.1" value="35"></label>
+    <label class="form-label" for="ws-q2">关节 2 的角度 <output class="tabular-nums" id="ws-q2-value">80.0°</output><input class="form-range" id="ws-q2" type="range" min="-180" max="180" step="0.1" value="80"></label>
+    <label class="form-label" for="ws-phi" data-ws-pose hidden>目标朝向（相对 +x）<output class="tabular-nums" id="ws-phi-value">0°</output><input class="form-range" id="ws-phi" type="range" min="-180" max="180" step="1" value="0"></label>
+  </div>
+  <div class="viz-row" role="group" aria-label="到达目标位置的两种关节组合">
+    <button class="btn" type="button" data-ws-solve="0">到达位置 · 解 1</button>
+    <button class="btn" type="button" data-ws-solve="1">到达位置 · 解 2</button>
+    <button class="btn" type="button" data-ws-current-heading hidden>将目标朝向设为当前朝向</button>
+  </div>
+  <dl class="ws-results" aria-live="polite">
+    <div><dt>目标位置</dt><dd id="ws-reach-result">位于可达域内</dd></div>
+    <div><dt>当前末端</dt><dd id="ws-current-result">尚未到达目标位置</dd></div>
+    <div><dt>当前坐标</dt><dd class="tabular-nums" id="ws-coordinates">（0.52, 1.21）m</dd></div>
+    <div data-ws-pose hidden><dt>位置与朝向同时满足</dt><dd id="ws-pose-result">—</dd></div>
+  </dl>
+  <div class="ws-assumptions text-small">2 个关节 · 2 个自由度 · 固定基座 · 无关节限位与障碍；本图只检查静态几何，不规划运动路径。</div>
+  <div class="text-small" data-ws-pose hidden>本演示到位容差：位置 0.01 m，朝向 1°。箭头沿第二根杆的延伸方向。</div>
+</div><figcaption>这里使用无障碍、无关节限位的平面两连杆模型。位置可达与特定朝向可达分别检查。</figcaption></figure>
+      <div class="table-wrap"><table><caption>读到“空间”时，先认清它记录的变量</caption><thead><tr><th>概念</th><th>这个例子里记录什么</th><th>回答的问题</th></tr></thead><tbody><tr><td>构型空间</td><td>两个关节角度</td><td>整条机械臂怎么摆？</td></tr><tr><td>任务空间</td><td>目标位置，必要时还包括朝向</td><td>任务要求什么？</td></tr><tr><td>位置工作空间</td><td>末端所有可达位置</td><td>这台机械臂的手能到哪里？</td></tr></tbody></table></div>
+      <details class="self-check"><summary>停一下，自己解释：杯子在三维世界里，为什么手仍可能够不到？</summary><p>目标所在的物理空间，并没有替机器人解除长度、关节、姿态或障碍约束。目标位置在可达域内，也还要检查要求的朝向和整条运动路径。</p></details>
+      <p class="source-note">来源：<a href="#source-p9">P9 官方转写</a>；环面辅助说明参考 <a href="https://modernrobotics.northwestern.edu/nu-gm-book-resource/2-3-1-configuration-space-topology/" target="_blank" rel="noopener noreferrer">§2.3.1</a>。</p>
+    </section>
+
+    <section id="frames" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>03</span> 对应 P10、P11 · 3.1 / 3.2.1 上</div>
+      <h2>先认三根轴，<br class="desktop-break">再看旋转矩阵</h2>
+      <p>“杯子在右边 1 米”还不够明确：是谁的右边？你转个身，“右边”就换了方向。<strong>坐标系</strong>用一个原点和三根互相垂直的轴，把“相对谁、朝哪里量”固定下来。</p>
+      <div class="explain-grid"><div><h3>世界坐标系 world</h3><p>固定在环境里的参考尺子。这里用它统一描述房间中的物体。</p></div><div><h3>物体坐标系 body</h3><p>固定在物体上的参考尺子。观察某一时刻，三根轴的朝向描述物体的朝向。</p></div></div>
+      <p>右手系可以将右手三指摆成互相垂直的方向来理解：<strong>食指对应 x，中指对应 y，拇指对应 z</strong>。正转方向则用<strong>拇指沿旋转轴正向，四指弯曲的方向</strong>判断。俯视 xy 平面、z 正向朝向你时，绕 +z 正转就是逆时针。</p>
+      <h3>R 的每一列，是一根轴的“方向说明”</h3>
+      <p>例如物体的 x 轴，在世界坐标中指向 <code>(0, 1, 0)</code>：它与世界的 +y 方向一致。把物体 x、y、z 三根单位轴的世界坐标<strong>依次作为三列</strong>排好，就是 <code>R_world_body</code>。</p>
+      <div class="try-this"><span>动手看</span><p>先保持两个姿态角为 0，只绕 z 转到 90°。观察物体的 x 轴指向哪里，再找矩阵的第一列。之后每次把另外两个姿态角设为 0，再单独观察剩下一个角度。</p></div>
+      <figure class="interactive-figure"><div id="mr-frames-rotation" class="mr-frame-widget">
+  <div class="mr-frame-split">
+    <figure class="mr-frame-figure">
+      <figcaption>世界系 w 固定 · 物体系 b 随物体转动</figcaption>
+      <svg class="mr-frame-svg" data-frame-scene role="img" aria-label="三维右手坐标系：灰色世界坐标轴固定，三根彩色物体单位轴随姿态角旋转。"></svg>
+      <div class="mr-frame-legend"><span><i class="mr-axis-swatch mr-axis-x"></i>x_b · 第 1 列</span><span><i class="mr-axis-swatch mr-axis-y"></i>y_b · 第 2 列</span><span><i class="mr-axis-swatch mr-axis-z"></i>z_b · 第 3 列</span></div>
+    </figure>
+    <div class="mr-frame-numbers">
+      <div data-rotation-matrix class="mr-matrix-holder"></div>
+      <details class="mr-frame-check">
+        <summary>旋转矩阵核对</summary>
+        <div data-rotation-check class="mr-matrix-holder mr-matrix-small"></div>
+        <output aria-live="off" data-rotation-det class="mr-frame-value"></output>
+        <output aria-live="off" data-rotation-error class="mr-frame-value text-small"></output>
+      </details>
+    </div>
+  </div>
+  <div class="viz-controls">
+    <label class="form-label" for="mr-frame-roll">滚转角 roll <output aria-live="off" class="tabular-nums" data-frame-value="roll">0°</output><input class="form-range" id="mr-frame-roll" data-frame-angle="roll" type="range" min="-180" max="180" step="1" value="0"></label>
+    <label class="form-label" for="mr-frame-pitch">俯仰角 pitch <output aria-live="off" class="tabular-nums" data-frame-value="pitch">0°</output><input class="form-range" id="mr-frame-pitch" data-frame-angle="pitch" type="range" min="-80" max="80" step="1" value="0"></label>
+    <label class="form-label" for="mr-frame-yaw">转向角 yaw <output aria-live="off" class="tabular-nums" data-frame-value="yaw">35°</output><input class="form-range" id="mr-frame-yaw" data-frame-angle="yaw" type="range" min="-180" max="180" step="1" value="35"></label>
+  </div>
+  <div class="mr-frame-formula">R_w_b = Rz(yaw) Ry(pitch) Rx(roll) · b → w</div>
+  <div class="mr-frame-status text-small" data-frame-status aria-live="polite">右手系 · 列向量约定 · 两个原点重合</div>
+</div><figcaption>矩阵的三列对应物体的三根单位轴。这里只比较朝向，平移放在第 5 节处理。</figcaption></figure>
+      <div class="worked-example"><h3>把 90° 的情况拆开看</h3><p>原来的 x 方向转到 +y，原来的 y 方向转到 −x，z 方向保持不变，所以：</p><div class="matrix-example"><span>R<sub>z</sub>(90°) =</span><table class="static-matrix" aria-label="绕 z 轴旋转九十度的矩阵"><tbody><tr><td>0</td><td>−1</td><td>0</td></tr><tr><td>1</td><td>0</td><td>0</td></tr><tr><td>0</td><td>0</td><td>1</td></tr></tbody></table></div><p>乘上 <code>(1, 0, 0)</code>，就是取第一列，得到 <code>(0, 1, 0)</code>。乘上 <code>(2, 1, 0)</code>，就是“第一列 × 2 + 第二列 × 1”，得到 <code>(−1, 2, 0)</code>。这让矩阵乘法变成了<strong>按新轴的方向走几步</strong>。</p></div>
+      <details><summary>为什么矩阵有 9 个数，旋转却只有 3 个自由度？</summary><p>这 9 个数不能随意填写。三列的长度都必须为 1，任意两列必须垂直；这给出 6 个独立约束。还要保持右手方向，排除镜像反射。</p><p><code>RᵀR = I</code> 把“单位长度、互相垂直”写在一起；<code>det(R) = +1</code> 用来排除反射。<code>I</code> 是对角线为 1、其余为 0 的单位矩阵，作用相当于“不改变”。<code>Rᵀ</code> 是把行列交换后的表。</p><p><code>SO(3)</code> 是所有合法三维旋转矩阵组成的集合。今天先认出这个名字及其含义，不要求证明李群性质。</p></details>
+      <p class="source-note">来源：<a href="#source-p10">P10 官方转写</a>、<a href="#source-p11">P11 官方转写</a>。</p>
+    </section>
+
+    <section id="active-passive" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>04</span> 对应 P12 · 3.2.1 下</div>
+      <h2>点真的转了，<br class="desktop-break">还是你换了一把尺子？</h2>
+      <p>同样出现一个 R，可能在做不同的事。P12 最容易卡住的地方，是把<strong>物理动作</strong>和<strong>坐标表达</strong>混在一起。</p>
+      <div class="try-this"><span>动手看</span><p>把角度改到 90°，同时看两幅图。一边保持坐标轴不动、转动点；另一边保持世界中的点不动、转动用来读数的坐标系。</p></div>
+      <figure class="interactive-figure"><div id="mr-active-passive" class="mr-frame-widget">
+  <div class="mr-frame-pair">
+    <figure class="mr-frame-figure">
+      <figcaption>主动旋转 · 坐标轴固定，点移动</figcaption>
+      <svg class="mr-frame-svg" data-active-scene role="img" aria-label="固定世界坐标系中，点从原位置沿圆弧旋转到新位置。"></svg>
+      <div class="mr-frame-formula">p′_w = R(θ) p_w</div>
+      <output aria-live="off" class="mr-frame-value tabular-nums" data-active-value></output>
+    </figure>
+    <figure class="mr-frame-figure">
+      <figcaption>被动换坐标 · 点固定，坐标轴旋转</figcaption>
+      <svg class="mr-frame-svg" data-passive-scene role="img" aria-label="同一个世界点保持原位，物体坐标轴旋转，虚线显示点在新坐标系中的坐标分量。"></svg>
+      <div class="mr-frame-formula">p_b = R_w_bᵀ p_w</div>
+      <output aria-live="off" class="mr-frame-value tabular-nums" data-passive-value></output>
+    </figure>
+  </div>
+  <label class="form-label" for="mr-active-passive-angle">同一个角度 θ <output aria-live="off" class="tabular-nums" data-active-angle-value>45°</output><input class="form-range" id="mr-active-passive-angle" type="range" min="-180" max="180" step="1" value="45"></label>
+  <div class="mr-frame-status text-small" data-active-status aria-live="polite">起始点 p_w = (1.00, 0.50) · 俯视，+z 指向屏幕外</div>
+</div><figcaption>为突出区别，此图使用原点重合的二维俯视情形；平移将在下一节加入。</figcaption></figure>
+      <div class="explain-grid"><div><h3>主动转动：点的位置改变</h3><p>世界坐标系保持不动。图中起始点是 <code>(1, 0.5, 0)</code>；绕 +z 转 90°，新点是 <code>(−0.5, 1, 0)</code>。</p><p class="inline-formula">p′<sub>world</sub> = R p<sub>world</sub></p></div><div><h3>换坐标：点没动，读数改变</h3><p>图中的点在世界中仍是 <code>(1, 0.5, 0)</code>。如果新坐标系相对世界转了 +90°，同一点在新坐标系里读作 <code>(0.5, −1, 0)</code>。</p><p class="inline-formula">p<sub>body</sub> = R<sub>world_body</sub><sup>T</sup> p<sub>world</sub></p></div></div>
+      <p><strong>三种用途都要认得：</strong>R 可以记录一个朝向；可以把同一个向量换到另一坐标系表达；也可以在固定坐标系中真正转动一个向量。先看下标和题意，再决定在做哪一种。</p>
+      <details><summary>视频里的左乘、右乘，先记到什么程度？</summary><p>转动物体坐标系时，左乘一个旋转，旋转轴按外部参考系解释；右乘一个旋转，旋转轴按物体自身坐标系解释。这两种操作通常得到不同结果。今天首先把“轴属于谁”标清楚，不需要背一长串旋转顺序。</p></details>
+      <details class="self-check"><summary>停一下，自己解释：相机转身后，桌上的杯子坐标变了，杯子一定移动了吗？</summary><p>不一定。若换了相机坐标系，同一个世界点的坐标也会改变。需要比较同一参考系中的位置，才能讨论杯子是否真的移动。</p></details>
+      <p class="source-note">来源：<a href="#source-p12">P12 官方转写</a>。</p>
+    </section>
+
+    <section id="transforms" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>05</span> 对应 P16 · 3.3.1</div>
+      <h2>位姿：朝向和位置，放在一起</h2>
+      <p>相机既可能转了方向，也可能放在房间的另一个位置。只用旋转矩阵 R 不够，还需要相机原点在世界中的位置 t。</p>
+      <div class="key-idea"><strong>把名字从右往左读</strong><p><code>T_world_camera</code>：把 <strong>camera 坐标 → world 坐标</strong>。这里 camera 是输入表达，world 是输出表达；t 也是用 world 坐标表达的。</p></div>
+      <div class="formula" role="math" aria-label="世界坐标等于旋转矩阵乘相机坐标再加平移">p<sub>world</sub> = R<sub>world_camera</sub> p<sub>camera</sub> + t<sub>world_camera</sub></div>
+      <p>把这句话读成两步：<strong>先用世界的方向解释相机坐标里的箭头，再加上相机原点在世界的位置。</strong>点本身可以没有移动；我们是在计算它的另一种坐标表达。</p>
+      <div class="try-this"><span>动手看</span><p>先只平移相机，再加入绕 z 的旋转。按步骤看“原相机坐标 → 旋转后的偏移 → 加上原点位置”。然后看逆变换能否恢复输入，最后切换到三个坐标系的变换链。</p></div>
+      <figure class="interactive-figure"><div id="mr-homogeneous-transform" class="mr-frame-widget">
+  <div class="viz-row" role="group" aria-label="齐次变换的模式">
+    <button class="btn" type="button" data-transform-mode="single" aria-pressed="true">相机 → 世界</button>
+    <button class="btn" type="button" data-transform-mode="chain" aria-pressed="false">相机 → 底座 → 世界</button>
+  </div>
+  <div class="mr-frame-split">
+    <figure class="mr-frame-figure">
+      <figcaption data-transform-scene-caption>世界系 w 与相机系 c</figcaption>
+      <svg class="mr-frame-svg mr-transform-svg" data-transform-scene role="img" aria-label="三维坐标变换：相机坐标系中的点经旋转和平移，表达为世界坐标。"></svg>
+      <div class="mr-frame-legend"><span>灰色：w 世界系</span><span>彩色：c 相机系</span><span data-transform-base-legend hidden>虚线：b 底座系</span></div>
+    </figure>
+    <div class="mr-frame-numbers">
+      <div data-transform-matrix class="mr-matrix-holder"></div>
+      <div class="mr-frame-formula" data-transform-equation>p_w = R_w_c p_c + t_w_c</div>
+      <output aria-live="off" class="mr-frame-value tabular-nums" data-transform-point></output>
+      <output aria-live="off" class="mr-frame-value tabular-nums" data-transform-inverse></output>
+      <output aria-live="off" class="mr-frame-value text-small" data-transform-error></output>
+    </div>
+  </div>
+  <div data-transform-controls="single">
+    <div class="viz-controls">
+      <label class="form-label" for="mr-transform-yaw">相机绕 z 的角度 <output aria-live="off" class="tabular-nums" data-transform-value="yaw">40°</output><input class="form-range" id="mr-transform-yaw" data-transform-input="yaw" type="range" min="-180" max="180" step="1" value="40"></label>
+      <label class="form-label" for="mr-transform-tx">相机原点 t_x <output aria-live="off" class="tabular-nums" data-transform-value="tx">0.80 m</output><input class="form-range" id="mr-transform-tx" data-transform-input="tx" type="range" min="-1" max="1.5" step="0.05" value="0.8"></label>
+      <label class="form-label" for="mr-transform-ty">相机原点 t_y <output aria-live="off" class="tabular-nums" data-transform-value="ty">0.40 m</output><input class="form-range" id="mr-transform-ty" data-transform-input="ty" type="range" min="-1" max="1.5" step="0.05" value="0.4"></label>
+      <label class="form-label" for="mr-transform-tz">相机原点 t_z <output aria-live="off" class="tabular-nums" data-transform-value="tz">0.50 m</output><input class="form-range" id="mr-transform-tz" data-transform-input="tz" type="range" min="0" max="1.5" step="0.05" value="0.5"></label>
+    </div>
+    <div class="viz-row" role="group" aria-label="观察点的数值计算步骤">
+      <button class="btn" type="button" data-transform-step="rotation" aria-pressed="false">① 看旋转项 R p_c</button>
+      <button class="btn" type="button" data-transform-step="translation" aria-pressed="true">② 再加平移 t</button>
+    </div>
+    <output aria-live="off" class="mr-frame-value text-small" data-transform-step-value></output>
+  </div>
+  <div data-transform-controls="chain" hidden>
+    <div class="viz-controls">
+      <label class="form-label" for="mr-transform-base-yaw">底座相对世界的转角 <output aria-live="off" class="tabular-nums" data-transform-value="baseYaw">30°</output><input class="form-range" id="mr-transform-base-yaw" data-transform-input="baseYaw" type="range" min="-180" max="180" step="1" value="30"></label>
+      <label class="form-label" for="mr-transform-camera-offset">相机沿底座 x 轴的偏移 <output aria-live="off" class="tabular-nums" data-transform-value="cameraOffset">0.70 m</output><input class="form-range" id="mr-transform-camera-offset" data-transform-input="cameraOffset" type="range" min="0" max="1.5" step="0.05" value="0.7"></label>
+    </div>
+    <div class="mr-frame-formula">T_w_c = T_w_b T_b_c · c → b → w</div>
+    <div class="mr-frame-matrix-pair"><div data-transform-base-matrix class="mr-matrix-holder mr-matrix-small"></div><div data-transform-camera-matrix class="mr-matrix-holder mr-matrix-small"></div></div>
+    <output aria-live="off" class="mr-frame-value text-small" data-transform-chain-point></output>
+  </div>
+  <div class="mr-frame-status text-small" data-transform-status aria-live="polite">固定相机点 p_c = (0.70, 0.35, 0.50) m · 齐次末项为 1</div>
+</div><figcaption>固定相机系输入点 (0.70, 0.35, 0.50) m；拖动相机位姿是在比较不同场景，所以对应的世界点也会改变。对某个给定场景，正向与逆向计算是在表达同一个点。</figcaption></figure>
+      <div class="worked-example"><h3>换一组便于手算的数，只看平移</h3><p>下面是独立的纸笔例子，数值与演示不同：相机原点在世界的 <code>(2, 0, 0)</code>，相机的三根轴与世界对齐；相机测得一个点 <code>(1, 2, 0)</code>。它的世界坐标就是：</p><p class="inline-formula">(1, 2, 0) + (2, 0, 0) = (3, 2, 0)</p><p>反过来从世界读回相机，要先减去相机原点位置。相机朝向也不同的时候，还要把方向转回去：</p><p class="inline-formula">p<sub>camera</sub> = R<sup>T</sup>(p<sub>world</sub> − t)</p></div>
+      <h3>为什么要多出一行，变成 4 × 4？</h3>
+      <p>为了把“旋转后再相加”合成一次矩阵乘法，把 R 放在左上角、t 放在右边，最后一行写 <code>0 0 0 1</code>。点的三个坐标后面补一个 1。这个额外的 1 让平移项参与计算，<strong>不表示现实中多出第四个空间方向</strong>。</p>
+      <p><strong>SE(3)</strong> 是这些合法三维刚体变换的集合；它同时表达位置和朝向，不包括缩放或把物体拉歪。</p>
+      <h3>多个设备，就沿坐标链转换</h3>
+      <p>若先把相机点变到机器人基座，再变到世界，完整关系是：</p>
+      <div class="formula" role="math">T<sub>world_camera</sub> = T<sub>world_base</sub> T<sub>base_camera</sub></div>
+      <p>作用于列向量时，最右边先算。中间的 <code>base</code> 接上了，最后得到 world 与 camera 的关系。<strong>矩阵通常不能调换相乘顺序。</strong>你可以将这套关系理解为不同设备之间共用空间参照的基础：各自原点不同，就先明确每段变换。</p>
+      <details><summary>逆变换为什么不能只把 t 加一个负号？</summary><p>要先撤销平移，再撤销旋转，所以逆变换的旋转是 <code>Rᵀ</code>，逆变换矩阵里的平移是 <code>−Rᵀt</code>。直接把 t 改成 −t，只有在某些特殊情况下才碰巧正确。</p><p>相对位姿描述、坐标转换和主动移动都可以用 T，但三者的解释仍要像上一节那样分开。给题目写清下标比死记一个矩阵更可靠。</p></details>
+      <details class="self-check"><summary>停一下，自己解释：T_world_camera 和 T_camera_world 能直接互换吗？</summary><p>不能。它们互为逆矩阵，输入与输出参考系相反。先写清要把哪个坐标系中的点变到哪个坐标系，再选矩阵。</p></details>
+      <p class="source-note">来源：<a href="#source-p16">P16 官方转写</a>；数值练习参照 <a href="https://github.com/venividici/14plan/blob/main/STUDY_GUIDES/R01.md" target="_blank" rel="noopener noreferrer">R01 学习任务</a>。</p>
+    </section>
+
+    <section id="perception" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>06</span> MIT R16 · 几何位姿估计选读</div>
+      <h2>相机看到的点，<br class="desktop-break">怎样放进同一个世界？</h2>
+      <p>普通彩色图像告诉你一个像素是什么颜色；深度信息还提供距离线索。知道相机模型后，可以把许多像素转换成相机坐标中的三维点，集合起来就是<strong>点云</strong>。</p>
+      <p>点云最初只是几何采样。它不会自动告诉你哪些点属于杯子、杯子哪个方向方便抓，更不会保证背面也被看见。</p>
+      <div class="try-this"><span>动手看</span><p>比较未正确配准和正确配准的点云。再改变估计的角度或平移：物体本身没有变，错误的变换却会把测量点放到错误的位置。若加入噪声，看看对齐后误差是否完全消失。</p></div>
+      <figure class="interactive-figure"><section id="day1-point-cloud" class="perception-explorer" aria-label="合成点云与坐标配准演示">
+  <div class="perception-topline"><strong>合成杯子点云</strong><span>合成示意 · 非传感器实测</span></div>
+  <div class="perception-panels">
+    <div><h4>相机局部坐标 C</h4><svg class="perception-scene" data-scene="camera" role="img" aria-label="杯子采样点在相机局部坐标系中的表示"></svg></div>
+    <div><h4>变换到世界坐标 W</h4><svg class="perception-scene" data-scene="world" role="img" aria-label="估计外参变换后的测量点与世界参考模型对比"></svg></div>
+  </div>
+  <div class="perception-legend"><span><i class="perception-reference"></i>合成参考模型</span><span><i class="perception-measured"></i>测量点</span><span><i class="perception-link"></i>已知对应关系</span></div>
+  <div class="viz-row" role="group" aria-label="选择相机外参示例"><button type="button" class="btn" data-perception-preset="wrong">外参误差示例</button><button type="button" class="btn" data-perception-preset="true">按示意真值对齐</button></div>
+  <div class="perception-controls">
+    <label class="form-label" for="perception-yaw">估计相机 yaw <output for="perception-yaw" data-value="yaw" aria-live="off">−20°</output><input id="perception-yaw" class="form-range" type="range" min="-40" max="90" step="1" value="-20" data-perception="yaw"></label>
+    <label class="form-label" for="perception-tx">估计相机 x 平移 <output for="perception-tx" data-value="tx" aria-live="off">−0.20 m</output><input id="perception-tx" class="form-range" type="range" min="-0.5" max="1.4" step="0.01" value="-0.2" data-perception="tx"></label>
+  </div>
+  <div class="perception-options"><label><input type="checkbox" data-perception="noise" checked>合成测量噪声</label><label><input type="checkbox" data-perception="occlusion">遮挡部分采样点</label></div>
+  <dl class="perception-values" aria-live="off"><div><dt>当前测量点数</dt><dd data-metric="count">—</dd></div><div><dt>对齐误差（均方根）</dt><dd data-metric="alignment">—</dd></div><div><dt>测量噪声（均方根）</dt><dd data-metric="noise">—</dd></div><div><dt>物体抓取姿态</dt><dd>未求解 · 未执行</dd></div></dl>
+  <div class="perception-caption">误差数值描述点的整体偏差大小；数值越小，整体偏差越小。</div>
+  <div class="perception-caption">示意真值：yaw = 30°，t = (0.65, −0.65, 0.20) m；仅调 yaw 和 x，其余外参固定。</div>
+  <div class="perception-caption">C、W 均采用 z 向上的示意坐标；对应关系已知。使用已知示意真值对齐，不自动估计未知位姿。</div>
+  <div class="perception-announcement" data-perception-announcement role="status" aria-live="polite" aria-atomic="true"></div>
+</section><figcaption>合成点云教学示意，用于解释坐标配准与误差；不是实拍传感器数据或完整感知算法。</figcaption></figure>
+      <div class="process-strip" aria-label="从观察到统一空间的处理步骤"><div><span>1</span><strong>测量</strong><p>彩色 / 深度图</p></div><div><span>2</span><strong>几何表达</strong><p>相机坐标中的点</p></div><div><span>3</span><strong>统一参考系</strong><p>使用坐标变换</p></div><div><span>4</span><strong>任务解释</strong><p>对象、位姿与抓取条件</p></div></div>
+      <h3>“换参考系”和“估计位姿”解决的问题不同</h3>
+      <p><strong>已知相机位姿时做坐标变换</strong>，是把测量放到统一世界里；<strong>位姿估计 / 配准</strong>，是根据测量和参考几何去推断未知的相对旋转和平移。图中的滑条让你手动体验“估计错一点，对齐就会错多少”，没有暗中运行一套真实相机标定程序。</p>
+      <div class="table-wrap"><table><caption>给同一个杯子保留三个不同层面的信息</caption><thead><tr><th>信息</th><th>你在讨论什么</th></tr></thead><tbody><tr><td>杯子的真实位姿</td><td>它实际在哪里、朝哪里；真实系统里未必能直接知道。</td></tr><tr><td>相机的观测与估计</td><td>传感器看到了哪些部分、算法估计了什么，可能存在噪声和遮挡。</td></tr><tr><td>机器人基座中的表达</td><td>把观测转换到基座参考系，供后续规划使用；换参考系不会自动消除估计误差。</td></tr></tbody></table></div>
+      <p>“看到了杯子”到“稳定抓住杯子”之间，还需要判断物体、抓取位置和方向、机械臂可达性、碰撞以及控制。今天先把观测、坐标表达和执行结果分清楚。</p>
+      <details class="self-check"><summary>停一下，自己解释：两台相机的点云直接拼到一起，为什么可能出现两个杯子？</summary><p>各自的原点和轴不同，原始坐标不能直接当成同一世界的坐标。需要正确的外参变换；即使坐标对齐，噪声、时间不同步和遮挡也可能让两份测量不完全一致。</p></details>
+      <p class="source-note">来源：<a href="#source-mit">MIT Geometric Pose Estimation</a> 中 Cameras、Point clouds、Pose estimation / registration 部分。</p>
+    </section>
+
+    <section id="room-validation" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>07</span> Day 1 应用 · 空间表示与受限验证</div>
+      <h2>图上连着，机器人就能过去吗？</h2>
+      <p>现在回到“去隔壁房间拿杯子”。用两个节点表示房间 A、B，用一条边声明它们之间有门，这叫<strong>拓扑表达</strong>。它很适合描述“谁与谁相连”，但这条线没有告诉你门宽多少、墙在哪里。</p>
+      <p><strong>度量几何</strong>补上位置、长度和形状。这里用 AABB 表达房间：一个与坐标轴对齐的包围盒；平面图里就是由最小、最大 x/y 确定的矩形。三维再加 z 的最小、最大值。</p>
+      <div class="try-this"><span>动手看</span><p>先保持图边存在，把门变窄；恢复门宽，再移动房间 B 制造缝隙或重叠；最后保持几何不变，把门锁上。每次都观察是哪一项检查改变。</p></div>
+      <figure class="interactive-figure"><section id="day1-room-validation" class="rooms-explorer" aria-label="房间、门与机器人通行的分层规则检查">
+  <div class="rooms-topline"><strong>机器人过门取杯</strong><span>二维轴对齐示意 · 不运行物理仿真</span></div>
+  <div class="rooms-figures"><div><h4>度量几何：房间、接面与门</h4><svg data-rooms-scene="plan" class="rooms-plan" role="img" aria-label="两个轴对齐房间、门洞净宽、机器人足迹和真实共墙接段"></svg></div><div><h4>拓扑声明</h4><svg data-rooms-scene="graph" class="rooms-graph" role="img" aria-label="A 与 B 之间是否声明门边"></svg><div class="rooms-box-values"><span>A = [0, 0, 4, 4] m</span><span data-rooms-value="box-b">B = [4, 0, 8, 4] m</span></div></div></div>
+  <div class="rooms-witness"><strong>Contact Witness</strong><output data-rooms-value="witness" aria-live="off">—</output></div>
+  <div class="viz-row" role="group" aria-label="选择房间规则示例"><button type="button" class="btn" data-rooms-preset="baseline">基线</button><button type="button" class="btn" data-rooms-preset="narrow">窄门</button><button type="button" class="btn" data-rooms-preset="gap">房间缝隙</button><button type="button" class="btn" data-rooms-preset="overlap">房间重叠</button><button type="button" class="btn" data-rooms-preset="locked">门锁定</button></div>
+  <div class="rooms-controls">
+    <label class="form-label" for="rooms-door-width">门洞净宽 <output for="rooms-door-width" data-rooms-output="doorWidth" aria-live="off">0.90 m</output><input id="rooms-door-width" class="form-range" type="range" min="0.2" max="1.5" step="0.01" value="0.9" data-rooms="doorWidth"></label>
+    <label class="form-label" for="rooms-robot-width">机器人宽度 <output for="rooms-robot-width" data-rooms-output="robotWidth" aria-live="off">0.60 m</output><input id="rooms-robot-width" class="form-range" type="range" min="0.2" max="1" step="0.01" value="0.6" data-rooms="robotWidth"></label>
+    <label class="form-label" for="rooms-b-x">B 房间左边界 x <output for="rooms-b-x" data-rooms-output="bx" aria-live="off">4.00 m</output><input id="rooms-b-x" class="form-range" type="range" min="2.5" max="5.5" step="0.05" value="4" data-rooms="bx"></label>
+    <label class="form-label" for="rooms-b-y">B 房间下边界 y <output for="rooms-b-y" data-rooms-output="by" aria-live="off">0.00 m</output><input id="rooms-b-y" class="form-range" type="range" min="-1" max="4.5" step="0.05" value="0" data-rooms="by"></label>
+  </div>
+  <div class="rooms-switches"><label><input type="checkbox" data-rooms="edge" checked>声明 A—B 门边</label><label><input type="checkbox" data-rooms="locked">门已上锁</label><label><input type="checkbox" data-rooms="move" checked>有移动能力</label><label><input type="checkbox" data-rooms="grasp" checked>有抓取能力</label><label><input type="checkbox" data-rooms="unlock">有解锁能力</label><label><input type="checkbox" data-rooms="key">持有匹配钥匙 K</label></div>
+  <div class="rooms-checks" aria-live="off">
+    <div><span>图关系</span><strong data-rooms-check="graph">—</strong></div>
+    <div><span>房间内部重叠</span><strong data-rooms-check="overlap">—</strong></div>
+    <div><span>共墙与门洞落位</span><strong data-rooms-check="wall">—</strong></div>
+    <div><span>净宽比较</span><strong data-rooms-check="width">—</strong></div>
+    <div><span>门锁状态</span><strong data-rooms-check="state">—</strong></div>
+    <div><span>声明的机器人能力</span><strong data-rooms-check="capability">—</strong></div>
+    <div><span>连续路径、抓取与执行</span><strong data-result="unknown">未验证</strong></div>
+  </div>
+  <div class="rooms-result" aria-live="off"><span>MiniLab 受限规则结论</span><strong data-rooms-value="status">—</strong><span data-rooms-value="reason">—</span></div>
+  <div class="rooms-caption">原规则不设置额外安全裕量；不验证连续路径、抓取与物理执行。规则通过不表示机器人已成功执行。</div>
+  <details class="rooms-boundary"><summary>规则边界</summary><p>门洞置于共墙接段中点；图边开关只改变门的声明。共墙坐标与宽度采用 10⁻⁸ m 的数值容差；内部重叠面积大于 10⁻⁸ m² 时判为无效。</p></details>
+  <div class="rooms-announcement" data-rooms-announcement role="status" aria-live="polite" aria-atomic="true"></div>
+</section><figcaption>按 Day 1 MiniLab 的受限二维规则解释几何和通行条件；完整运动路径、抓取与物理执行仍需另行验证。</figcaption></figure>
+      <h3>Contact Witness：把“相接”变成可以检查的证据</h3>
+      <p>在这个房间例子里，要找出两个盒子<strong>实际共享的边界线段</strong>，再检查门口是否放在这段边界上、尺寸是否符合规则。这段接面及其几何检查结果，就是“门连接这两个房间”的证据。仓库把这类接触 / 接面证据称为 Contact Witness。</p>
+      <p>一条接面证据能支持“这里存在指定的几何连接”，但它没有替机器人检查从起点到杯子的所有碰撞、开门动作或抓取过程。<strong>门足够宽</strong>也只是当前简化模型里的一项条件。</p>
+      <h3>把“能不能做”拆成五层问</h3>
+      <div class="table-wrap"><table><caption>这是 Day 1 的学习组织方式，用来定位失败原因</caption><thead><tr><th>层级</th><th>问什么</th><th>一个反例</th></tr></thead><tbody><tr><td>拓扑</td><td>房间之间声明了什么连接？</td><td>图里没有 A → B 的连接。</td></tr><tr><td>几何</td><td>连接落在真实接面上吗？尺寸够吗？</td><td>图边还在，两个房间之间却有缝隙。</td></tr><tr><td>状态</td><td>门开着、关着，还是锁着？</td><td>门够宽，但门锁没有解除。</td></tr><tr><td>能力</td><td>机器人具备完成动作的能力吗？</td><td>需要开门，但机器人没有相应操作能力。</td></tr><tr><td>执行</td><td>轨迹、控制和真实反馈支持成功吗？</td><td>规则允许，实际动作仍可能失败。</td></tr></tbody></table></div>
+      <h3>这里说的“世界模型”，先理解到哪一步？</h3>
+      <p>房间、门、杯子、机器人、几何尺寸和状态，构成了一份<strong>结构化的世界表示</strong>。它可以由人工建立，也可以由感知更新。学习型动态世界模型还涉及根据状态和动作预测后续变化；仅仅建了一张空间图，并没有完成这种动态预测模型的训练。</p>
+      <details class="self-check"><summary>停一下，自己解释：房间相邻、图上连通、门能通过，分别需要什么证据？</summary><p>几何相邻要检查边界位置；图连通看节点与边；门通行还要检查实际开口、机器人尺寸与余量、门状态及相关动作能力。完整任务成功还需要运动与执行验证。</p></details>
+      <p class="source-note">来源：<a href="https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/TASK_GUIDES/day-01.md" target="_blank" rel="noopener noreferrer">Day 1 任务手册</a> 与 <a href="https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/minilab/validate.py" target="_blank" rel="noopener noreferrer">MiniLab 实际规则</a>。这一节是计划中的应用补充，不属于 Modern Robotics 六个短片的逐字内容。</p>
+    </section>
+
+    <section id="practice" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>08</span> 把观察变成自己的解释</div>
+      <h2>先留下一次预测，<br class="desktop-break">再动手验证。</h2>
+      <p>不用因为读到了页尾就把自己标成“已掌握”。先选一个最不确定的问题，写下预测，再去对应的演示里改变参数。下面的练习也可以直接在纸上做。</p>
+      <ol class="practice-list"><li><h3>画两个坐标系</h3><p>在同一张图上标 world、camera 的原点和三根轴。解释 <code>T_world_camera</code> 的输入与输出。</p><a href="#transforms">返回变换演示 ↑</a></li><li><h3>自己算一次，再反算一次</h3><p>相机绕 z 转 90°，相机原点在世界 <code>(2, 1, 0)</code>，相机系点是 <code>(1, 0, 0)</code>。先写旋转后的偏移，再加平移，最后用逆变换检验。</p><details><summary>已经尝试，查看核对提示</summary><p>旋转后的偏移是 <code>(0, 1, 0)</code>，世界点是 <code>(2, 2, 0)</code>。先减 <code>(2, 1, 0)</code>，再乘逆旋转，应恢复 <code>(1, 0, 0)</code>。别只记结果，要能解释每一步相对谁。</p></details></li><li><h3>制造三个不同的失败</h3><p>保持图边、缩小门；保留图边、移开房间；保持几何、锁上门。分别写“改了什么 → 哪层失败 → 需要哪种证据”。</p><a href="#room-validation">返回房间演示 ↑</a></li></ol>
+      <div class="personal-note"><div class="note-heading"><div><span class="eyebrow">我的理解</span><h3>写给下次复习的自己</h3></div><span id="note-status" class="note-status" aria-live="polite">记录保存在此浏览器</span></div><label class="form-label" for="learning-note">我原先怎么想？改了哪个参数？现在能怎样解释？还有什么没懂？</label><textarea class="form-control" id="learning-note" rows="8" placeholder="例如：我一开始把‘换坐标’理解成了物体移动。把角度改到 90° 后，我观察到……"></textarea><div class="note-actions"><button type="button" class="btn" id="export-note">导出我的笔记 .md</button><span>浏览器自动保存；导出后可自行放入仓库，不会自动上传。</span></div></div>
+      <p>原计划的 MiniLab 实验、首次答案和真实运行记录，仍在 <a href="https://github.com/venividici/14plan/blob/main/TASK_GUIDES/day-01.md" target="_blank" rel="noopener noreferrer">Day 1 操作手册</a> 中继续。网页演示用于帮助理解，不能代替你的亲自运行记录。</p>
+    </section>
+
+    <section id="sources" class="lesson-section sources-section" data-nav>
+      <div class="section-kicker"><span>↗</span> 原课程与阅读范围</div>
+      <h2>看懂一段，再回原视频听一遍</h2>
+      <p>以下 6 个短片合计 <strong>22 分 35 秒</strong>，是原计划指定的 Day 1 必修。MIT 部分按计划定向阅读约 30–40 分钟，不要求看完一整讲。打开视频后，可以只复听你刚在演示里弄明白的那一段。</p>
+      <div class="course-list">
+        <article class="course-item" id="source-p4"><span class="course-part">P4</span><div><h3>2.1 刚体的自由度</h3><p>构型、自由度、三个点确定刚体。</p><a href="https://www.bilibili.com/video/BV1KV411Z7sC/?p=4" target="_blank" rel="noopener noreferrer">原视频 ↗</a><a href="https://modernrobotics.northwestern.edu/nu-gm-book-resource/2-1-degrees-of-freedom-of-a-rigid-body/" target="_blank" rel="noopener noreferrer">官方转写 ↗</a></div><time>05:16</time></article>
+        <article class="course-item" id="source-p9"><span class="course-part">P9</span><div><h3>2.5 任务空间与工作空间</h3><p>任务怎么描述，末端能到哪里。</p><a href="https://www.bilibili.com/video/BV1KV411Z7sC/?p=9" target="_blank" rel="noopener noreferrer">原视频 ↗</a><a href="https://modernrobotics.northwestern.edu/nu-gm-book-resource/2-5-task-space-and-workspace/" target="_blank" rel="noopener noreferrer">官方转写 ↗</a></div><time>01:36</time></article>
+        <article class="course-item" id="source-p10"><span class="course-part">P10</span><div><h3>3.1 刚体运动简介</h3><p>右手系、世界系、物体系与旋转正方向。</p><a href="https://www.bilibili.com/video/BV1KV411Z7sC/?p=10" target="_blank" rel="noopener noreferrer">原视频 ↗</a><a href="https://modernrobotics.northwestern.edu/nu-gm-book-resource/introduction-to-rigid-body-motions/" target="_blank" rel="noopener noreferrer">官方转写 ↗</a></div><time>02:11</time></article>
+        <article class="course-item" id="source-p11"><span class="course-part">P11</span><div><h3>3.2.1 旋转矩阵 · 上</h3><p>矩阵三列、单位轴、正交与 SO(3)。</p><a href="https://www.bilibili.com/video/BV1KV411Z7sC/?p=11" target="_blank" rel="noopener noreferrer">原视频 ↗</a><a href="https://modernrobotics.northwestern.edu/nu-gm-book-resource/3-2-1-rotation-matrices-part-1-of-2/" target="_blank" rel="noopener noreferrer">官方转写 ↗</a></div><time>02:54</time></article>
+        <article class="course-item" id="source-p12"><span class="course-part">P12</span><div><h3>3.2.1 旋转矩阵 · 下</h3><p>描述朝向、换参考系、主动转动。</p><a href="https://www.bilibili.com/video/BV1KV411Z7sC/?p=12" target="_blank" rel="noopener noreferrer">原视频 ↗</a><a href="https://modernrobotics.northwestern.edu/nu-gm-book-resource/3-2-1-rotation-matrices-part-2-of-2/" target="_blank" rel="noopener noreferrer">官方转写 ↗</a></div><time>04:15</time></article>
+        <article class="course-item" id="source-p16"><span class="course-part">P16</span><div><h3>3.3.1 齐次变换矩阵</h3><p>R 与 t、4 × 4 矩阵、逆变换和变换链。</p><a href="https://www.bilibili.com/video/BV1KV411Z7sC/?p=16" target="_blank" rel="noopener noreferrer">原视频 ↗</a><a href="https://modernrobotics.northwestern.edu/nu-gm-book-resource/3-3-1-homogeneous-transformation-matrices/" target="_blank" rel="noopener noreferrer">官方转写 ↗</a></div><time>06:23</time></article>
+        <article class="course-item" id="source-mit"><span class="course-part">MIT</span><div><h3>Geometric Pose Estimation · 定向选读</h3><p>相机、点云、遮挡、位姿估计与配准。2022 第 5 讲作为对应视频入口。</p><a href="https://manipulation.mit.edu/pose.html" target="_blank" rel="noopener noreferrer">官方在线讲义 ↗</a><a href="https://www.bilibili.com/video/BV1dB4y1R7bS/?p=5" target="_blank" rel="noopener noreferrer">对应长视频 ↗</a></div><span class="reading-label">选读</span></article>
+      </div>
+      <div class="source-method"><h3>这份教程怎样整理</h3><p>课程清单来自 <a href="https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/STUDY_GUIDES/R01.md" target="_blank" rel="noopener noreferrer">R01</a>、<a href="https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/STUDY_GUIDES/R16.md" target="_blank" rel="noopener noreferrer">R16</a> 和 Day 1 手册；讲解依据西北大学课程官方转写、原书与 MIT 在线讲义编写。这里不声称完整播放过 B 站各视频，也不编造逐秒定位。</p><p>交互演示为配套教学实现，数值按所注明的简化模型计算。图中合成示例、浏览器练习与你自己的掌握情况、设备实测分别记录。</p><p><a href="notes/day-01-2-1-rigid-body-dof.md">2.1 完整文字笔记</a> · <a href="notes/day-01-course-map.md">Day 1 课程对应表</a> · <a href="notes/day-01-tutorial.md">本页文字版教程</a></p></div>
+    </section>
+    <footer class="site-footer"><div><strong>Modern Robotics 学习手记</strong><p>先看见变化，再说清原因。</p></div><a href="#start">回到顶部 ↑</a></footer>
+  </main>
+</div>
+<noscript><div class="noscript-note">文字教程可以正常阅读。交互演示需要在浏览器中启用 JavaScript。</div></noscript>
+</body>
+</html>

@@ -1,0 +1,26 @@
+<section id="day1-room-validation" class="rooms-explorer" aria-label="房间、门与机器人通行的分层规则检查">
+  <div class="rooms-topline"><strong>机器人过门取杯</strong><span>二维轴对齐示意 · 不运行物理仿真</span></div>
+  <div class="rooms-figures"><div><h4>度量几何：房间、接面与门</h4><svg data-rooms-scene="plan" class="rooms-plan" role="img" aria-label="两个轴对齐房间、门洞净宽、机器人足迹和真实共墙接段"></svg></div><div><h4>拓扑声明</h4><svg data-rooms-scene="graph" class="rooms-graph" role="img" aria-label="A 与 B 之间是否声明门边"></svg><div class="rooms-box-values"><span>A = [0, 0, 4, 4] m</span><span data-rooms-value="box-b">B = [4, 0, 8, 4] m</span></div></div></div>
+  <div class="rooms-witness"><strong>Contact Witness</strong><output data-rooms-value="witness" aria-live="off">—</output></div>
+  <div class="viz-row" role="group" aria-label="选择房间规则示例"><button type="button" class="btn" data-rooms-preset="baseline">基线</button><button type="button" class="btn" data-rooms-preset="narrow">窄门</button><button type="button" class="btn" data-rooms-preset="gap">房间缝隙</button><button type="button" class="btn" data-rooms-preset="overlap">房间重叠</button><button type="button" class="btn" data-rooms-preset="locked">门锁定</button></div>
+  <div class="rooms-controls">
+    <label class="form-label" for="rooms-door-width">门洞净宽 <output for="rooms-door-width" data-rooms-output="doorWidth" aria-live="off">0.90 m</output><input id="rooms-door-width" class="form-range" type="range" min="0.2" max="1.5" step="0.01" value="0.9" data-rooms="doorWidth"></label>
+    <label class="form-label" for="rooms-robot-width">机器人宽度 <output for="rooms-robot-width" data-rooms-output="robotWidth" aria-live="off">0.60 m</output><input id="rooms-robot-width" class="form-range" type="range" min="0.2" max="1" step="0.01" value="0.6" data-rooms="robotWidth"></label>
+    <label class="form-label" for="rooms-b-x">B 房间左边界 x <output for="rooms-b-x" data-rooms-output="bx" aria-live="off">4.00 m</output><input id="rooms-b-x" class="form-range" type="range" min="2.5" max="5.5" step="0.05" value="4" data-rooms="bx"></label>
+    <label class="form-label" for="rooms-b-y">B 房间下边界 y <output for="rooms-b-y" data-rooms-output="by" aria-live="off">0.00 m</output><input id="rooms-b-y" class="form-range" type="range" min="-1" max="4.5" step="0.05" value="0" data-rooms="by"></label>
+  </div>
+  <div class="rooms-switches"><label><input type="checkbox" data-rooms="edge" checked>声明 A—B 门边</label><label><input type="checkbox" data-rooms="locked">门已上锁</label><label><input type="checkbox" data-rooms="move" checked>有移动能力</label><label><input type="checkbox" data-rooms="grasp" checked>有抓取能力</label><label><input type="checkbox" data-rooms="unlock">有解锁能力</label><label><input type="checkbox" data-rooms="key">持有匹配钥匙 K</label></div>
+  <div class="rooms-checks" aria-live="off">
+    <div><span>图关系</span><strong data-rooms-check="graph">—</strong></div>
+    <div><span>房间内部重叠</span><strong data-rooms-check="overlap">—</strong></div>
+    <div><span>共墙与门洞落位</span><strong data-rooms-check="wall">—</strong></div>
+    <div><span>净宽比较</span><strong data-rooms-check="width">—</strong></div>
+    <div><span>门锁状态</span><strong data-rooms-check="state">—</strong></div>
+    <div><span>声明的机器人能力</span><strong data-rooms-check="capability">—</strong></div>
+    <div><span>连续路径、抓取与执行</span><strong data-result="unknown">未验证</strong></div>
+  </div>
+  <div class="rooms-result" aria-live="off"><span>MiniLab 受限规则结论</span><strong data-rooms-value="status">—</strong><span data-rooms-value="reason">—</span></div>
+  <div class="rooms-caption">原规则不设置额外安全裕量；不验证连续路径、抓取与物理执行。规则通过不表示机器人已成功执行。</div>
+  <details class="rooms-boundary"><summary>规则边界</summary><p>门洞置于共墙接段中点；图边开关只改变门的声明。共墙坐标与宽度采用 10⁻⁸ m 的数值容差；内部重叠面积大于 10⁻⁸ m² 时判为无效。</p></details>
+  <div class="rooms-announcement" data-rooms-announcement role="status" aria-live="polite" aria-atomic="true"></div>
+</section>
