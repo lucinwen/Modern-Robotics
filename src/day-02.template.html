@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f8f7">
+  <meta name="description" content="Day 2 Z3 与 SMT 新手教程：变量、非重叠、门接面、SAT/UNSAT/UNKNOWN、增量求解、冲突核心与优化。九个可视化，六例真实 Z3 运行记录。">
+  <title>Day 02 · 看懂约束与求解 | Modern Robotics 学习手记</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/site.css">
+  <link rel="stylesheet" href="assets/day2-page.css">
+  <link rel="stylesheet" href="assets/day2-geometry.css">
+  <link rel="stylesheet" href="assets/day2-logic.css">
+  <script src="assets/site.js" defer></script>
+  <script src="assets/day2-geometry.js" defer></script>
+  <script src="assets/day2-logic.js" defer></script>
+  <script src="assets/day2-records.js" defer></script>
+</head>
+<body data-lesson-key="day-02" data-lesson-title="Day 02 · 我的约束求解学习笔记" data-lesson-topic="Z3 / SMT、空间约束与失败归因">
+<a class="skip-link" href="#main">跳到教程正文</a>
+<header class="site-header">
+  <a class="brand" href="index.html" aria-label="返回 Modern Robotics 学习手记 Day 1"><span class="brand-monogram">MR<span>.</span></span><span class="brand-name">Modern Robotics<small>可视化学习手记</small></span></a>
+  <div class="header-actions"><span class="edition">DAY 02 / 空间约束</span><a href="https://github.com/venividici/-Modern-Robotics" target="_blank" rel="noopener noreferrer">GitHub 仓库 ↗</a><button class="btn theme-toggle" id="theme-toggle" type="button" aria-label="切换明暗主题">切换主题</button></div>
+</header>
+<div class="page-shell">
+  <aside class="sidebar" aria-label="学习导航">
+    <nav class="course-switcher" aria-label="选择学习日"><a href="index.html"><strong>DAY 01</strong><span>空间与运动</span></a><a href="day-02.html" aria-current="page"><strong>DAY 02</strong><span>约束与求解</span></a></nav>
+    <div class="sidebar-intro"><span class="eyebrow">从几何走向规则</span><strong>第二天，把要求说清楚。</strong></div>
+    <nav class="lesson-nav" aria-label="本页目录">
+      <a href="#start" class="is-current" aria-current="location"><span>00</span> 从这里开始</a>
+      <a href="#variables"><span>01</span> 变量、约束与模型</a>
+      <a href="#nonoverlap"><span>02</span> 不重叠为什么用 Or</a>
+      <a href="#packing"><span>03</span> 面积够，为什么放不下</a>
+      <a href="#contact"><span>04</span> 门与楼梯接面</a>
+      <a href="#solver-status"><span>05</span> 三种结果与验证</a>
+      <a href="#incremental"><span>06</span> push / pop 临时试验</a>
+      <a href="#unsat-core"><span>07</span> 找到一组冲突证据</a>
+      <a href="#preferences"><span>08</span> 硬要求与软偏好</a>
+      <a href="#experiments"><span>09</span> 六例真实 Z3 记录</a>
+      <a href="#practice"><span>10</span> 亲手改一项并解释</a>
+      <a href="#sources"><span>↗</span> 原文与课程地图</a>
+    </nav>
+    <div class="sidebar-note"><span class="small-label">每次只改一项</span><p>先写一句预测，<br>再看公式和图的变化，<br>最后核对求解记录。</p><a href="https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/DAILY/day-02.md" target="_blank" rel="noopener noreferrer">原 Day 2 学习计划 ↗</a></div>
+  </aside>
+  <main id="main">
+    <section id="start" class="hero lesson-section" data-nav>
+      <div class="eyebrow">DAY 02 / Z3 · SMT · 空间约束</div>
+      <h1>把摆放的要求，<br><span>变成可以求解的规则。</span></h1>
+      <p class="hero-lead">昨天用坐标描述“物体在哪里”；今天继续问：有没有一种摆法，能把所有要求同时满足？从两个房间开始，逐步看懂公式、解和冲突。</p>
+      <div class="lesson-meta"><span>计划日 2026.10.21</span><span>R03 官方文档 · 约 105 分钟选读</span><span>9 个可视化 · 6 例 Z3 运行记录</span></div>
+      <a class="start-link" href="#variables">从一根数轴开始 <span aria-hidden="true">↓</span></a>
+      <div class="opening-question"><span class="small-label">贯穿今天的一个问题</span><p>“放下两个房间，还要让机器人能过门。”</p><span>放得下吗？哪些条件必须同时成立？哪里发生了冲突？求解成功以后，还缺什么检查？</span></div>
+      <div class="reading-guide">
+        <h2>先看几何，再把它写成公式</h2>
+        <p>Day 2 的指定资源是 <strong>Z3 官方文档</strong>。按 <a href="#sources">R03 阅读范围</a>学习即可；这一日没有必修视频配额。你已有 Python 基础，这里从变量的数学含义和空间规则开始，把代码留在对应的几何解释后面。</p>
+        <p>每节先找出<strong>允许改的量、必须满足的要求、当前图说明了什么</strong>。网页里的数轴、房间与候选方案按注明的解析公式或有限枚举更新；第 9 节展示的是制作教程时实际运行 Z3 的固定记录。你在自己环境中的改动与运行，另记在页末。</p>
+      </div>
+      <div class="d2-learning-route" aria-label="今天的三段学习路线"><div><span>先建立直觉</span><strong>变量 → 几何约束</strong><p>第 01–04 节：看懂允许的摆法。</p></div><div><span>再解释结果</span><strong>求解 → 冲突 → 偏好</strong><p>第 05–08 节：看懂程序能回答什么。</p></div><div><span>最后留下证据</span><strong>预测 → 运行 → 复核</strong><p>第 09–10 节：自己改一项并解释。</p></div></div>
+      <p class="source-note">范围依据 <a href="https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/STUDY_GUIDES/R03.md" target="_blank" rel="noopener noreferrer">R03 子教程</a>与 <a href="https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/TASK_GUIDES/day-02.md" target="_blank" rel="noopener noreferrer">Day 2 任务手册</a>。制作日期为 2026-10-20，计划日不代表已经完成个人学习。</p>
+    </section>
+
+    <section id="variables" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>01</span> Getting Started · Boolean Logic · Arithmetic</div>
+      <h2>先留出未知的位置，<br class="desktop-break">再告诉程序哪些值可以用。</h2>
+      <p>在 Day 1 的演示中，你亲手给物体的位置和角度赋值。现在可以把房间的位置先留成未知数，例如 <code>x_A</code>、<code>y_A</code>，然后写下“必须在边界内”“不得重叠”。求解器寻找的是<strong>一组让这些要求同时成立的取值</strong>。</p>
+      <div class="table-wrap"><table><caption>把新词对应到两个房间的例子</caption><thead><tr><th>术语</th><th>在这里指什么</th><th>例子</th></tr></thead><tbody><tr><td>变量</td><td>暂时未知、希望确定的量</td><td>A 的左下角横坐标 <code>x_A</code></td></tr><tr><td>变量的类型／取值域</td><td>允许用哪一类值</td><td>整数 Int、实数 Real、真假 Bool</td></tr><tr><td>约束／断言</td><td>必须成立的公式；加入求解器后称为断言</td><td><code>x_A ≥ 0</code></td></tr><tr><td>模型 model</td><td>使当前断言都成立的一组解释或赋值</td><td><code>x_A = 0, y_A = 0</code></td></tr><tr><td>可满足 satisfiable</td><td>至少存在一个模型</td><td>找到一种完整满足要求的摆法</td></tr></tbody></table></div>
+      <p>这里的 <strong>model 是一组满足公式的解释</strong>，和“训练一个神经网络模型”不是同一个用法。一个问题可能有很多模型；普通 <code>Solver()</code> 找到一个即可，没有自动承诺它最漂亮、最省面积或最方便通行。</p>
+      <div class="try-this"><span>动手看</span><p>把范围设为 <code>2.2 ≤ x ≤ 2.8</code>，比较实数与整数。再把上界移到 3：究竟是公式变了、变量类型变了，还是出现了新的允许值？</p></div>
+      <figure class="interactive-figure">{{component:day2-domains}}<figcaption>数轴按上下界解析计算。Real 表示连续数学实数，Int 表示整数；图上采样点只是显示方式，不能据此把实数取值域变成离散网格。</figcaption></figure>
+      <h3>SAT 与 SMT，在解决哪一类问题？</h3>
+      <p><strong>SAT</strong> 关心布尔公式：能不能给若干命题分配“真／假”，使整个逻辑式为真？例如“门已解锁”与“机器人有权限”都为真，某个通行条件才成立。</p>
+      <p><strong>SMT</strong> 在逻辑连接词之外，还让整数、实数等对象遵守相应数学规则。例如它要理解 <code>x ≥ 2</code> 和 <code>x ≤ 1</code> 对同一个数不能同时成立。Z3 是支持多种理论与求解接口的工具；你仍然需要把场景要求翻译成公式。</p>
+      <div class="d2-logic-glossary"><div><code>And(A, B)</code><span>A 与 B 都要成立</span></div><div><code>Or(A, B)</code><span>A、B 至少一个成立，也可都成立</span></div><div><code>Not(A)</code><span>A 不成立</span></div><div><code>Implies(A, B)</code><span>若 A 成立，则要求 B 成立</span></div></div>
+      <details><summary>用你熟悉的 Python 看一个最小 Z3 例子</summary><pre class="d2-code"><code>from z3 import Int, Solver, sat, unsat
+
+x = Int("x")                 # 数学整数变量；此时还没有给它取值
+s = Solver()
+s.add(x &gt;= 2, x &lt;= 4)       # 这两条必须同时成立
+result = s.check()
+if result == sat:
+    print(s.model())         # 查看本次找到的一组满足赋值
+elif result == unsat:
+    print("当前约束不可同时满足")
+else:
+    print("尚无法判定：", s.reason_unknown())</code></pre><p><code>s.add(a, b)</code> 同时加入 a 与 b；需要“至少一个”时写 <code>s.add(Or(a, b))</code>。组合 Z3 符号公式时使用 <code>And/Or/Not</code>，避免把 Python 的 <code>and/or/not</code> 当成符号逻辑连接词。</p></details>
+      <details class="self-check"><summary>停一下，自己解释：把米坐标从 Real 改成 Int，只是显示格式变化吗？</summary><p>它改变了允许的位置。以米为单位的 Int 只允许整数米坐标。若用整数厘米，需要把全部尺寸与阈值统一换成厘米。不能用整数网格中没找到解，直接断言连续坐标中也无解。</p></details>
+      <p class="source-note">来源：<a href="#source-guide">Z3Py 官方入门：Getting Started、Boolean Logic、Arithmetic、Solvers</a>。</p>
+    </section>
+
+    <section id="nonoverlap" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>02</span> 把中文要求逐条形式化</div>
+      <h2>不重叠：只要在一个方向上分开。</h2>
+      <p>先限定今天的模型：房间是<strong>轴对齐矩形</strong>，边始终平行于 x、y 轴，不允许转斜；宽高都是正数，位置记在左下角，单位为米。A 的横向范围是 <code>[x_A, x_A + w_A]</code>，纵向范围是 <code>[y_A, y_A + h_A]</code>。</p>
+      <h3>第一组：完整放进外框</h3>
+      <p>外框宽 W、高 H，左下角在原点。对每个房间 i，都需要下面四条<strong>同时成立</strong>：</p>
+      <div class="formula" role="math" aria-label="x i大于等于零，y i大于等于零，x i加宽小于等于W，y i加高小于等于H">x<sub>i</sub> ≥ 0　∧　y<sub>i</sub> ≥ 0<br>x<sub>i</sub> + w<sub>i</sub> ≤ W　∧　y<sub>i</sub> + h<sub>i</sub> ≤ H</div>
+      <p>只检查左下角在外框里会漏掉伸出去的右边与上边。这也是为什么要先说清楚“坐标记在中心还是左下角”。</p>
+      <h3>第二组：两个房间的内部不相交</h3>
+      <p>把两张纸片放在桌面上。它们可以一左一右分开，也可以一上一下分开。只要其中一种分离关系成立，就不会出现内部重叠。</p>
+      <div class="try-this"><span>动手看</span><p>先选左右贴边，观察哪一项为真；再选上下分开。最后切换 Or 与 And，解释为什么“上下已经分开”时，并不需要“左右也分开”。</p></div>
+      <figure class="interactive-figure">{{component:day2-nonoverlap}}<figcaption>四个谓词检查的是当前两盒的位置。当前摆放重叠，只能说明这个候选不合格；其他位置是否都不可能，需要求解整个断言集或给出完整证明。</figcaption></figure>
+      <p>下面把两间房的宽高暂时都固定为 2，并用 Real 声明连续坐标，单独构造这条非重叠公式：</p>
+      <pre class="d2-code"><code>from z3 import Or, Reals
+
+xA, yA, xB, yB = Reals("xA yA xB yB")
+wA = hA = wB = hB = 2
+no_overlap = Or(
+    xA + wA &lt;= xB,   # A 在 B 左边
+    xB + wB &lt;= xA,   # B 在 A 左边
+    yA + hA &lt;= yB,   # A 在 B 下边
+    yB + hB &lt;= yA    # B 在 A 下边
+)
+print(no_overlap)</code></pre>
+      <p><strong>外框要求与非重叠要求之间是 And；四个分离方向内部是 Or。</strong>如果把四项全部写成 And，你会同时要求“A 完全在 B 左边”和“B 完全在 A 左边”，正宽度的两个房间不可能满足。</p>
+      <p>这里使用 <code>≤</code>，所以允许贴边。若需要非负间隔 <code>g ≥ 0</code>，就在对应分离项中加上 g，例如 <code>xA + wA + g ≤ xB</code>。间隔代表哪个实际要求、是否允许为零，应在建模时先确定。</p>
+      <details><summary>为什么这个四向条件没有漏掉其他轴对齐情况？</summary><p>两个正尺寸轴对齐矩形内部重叠，当且仅当它们的 x 区间有正长度重叠，而且 y 区间也有正长度重叠。要让内部不重叠，只需至少一个轴上的内部区间分开；每个轴有两个先后方向，合起来就是四项。旋转矩形、非矩形轮廓不直接适用这条 AABB 公式。</p></details>
+      <details class="self-check"><summary>停一下，自己解释：只验证 x 方向，可能会犯什么错？</summary><p>如果强制必须左右分离，会错误拒绝原本可以上下排开的合法摆法。完整条件要保留两个坐标方向。</p></details>
+      <p class="source-note">来源：<a href="#source-task">Day 2 空间约束任务</a>；逻辑语法见 <a href="#source-guide">Z3 Guide · Boolean Logic</a>。区间推理与交互为本教程的解释。</p>
+    </section>
+
+    <section id="packing" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>03</span> 用反例理解 UNSAT</div>
+      <h2>面积 9，为什么容不下总面积 8？</h2>
+      <p>给两个房间都固定为 <code>2 m × 2 m</code>，外框取 <code>3 m × 3 m</code>。总面积确实足够，但几何摆放还必须满足每个方向的尺寸关系。</p>
+      <div class="try-this"><span>动手看</span><p>保持高度 3，把宽度从 4 拖到 3。接着保持宽度 3，把高度改到 4。观察合法见证如何从左右摆放变成上下摆放。</p></div>
+      <figure class="interactive-figure">{{component:day2-packing}}<figcaption>这是固定两个 2×2 轴对齐盒的精确解析演示：连续坐标、完整包含、允许贴边、无旋转。真实 Z3 整数与实数对照记录在第 9 节及配套数据中。</figcaption></figure>
+      <details class="self-check"><summary>先试着证明 3×3 无解，再展开分步解释</summary><ol><li>每个宽 2 的房间都要留在宽 3 的外框里，所以 <code>0 ≤ xA,xB ≤ 1</code>。</li><li>若 A 在 B 左边，需要 <code>xA + 2 ≤ xB</code>；但左边至少为 2，右边最多为 1，矛盾。左右交换同样矛盾。</li><li>高度也是 3，因此 <code>0 ≤ yA,yB ≤ 1</code>。上下两个分离方向同样都不可能。</li><li>四项 Or 的每一项都不可能成立，所以整组约束不可满足。</li></ol><p>这段证明允许任意实数坐标，因此结论不依赖“只试了几个整数位置”。这里的条件全部固定后，面积足够只是必要条件，并非充分条件。</p></details>
+      <div class="key-idea"><strong>可行见证与无解证明，证据形式不同</strong><p>证明有解，拿出一个满足全部约束的摆法即可。证明无解，需要排除全部允许的摆法。反复拖动却没摆好，本身不能完成后者。</p></div>
+      <p>对于这个特定的“两间固定 2×2”模型，能够放下的条件恰好是：</p>
+      <div class="formula" role="math" aria-label="W至少2，H至少2，并且W至少4或者H至少4">W ≥ 2　∧　H ≥ 2　∧　(W ≥ 4　∨　H ≥ 4)</div>
+      <p>尺寸或房间数量变了，就要重新推导或求解。尤其是更多房间的布局，不能直接套用这条两盒结论。</p>
+      <details><summary>如果让房间面积也成为设计变量呢？</summary><p>本页把房间宽高固定为 2，位置是未知变量，所以主要使用线性算术与布尔析取。若宽、高都变为未知数，面积约束 <code>w × h ≥ A</code> 包含变量相乘，会改变求解问题的性质。应记录你改了哪些变量、约束和求解设置，并重新检查结果与耗时。</p></details>
+      <p class="source-note">来源：<a href="#source-task">Day 2 的 3×3 反例</a>、<a href="#source-minilab">原 MiniLab</a>。连续坐标证明为本教程给出的几何推导。</p>
+    </section>
+
+    <section id="contact" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>04</span> 从“不重叠”继续走到“有可用接面”</div>
+      <h2>没有撞在一起，<br class="desktop-break">还不代表门接得上。</h2>
+      <p>两个房间可以相隔很远而不重叠。要在它们之间开门，还需要一段真实的共享墙、一个位于墙段内的开口，以及足够的有效净宽。几何关系与 Day 1 的图连通是不同证据。</p>
+      <p>以 A 在左、B 在右为例，共墙首先要求 <code>xA + wA = xB</code>。共享墙的纵向区间为：</p>
+      <div class="formula" role="math" aria-label="共享区间下端L是两个y中的较大者，上端U是两个上边界中的较小者，并且U大于L">L = max(yA, yB)<br>U = min(yA + hA, yB + hB)<br>U &gt; L</div>
+      <p><code>U &gt; L</code> 要求有正长度。只碰到一个角时 <code>U = L</code>，没有可容纳正宽门洞的墙段。</p>
+      <div class="try-this"><span>动手看</span><p>先观察共墙；把 B 稍微移开，制造缝隙；再移到只碰角的位置。恢复共墙后，把门洞移向墙段端点：即使门宽小于整段墙长，也可能放错位置。</p></div>
+      <figure class="interactive-figure">{{component:day2-contact}}<figcaption>门的净宽与接面检查是受限二维几何条件。楼梯补充图只解释平台高度与足印接触，还需另验坡度、台阶、头部净空、连续路径与实际运动能力。</figcaption></figure>
+      <h3>门的位置和门的宽度，要一起检查</h3>
+      <p>把门洞中心记为 c、净宽记为 d，它沿墙的开口区间是 <code>[c − d/2, c + d/2]</code>。完整落在共享墙段内，需要：</p>
+      <div class="formula" role="math" aria-label="门宽大于零，门洞下端至少为L，上端至多为U">d &gt; 0<br>L ≤ c − d/2　∧　c + d/2 ≤ U</div>
+      <p>如果机器人用一个固定宽度 b 表示，每侧要求留出余量 s，则净宽条件为 <code>d ≥ b + 2s</code>。这只是当前模型中的横向尺寸要求；机器人转弯时的扫掠空间、门扇、门槛与高度还可能引入其他限制。</p>
+      <h3>楼梯接面为什么还要看高度？</h3>
+      <p>俯视图中重叠的区域，可能位于不同高度。图中预定落脚高度为 <code>1.00 m</code>，平台顶面为 <code>0.80 m</code>；即使水平投影有正面积交集，竖直方向仍相差 <code>0.20 m</code>，还没有发生接触。高度对齐与可用接触面积只是候选接触证据，完整支撑、台阶尺寸和身体运动还要继续检查。</p>
+      <details><summary>数学公式的相等，与测量几何的容差</summary><p>Z3 的数学整数／实数关系与浏览器几何显示的数值计算要分开。编码里的精确相等要求两个表达式相等；带噪声的测量通常需要事先声明允许误差。后验检查中的容差只能处理已定义的误差范围，不能偷偷把真实缝隙或净宽不足当作通过。当前组件给出自己的数值边界说明。</p></details>
+      <details class="self-check"><summary>停一下，自己解释：“门宽小于墙长”足够证明门合法了吗？</summary><p>还不够。先要有有效共享墙，并检查门开口的整个区间位于共享墙段内。门过窄、门被锁、门后有障碍、机器人无法转弯，分别还涉及尺寸、状态和运动条件。</p></details>
+      <p class="source-note">来源：<a href="#source-task">Day 2 门／楼梯接面任务</a>。门区间公式和平台图为明确建模条件的教学补充。</p>
+    </section>
+
+    <section id="solver-status" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>05</span> Solvers · Models · reason_unknown</div>
+      <h2>求解器的三个回答，<br class="desktop-break">决定三种后续工作。</h2>
+      <div class="table-wrap"><table><caption>先把返回值翻译成一句准确的话</caption><thead><tr><th>返回值</th><th>它回答了什么</th><th>接着做什么</th></tr></thead><tbody><tr><td><code>sat</code></td><td>当前断言存在模型</td><td>读取模型，核对编码，再做独立几何与任务检查</td></tr><tr><td><code>unsat</code></td><td>当前断言无法同时成立</td><td>确认输入、单位和模型条件，再研究冲突证据</td></tr><tr><td><code>unknown</code></td><td>本次求解没有判定可满足或不可满足</td><td>保存原因、预算和输入，调整方法后再检验</td></tr></tbody></table></div>
+      <p><strong>unknown 不等于 unsat。</strong>超时是可能的原因之一，也可能涉及理论或求解能力限制。报告实际 <code>reason_unknown()</code> 返回什么；若它只给出笼统原因，就保留这个限度。</p>
+      <div class="try-this"><span>动手看</span><p>切换四种已记录的情况，观察流程在哪一步停下。尤其比较“公式有模型”和“公式有模型，但后面的门宽检查拒绝”。</p></div>
+      <figure class="interactive-figure">{{component:day2-pipeline}}<figcaption>这里回看配套 Python 脚本的真实求解记录，并展示后续检查的状态；切换按钮不会在浏览器中发起新的 Z3 求解。</figcaption></figure>
+      <h3>求解成功后，为什么还要检查？</h3>
+      <p>假设公式只描述“两房完整放进外框，且不重叠”。Z3 给出 sat，说明这一组几何要求可满足。若你随后问“宽 0.60 m 的机器人能否通过宽 0.50 m 的门”，这个新问题没有被前面的打包公式回答。</p>
+      <p>独立检查可以发现模型里遗漏的要求、单位或坐标转换错误、几何接面问题。再往后的路径规划与执行验证，回答的是实际运动能否完成。每一层都应把<strong>已检查条件和仍未检查条件</strong>写清楚。</p>
+      <details><summary>一个实际返回 unknown 的例子</summary><pre class="d2-code"><code>from z3 import Real, Solver, sat, unsat
+
+x = Real("x")
+s = Solver()
+s.set(timeout=3000)    # 时间预算 3000 ms；设置预算不代表实际发生超时
+s.add(2 ** x == 3)
+result = s.check()
+print(result)
+if result != sat and result != unsat:
+    print(s.reason_unknown())</code></pre><p>官方入门用这个非多项式表达式说明求解边界。配套运行记录保留本次 Z3 版本的真实状态与原因；不能把这一次输出推广为所有公式、版本和设置的表现，更不能自行把原因改写成“超时”。</p></details>
+      <details class="self-check"><summary>停一下，自己解释：一个无效摆放、一个 UNSAT 问题、一次 UNKNOWN，分别说明什么？</summary><p>无效摆放：这个候选违反至少一条要求。UNSAT：当前模型中全部允许赋值都无法同时满足断言。UNKNOWN：本次求解没有得出上述两种结论。三者需要不同证据。</p></details>
+      <p class="source-note">来源：<a href="#source-guide">Z3 Guide · Solvers</a>、<a href="#source-programming">Programming Z3 · Models</a>；实际记录见 <a href="data/day-02-z3-results.json">运行数据</a>。</p>
+    </section>
+
+    <section id="incremental" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>06</span> Incrementality · Scopes · Assumptions</div>
+      <h2>先保留基础条件，<br class="desktop-break">临时试一个新要求。</h2>
+      <p>你常常要比较相似场景：房间宽度不变，暂时加一道门宽限制；或者保持基础关系，试试某个状态。<code>push()</code> 可以开启一个临时作用域，<code>pop()</code> 撤回与它匹配的作用域里新增的断言。</p>
+      <div class="try-this"><span>动手看</span><p>先 check 基础约束；push 一层后加上 <code>x ≤ 1</code>，再 check；最后 pop 并重新 check。观察哪些断言一起被撤回，哪些基础断言仍然保留。</p></div>
+      <figure class="interactive-figure">{{component:day2-incremental}}<figcaption>这个数轴实例用区间解析演示作用域栈，基础条件为 x ≥ 2。配套 Python 记录的基础层还包含 x ≤ 6；允许区间更窄，但 push／pop 的作用相同。</figcaption></figure>
+      <pre class="d2-code"><code>from z3 import Int, Solver
+
+x = Int("x")
+s = Solver()
+s.add(x &gt;= 2)        # 基础层
+print(s.check())
+
+s.push()              # 记住当前作用域边界
+s.add(x &lt;= 1)        # 临时新增的要求
+print(s.check())
+
+s.pop()               # 撤回这一层新增的断言
+print(s.check())       # 必须针对恢复后的状态重新检查</code></pre>
+      <p><code>pop()</code> 不是“删掉最近一条公式”：同一层新增的多条断言会一起撤回。模型和冲突核心要对应最近一次检查时的断言集；改了断言后，重新 check，再读取对应结果。</p>
+      <h3>assumptions：只对这一次检查启用的条件</h3>
+      <p>也可以把可选要求接在一个布尔开关后面。例如 <code>Implies(try_narrow, x ≤ 1)</code> 表示“如果启用这个开关，就要求 x≤1”。调用 <code>s.check(try_narrow)</code> 会在本次检查假设开关为真；假设不会作为一条永久新增断言留在后续普通 <code>check()</code> 中。不传这个开关，表示本次没有要求它为真，并不等于另外断言了 <code>Not(try_narrow)</code>。</p>
+      <details><summary>“打开条件”的代码，和“只给条件贴标签”有什么区别？</summary><p>显式 <code>Implies(flag, condition)</code> 搭配 <code>check(flag)</code> 可以按本次假设启用规则；<code>assert_and_track(condition, label)</code> 会让该条件在它所在的作用域内保持启用，同时为诊断提供标签。普通 check 时漏写 track 标签，不会把被跟踪条件关闭。</p></details>
+      <details class="self-check"><summary>停一下，自己解释：push 后加两条要求，再 pop，会留下哪几条？</summary><p>push 之前的基础断言留下；匹配作用域里新增的两条一起撤回。若有嵌套作用域，先退回最上面一层。增量机制帮助复用求解状态，不承诺每种问题都一定更快。</p></details>
+      <p class="source-note">来源：<a href="#source-guide">Z3 Guide · Solvers</a>、<a href="#source-programming">Programming Z3 §4.1–4.3</a>。</p>
+    </section>
+
+    <section id="unsat-core" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>07</span> assert_and_track · Unsat Core</div>
+      <h2>冲突核心：一组足以冲突的证据。</h2>
+      <p>当要求很多时，只得到 unsat 还不容易知道该从哪里检查。你可以为条件贴标签，在最近一次 check 返回 unsat 后，读取 <code>unsat_core()</code>，得到一组与该次不可满足有关的跟踪标签或假设。</p>
+      <div class="worked-example"><h3>门宽的两条要求</h3><p><code>minimum_clearance: d ≥ 0.8</code> 与 <code>available_opening: d ≤ 0.5</code> 不能同时成立。它们指出一个兼容性问题：需求下界高于几何上界。仅凭这个结果，不能判断哪一条记录是错的，也不能决定应该牺牲哪项真实要求。</p></div>
+      <div class="try-this"><span>动手看</span><p>先选择 x 的两条冲突，再选择 y 的两条冲突。把当前全体约束中的一条 x 条件移除，看看 y 的冲突是否还在。然后检查“全部标签”是否也足以无解，却含有多余条件。</p></div>
+      <figure class="interactive-figure">{{component:day2-core}}<figcaption>简单上下界的解析教学工具，用于检查你选择的候选子集。它没有声称模拟 Z3 内部选择核心的顺序；真实输出在运行记录中保留。</figcaption></figure>
+      <h3>标签的粒度，决定你能定位到多细</h3>
+      <p>如果把 A 的四条边界打包成 <code>assert_and_track(And(...), "a_inside")</code>，核心只能告诉你整组边界标签参与了冲突。若每条边界分别贴标签，就有机会定位到更细的断言。核心中的“一个标签”不一定对应“一条原子不等式”。</p>
+      <pre class="d2-code"><code>from z3 import Real, RealVal, Solver, unsat
+
+d = Real("door_width")
+s = Solver()
+s.assert_and_track(d &gt;= RealVal("0.8"), "minimum_clearance")
+s.assert_and_track(d &lt;= RealVal("0.5"), "available_opening")
+if s.check() == unsat:
+    print(s.unsat_core())</code></pre>
+      <p>这里用字符串建立精确十进制有理数。涉及分数时，也可以用 <code>Q(1, 3)</code> 等 Z3 表达式，避免先在 Python 中进行浮点运算，再把近似结果误当精确约束。</p>
+      <div class="table-wrap"><table><caption>三个看起来相近、含义不同的“核心”</caption><thead><tr><th>说法</th><th>准确含义</th></tr></thead><tbody><tr><td>一个不可满足核心</td><td>这组所标条件连同固定背景，已足以不可满足；可能有多余项。</td></tr><tr><td>包含极小核心</td><td>从该核心再删任何一项，就不再是核心。</td></tr><tr><td>条数最少的核心</td><td>在所有核心中，包含的标签数量最少；这是更强的要求。</td></tr></tbody></table></div>
+      <p><strong>默认返回的核心不保证唯一，也不保证极小或条数最少。</strong>“存在两个不同核心”也不等于某个求解器每次运行必然轮流输出它们。最小化设置、标签分组和求解流程都会影响你能得到的诊断。</p>
+      <details><summary>有未跟踪背景约束时，核心要和什么放在一起理解？</summary><p>设未跟踪的固定背景是 B，返回的标签对应条件 C。保证的是 <code>B ∧ C</code> 不可满足，而不是 C 单独必然不可满足。若 B 自己已经矛盾，返回空核心也可能合理。因此记录核心时，还要保存背景断言、标签映射、本次 assumptions 和版本。</p></details>
+      <details class="self-check"><summary>停一下，自己解释：从一个核心里去掉一项，就一定把整个问题修好了吗？</summary><p>不一定。若这个核心不是极小的，剩余子集可能仍然冲突；即使它被打断，全体约束中还可能有另一组独立冲突。更根本的是，核心给出逻辑证据，不负责决定允许修改哪些需求。应先检查输入和编码，再在获准改变的条件范围内提出方案。</p></details>
+      <p class="source-note">来源：<a href="#source-programming">Programming Z3 §4.3–4.4</a>；真实标签粒度对照与两个独立冲突见配套实验。</p>
+    </section>
+
+    <section id="preferences" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>08</span> Solver · Optimize · 分级退让</div>
+      <h2>先满足必须做到的事，<br class="desktop-break">再比较哪种方案更合意。</h2>
+      <p>“房间必须留在外框内”“门洞至少有要求的净宽”可以作为<strong>硬约束</strong>。而“门宽尽量接近期望值”“房间尽量靠窗”可以作为<strong>偏好或优化目标</strong>。它们是否允许让步，要由需求定义，求解器不会自行知道。</p>
+      <p>普通 <code>Solver</code> 判断可满足并找模型；<code>Optimize</code> 可以在保留硬约束的同时，通过最小化／最大化目标、或带权软约束比较方案。<strong>Z3 包含优化接口</strong>，因此“Z3 和优化器完全无关”也是误解。</p>
+      <div class="try-this"><span>动手看</span><p>先观察候选门宽怎样被硬要求筛选，再调整偏好。把可用宽度收紧到低于最低净宽，看看只改变期望门宽能否恢复可行。</p></div>
+      <figure class="interactive-figure">{{component:day2-preferences}}<figcaption>在组件注明的有限候选集合中枚举与排序；最优只相对于该候选集合和指定成本。真实 Z3 Optimize 的独立短例保存在配套实验里。</figcaption></figure>
+      <h3>分级退让，要把改动对象写出来</h3>
+      <ol class="reasoning-steps"><li><strong>先保持硬要求。</strong>核对坐标、单位和是否写错连接词。</li><li><strong>再调整已允许让步的偏好。</strong>例如降低某个软目标的优先级，记录“改了哪个目标”。</li><li><strong>仍无解时，回到需求层讨论结构性改动。</strong>例如扩大外框或改变任务设定；它们属于问题条件变化，不能装作原条件已经被满足。</li><li><strong>对修改后的结果重新检查。</strong>保留原输入、新输入、变更原因与检查结论。</li></ol>
+      <p>若真正的硬约束自身已经冲突，仅仅改变优化权重，不能凭空产生满足这些硬约束的模型。</p>
+      <details class="self-check"><summary>停一下，自己解释：“找到了一个模型”和“找到了最优模型”差哪一步？</summary><p>前者只要求模型满足当前断言；后者还要明确候选空间、目标函数、目标之间的优先方式和求解结果。没有指定的目标，“更好”没有可计算的含义。</p></details>
+      <p class="source-note">来源：<a href="#source-programming">Programming Z3 §8 Optimization</a>、<a href="#source-task">Day 2 分级退让与后验验证要求</a>。</p>
+    </section>
+
+    <section id="experiments" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>09</span> 带输入、输出与环境的实际示例</div>
+      <h2>先预测，再核对六次 Z3 输出。</h2>
+      <p>这六例按 Day 2 手册构造，包含 3 个可满足与 3 个不可满足问题。结果由配套 Python 脚本实际生成。查看之前，先写出你认为决定结果的那条几何或逻辑关系。</p>
+      <figure class="interactive-figure">{{component:day2-results}}<figcaption>展示本教程制作环境的一次实际运行记录；变量、约束、版本与耗时一同保留。具体模型、核心顺序和耗时可能因版本与环境变化。</figcaption></figure>
+      <h3>整数坐标版本，与连续空间演示怎样对应？</h3>
+      <p>原 <code>minilab.z3_demo</code> 用 <code>Int</code> 坐标、固定高 3 和两个 2×2 房间。配套六例中 S1–U2 的房间位置也用 Int；U3 的门宽用 Real。上面的宽高图使用连续坐标的解析证明。对 3×3 的特例，两种坐标取值域都无解，配套脚本额外运行了 Real 坐标对照。其他问题不能据此混同两种取值域。</p>
+      <h3>在自己的环境中复现</h3>
+      <p>下载仓库后，在根目录执行。以下脚本会写出你本机的新记录；教程中展示的那份制作记录保留在 <code>data/</code> 中。</p>
+      <pre class="d2-code"><code>python -m pip install -r examples/day-02/requirements.txt
+python examples/day-02/run_examples.py --output day-02-my-results.json</code></pre>
+      <p>原学习仓库的实验则在 <code>14plan</code> 根目录按其安装说明运行：</p>
+      <pre class="d2-code"><code>python -m minilab.z3_demo --width 4
+python -m minilab.z3_demo --width 3
+python -m minilab.z3_demo --width 5</code></pre>
+      <p>配套程序除了六例，还记录 push／pop、assumptions、标签粒度、多个冲突、真实 unknown、Optimize 和 sat 后检查拒绝。先复现一例，再亲手改一项，能解释变化之后继续下一例。</p>
+      <div class="d2-downloads"><a class="btn" href="examples/day-02/README.md">实验说明</a><a class="btn" href="examples/day-02/run_examples.py">Python 源码</a><a class="btn" href="data/day-02-z3-results.json">完整运行数据 JSON</a></div>
+      <details><summary>记录中的几个字段应该怎样读？</summary><p><code>model</code> 是本次的满足赋值；<code>unsat_core</code> 是本次返回的标签；<code>reason_unknown</code> 保留原始诊断；<code>elapsed_ms</code> 是这次 check 的耗时记录，不能作为跨机器性能结论。脚本保存的版本和条件用于复核结果，而不是证明机器人已经执行成功。</p></details>
+      <p class="source-note">输入来自 <a href="#source-task">Day 2 六例表</a>与 <a href="#source-minilab">原 MiniLab</a>；新增诊断示例参照官方 API，自行编写并实际运行。</p>
+    </section>
+
+    <section id="practice" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>10</span> 把教程变成自己的解释与记录</div>
+      <h2>挑一条条件，<br class="desktop-break">亲手让结果发生变化。</h2>
+      <p>先用自己的话留下预测，再运行或操作。没有实际运行的部分标为“未运行”；把教程制作时的示例记录和自己的实验分开。你的目标是解释<strong>为什么</strong>变了，而不仅是得到某个返回值。</p>
+      <ol class="practice-list">
+        <li><h3>闭卷重写四向析取</h3><p>画出 A、B 左下角与宽高，分别说清楚每个不等式对应哪一对边。然后解释四项为什么是 Or，边界条件为什么是 And。</p><a href="#nonoverlap">回看四向演示 ↑</a></li>
+        <li><h3>自己变一组尺寸</h3><p>把两个 2×2 房间的外框改成宽 3、高 4。先预测是否有解，若认为可行就给一个坐标见证，随后用完整边界和非重叠公式核对。</p><details><summary>已经尝试，查看核对提示</summary><p>试试让两个房间上下贴边。核对下房间的上边界、上房间的下边界以及外框高度；如果横向位置也在边界内，就得到了一个可行见证。具体模型不必和求解器返回的模型完全相同。</p></details></li>
+        <li><h3>设计自己的 3 个 SAT 与 3 个 UNSAT</h3><p>至少两个不可满足例子标注条件名称。保留变量类型、单位、全部断言、预测、实际结果和局限。对一个例子改变标签分组，解释核心信息的粒度为什么变化。</p><a href="#experiments">查看六例记录的格式 ↑</a></li>
+        <li><h3>制造一次“sat 后仍被检查拒绝”</h3><p>明确写出求解器实际编码了什么，再增加一个后验要求。解释失败属于漏建模、候选几何问题、动作状态，还是尚未检查的执行层。</p><a href="#solver-status">回看求解与验证流程 ↑</a></li>
+        <li><h3>完成两轮“为什么”追问</h3><p>为什么不能只看面积？为什么换成 And 会错？为什么 unknown 不等于无解？为什么核心不是唯一修复方案？为什么调软偏好救不了硬冲突？</p></li>
+      </ol>
+      <details><summary>把本教程放回原计划的 10 小时安排</summary><div class="table-wrap"><table><caption>累计有效学习时间；保留原计划，不含休息</caption><thead><tr><th>时段</th><th>对应操作</th></tr></thead><tbody><tr><td>00:00–00:45</td><td>闭卷复习 Day 1 的图／几何，预测两个房间的冲突</td></tr><tr><td>00:45–01:45</td><td>结合第 01、05–07 节读 Z3 的模型、断言与接口</td></tr><tr><td>01:45–04:15</td><td>第 02–04、07 节：手推非重叠、门接面与核心语义</td></tr><tr><td>04:15–06:30</td><td>第 09–10 节：亲自设计六个断言集，先写预测</td></tr><tr><td>06:30–08:30</td><td>运行 MiniLab 与配套脚本，修改宽度，记录输出和版本</td></tr><tr><td>08:30–09:15</td><td>闭卷解释 sat 与任务成功之间还需要哪些证据</td></tr><tr><td>09:15–10:00</td><td>两轮技术追问，保留不确定点，为 Day 3 准备状态谓词</td></tr></tbody></table></div><p>R03 的约 105 分钟是官方材料的定向学习量，穿插在这些阶段内，并非额外增加的时间。需要更多暂停时，以自己的理解与记录为准。</p></details>
+      <div class="personal-note"><div class="note-heading"><div><span class="eyebrow">我的 Day 2 记录</span><h3>预测、改动、结果与解释</h3></div><span id="note-status" class="note-status" aria-live="polite">记录保存在此浏览器</span></div><label class="form-label" for="learning-note">输入与单位 → 条件与类型 → 我的推理 → 预测 → 实际结果／未运行 → 局限与下一步</label><textarea class="form-control" id="learning-note" rows="10" placeholder="例子名称：&#10;输入与单位：&#10;变量类型和全部条件：&#10;我的首次推理与预测：&#10;我改了什么：&#10;实际命令、环境、输出（未运行则写未运行）：&#10;修订后的解释：&#10;局限与下一步："></textarea><div class="note-actions"><button type="button" class="btn" id="export-note">导出 Day 2 笔记 .md</button><span>与 Day 1 分开保存在此浏览器，支持导出；不会自动上传个人输入。</span></div></div>
+      <p>回到 <a href="https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/TASK_GUIDES/day-02.md" target="_blank" rel="noopener noreferrer">原任务手册</a>核对七段产物。明天要用到的状态可以先写成 <code>door_locked</code>、<code>robot_has_key</code> 两个布尔谓词，继续区分“世界是什么状态”与“允许做什么动作”。</p>
+    </section>
+
+    <section id="sources" class="lesson-section sources-section" data-nav>
+      <div class="section-kicker"><span>↗</span> 官方原文 · 精确阅读范围</div>
+      <h2>看懂一个例子，再读对应原文。</h2>
+      <p>本教程依据官方文档与计划仓库重新组织讲解。今天的材料是文档课程；页面不把演示操作或制作环境记录写成你已完成的个人学习。</p>
+      <div class="course-list">
+        <article class="course-item" id="source-guide"><span class="course-part">R03</span><div><h3>Z3Py 官方入门</h3><p>Getting Started、Boolean Logic、Solvers、Arithmetic。重点读 Solver、check、model、assertions、push／pop 和 unknown。</p><a href="https://github.com/microsoft/z3guide/blob/main/website/docs-programming/02%20-%20Z3%20Python/01%20-%20Introduction.md" target="_blank" rel="noopener noreferrer">指定原文 ↗</a><a href="https://microsoft.github.io/z3guide/" target="_blank" rel="noopener noreferrer">官方指南入口 ↗</a></div><span class="reading-label">约 90m</span></article>
+        <article class="course-item" id="source-programming"><span class="course-part">API</span><div><h3>Programming Z3</h3><p>定向查阅 §4.1–4.5：增量、作用域、假设、核心、模型；§8 用于理解 Optimize。无需今天推导整个求解器内部算法。</p><a href="https://z3prover.github.io/papers/programmingz3.html" target="_blank" rel="noopener noreferrer">官方技术文档 ↗</a></div><span class="reading-label">约 15m</span></article>
+        <article class="course-item" id="source-task"><span class="course-part">任务</span><div><h3>14plan · Day 2</h3><p>六例断言集、两个 2×2 房间、门接面、分级退让和真实记录要求。</p><a href="https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/DAILY/day-02.md" target="_blank" rel="noopener noreferrer">每日计划 ↗</a><a href="https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/TASK_GUIDES/day-02.md" target="_blank" rel="noopener noreferrer">逐阶段手册 ↗</a><a href="https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/STUDY_GUIDES/R03.md" target="_blank" rel="noopener noreferrer">R03 子教程 ↗</a></div><span class="reading-label">计划</span></article>
+        <article class="course-item" id="source-minilab"><span class="course-part">代码</span><div><h3>原 MiniLab 与本教程实验</h3><p>原版整数坐标打包，与新增真实 Z3 示例分别标注来源。可查看代码和完整原始输出。</p><a href="https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/minilab/z3_demo.py" target="_blank" rel="noopener noreferrer">原 MiniLab ↗</a><a href="examples/day-02/README.md">本教程实验说明</a><a href="data/day-02-z3-results.json">本次运行 JSON</a></div><span class="reading-label">实操</span></article>
+      </div>
+      <div class="source-method"><h3>模型与记录的边界</h3><p>网页交互使用各自注明的解析公式或有限候选枚举，帮助理解概念；Z3 输出来自制作环境的实际运行并内嵌展示。房间、门与楼梯图采用教学简化条件。真实场景的几何、路径、状态与物理执行仍需分别验证。</p><p>本页与完整文字版保留相同的概念、推理、例题、条件和来源。个人首答、修订答案和本机运行结果由你自己记录。</p><p><a href="notes/day-02-tutorial.md">完整文字版教程</a> · <a href="notes/day-02-course-map.md">Day 2 课程对应表</a> · <a href="index.html">回顾 Day 1</a></p></div>
+    </section>
+    <div class="next-lesson"><span class="small-label">回到这两天的联系</span><a href="index.html#room-validation">Day 01 · 图上连着，机器人就能过去吗？ ↑</a></div>
+    <footer class="site-footer"><div><strong>Modern Robotics 学习手记</strong><p>先说清要求，再解释证据。</p></div><a href="#start">回到顶部 ↑</a></footer>
+  </main>
+</div>
+<script id="day2-run-data" type="application/json">{{data:day-02-z3-results}}</script>
+<noscript><div class="noscript-note">文字教程可以正常阅读。交互需要启用 JavaScript；真实实验记录也可从 JSON 或文字说明查看。</div></noscript>
+</body>
+</html>

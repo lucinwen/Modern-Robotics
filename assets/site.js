@@ -46,7 +46,10 @@
   const note = document.getElementById('learning-note');
   const noteStatus = document.getElementById('note-status');
   const exportButton = document.getElementById('export-note');
-  const noteKey = 'mr-learning-notes:day-01:v1';
+  const lessonKey = document.body.dataset.lessonKey || 'day-01';
+  const lessonTitle = document.body.dataset.lessonTitle || 'Day 01 · 我的学习笔记';
+  const lessonTopic = document.body.dataset.lessonTopic || 'Modern Robotics 空间基础与 Day 1 应用';
+  const noteKey = 'mr-learning-notes:' + lessonKey + ':v1';
   if (note) {
     try {
       const saved = localStorage.getItem(noteKey);
@@ -58,11 +61,11 @@
     });
   }
   if (note && exportButton) exportButton.addEventListener('click', function () {
-    const text = '# Day 01 · 我的学习笔记\n\n' + note.value + '\n\n---\n课程：Modern Robotics 空间基础与 Day 1 应用\nhttps://github.com/venividici/-Modern-Robotics\n';
+    const text = '# ' + lessonTitle + '\n\n' + note.value + '\n\n---\n课程：' + lessonTopic + '\nhttps://github.com/venividici/-Modern-Robotics\n';
     const blob = new Blob([text], {type: 'text/markdown;charset=utf-8'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url; a.download = 'day-01-my-notes.md';
+    a.href = url; a.download = lessonKey + '-my-notes.md';
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
     noteStatus.textContent = '已生成笔记下载';

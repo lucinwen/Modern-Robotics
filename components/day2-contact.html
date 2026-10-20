@@ -1,0 +1,27 @@
+<div id="day2-contact" class="d2g-root">
+  <div class="d2g-heading"><strong>从“不重叠”走到“门口有接面”</strong><span>每个绿色判断，都需要自己的条件</span></div>
+  <div class="d2g-workbench">
+    <div class="d2g-picture">
+      <svg class="d2g-scene" role="img" aria-labelledby="d2g-contact-title d2g-contact-desc"><title id="d2g-contact-title">房间共墙、门洞和机器人净宽</title><desc id="d2g-contact-desc">方块 A 固定，方块 B 可移动。正长度共墙用青绿色粗线表示，门洞用橙线表示。紫色平行线表示机器人宽度，虚线表示两侧余量。碰角或缝隙不能形成共墙门洞。</desc></svg>
+      <div class="d2g-legend"><span><i class="d2g-key-wall"></i>共墙段</span><span><i class="d2g-key-door"></i>候选门洞</span><span><i class="d2g-key-b"></i>机器人宽度</span></div>
+    </div>
+    <div class="d2g-proof">
+      <ol class="d2g-truth-list d2g-contact-steps" id="d2g-contact-steps" aria-label="四步几何检查"></ol>
+      <div class="d2g-result" id="d2g-contact-result" aria-live="off"></div>
+      <p class="d2g-explanation" id="d2g-contact-explanation"></p>
+    </div>
+  </div>
+  <div class="d2g-controls">
+    <label class="form-label" for="d2g-contact-x">房间 B 左下角 x <output id="d2g-contact-x-value" aria-live="off">2.00 m</output><input class="form-range" id="d2g-contact-x" type="range" min="-250" max="250" step="5" value="200" aria-valuetext="2.00 米"></label>
+    <label class="form-label" for="d2g-contact-y">房间 B 左下角 y <output id="d2g-contact-y-value" aria-live="off">0.00 m</output><input class="form-range" id="d2g-contact-y" type="range" min="-250" max="250" step="5" value="0" aria-valuetext="0.00 米"></label>
+    <label class="form-label" for="d2g-contact-center">门中心沿墙的坐标 <output id="d2g-contact-center-value" aria-live="off">1.00 m</output><input class="form-range" id="d2g-contact-center" type="range" min="-50" max="250" step="5" value="100" aria-valuetext="1.00 米"></label>
+    <label class="form-label" for="d2g-contact-door">门洞净宽 d <output id="d2g-contact-door-value" aria-live="off">0.90 m</output><input class="form-range" id="d2g-contact-door" type="range" min="10" max="250" step="10" value="90" aria-valuetext="0.90 米"></label>
+    <label class="form-label" for="d2g-contact-robot">机器人横向宽度 b <output id="d2g-contact-robot-value" aria-live="off">0.60 m</output><input class="form-range" id="d2g-contact-robot" type="range" min="20" max="150" step="5" value="60" aria-valuetext="0.60 米"></label>
+    <label class="form-label" for="d2g-contact-margin">每一侧预留余量 s <output id="d2g-contact-margin-value" aria-live="off">0.10 m</output><input class="form-range" id="d2g-contact-margin" type="range" min="0" max="30" step="5" value="10" aria-valuetext="0.10 米"></label>
+  </div>
+  <p class="d2g-note" id="d2g-contact-axis-note">当前共墙竖直，门中心读 y 坐标；若共墙水平，则读 x 坐标。</p>
+  <div class="viz-row" role="group" aria-label="比较不同接面情况"><button class="btn" type="button" data-d2g-contact-preset="baseline">共墙且门宽够</button><button class="btn" type="button" data-d2g-contact-preset="corner">只碰一个角</button><button class="btn" type="button" data-d2g-contact-preset="gap">有缝隙</button><button class="btn" type="button" data-d2g-contact-preset="overlap">内部重叠</button><button class="btn" type="button" data-d2g-contact-preset="offwall">门超出共墙</button><button class="btn" type="button" data-d2g-contact-preset="narrow">门太窄</button></div>
+  <details class="d2g-details"><summary>门洞公式与这个模型的边界</summary><p>两盒内部分离；一对墙的坐标相等；它们沿墙方向的交集 [l, u] 满足 u − l &gt; 0。若门中心为 c、净宽为 d，还需 l ≤ c − d/2 且 c + d/2 ≤ u。机器人正对门、把自身宽度视为常量时，净宽条件是 <strong>d ≥ b + 2s</strong>，其中 s 是每侧余量，数值单位都是米。</p><p>滑条以厘米整数计算，再显示为米，因此这里没有隐藏的几何吸附容差。净宽把每侧余量显式列出。它没有验证门扇开启、墙厚、转弯、连续路径或实际运动。</p></details>
+  <details class="d2g-details"><summary>楼梯平台为什么还要检查高度？</summary><div class="d2g-stair-grid"><figure><svg viewBox="0 0 300 180" role="img" aria-labelledby="d2g-stair-plan-title"><title id="d2g-stair-plan-title">俯视图中，候选落脚区域与平台投影有正面积重叠</title><rect x="92" y="64" width="162" height="94" class="d2g-static-platform"/><rect x="48" y="26" width="104" height="92" class="d2g-static-foot"/><rect x="92" y="64" width="60" height="54" class="d2g-static-overlap"/><text x="48" y="18">候选落脚区域</text><text x="188" y="146">平台</text><text x="158" y="92">交集面积 &gt; 0</text></svg><figcaption>俯视：水平投影确实有交集。</figcaption></figure><figure><svg viewBox="0 0 300 180" role="img" aria-labelledby="d2g-stair-side-title"><title id="d2g-stair-side-title">侧视图中，预定落脚高度与平台顶面相差零点二米，尚未接触</title><rect x="92" y="99" width="162" height="59" class="d2g-static-platform"/><line x1="48" y1="56" x2="152" y2="56" class="d2g-static-foot-line"/><line x1="122" y1="60" x2="122" y2="96" class="d2g-static-gap"/><line x1="114" y1="60" x2="130" y2="60" class="d2g-static-gap"/><line x1="114" y1="96" x2="130" y2="96" class="d2g-static-gap"/><text x="47" y="39">预定落脚 z = 1.00 m</text><text x="148" y="78">间隙 0.20 m</text><text x="123" y="124">平台 z = 0.80 m</text></svg><figcaption>侧视：高度没对齐，仍没有接触。</figcaption></figure></div><p>平台接面还涉及竖直坐标。正面积的水平交集和正确高度只是候选接触证据；完整支撑范围、台阶尺寸、身体碰撞和机器人可爬性仍需检查。</p></details>
+  <div class="sr-only" id="d2g-contact-live" role="status" aria-live="polite"></div>
+</div>

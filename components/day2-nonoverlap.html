@@ -1,0 +1,21 @@
+<div id="day2-nonoverlap" class="d2g-root">
+  <div class="d2g-heading"><strong>让四个方向替你检查摆放</strong><span>两个 2 m × 2 m 的轴对齐方块</span></div>
+  <div class="d2g-workbench">
+    <div class="d2g-picture">
+      <svg class="d2g-scene" role="img" aria-labelledby="d2g-no-title d2g-no-desc"><title id="d2g-no-title">两个方块的四向分离关系</title><desc id="d2g-no-desc">绿色方块 A 固定。移动紫色方块 B，观察左、右、下、上四个分离条件。横轴向右，纵轴向上；红色区域表示内部重叠。</desc></svg>
+      <div class="d2g-legend"><span><i class="d2g-key-a"></i>A 固定</span><span><i class="d2g-key-b"></i>B 可移动</span><span><i class="d2g-key-error"></i>内部重叠</span></div>
+    </div>
+    <div class="d2g-proof">
+      <div class="d2g-mode" role="group" aria-label="选择四个分离条件的连接方式"><button class="btn" type="button" data-d2g-no-mode="or" aria-pressed="true">OR · 至少一个成立</button><button class="btn" type="button" data-d2g-no-mode="and" aria-pressed="false">AND · 同时成立</button></div>
+      <ol class="d2g-truth-list" id="d2g-no-predicates" aria-label="四个分离不等式的当前真假"></ol>
+      <div class="d2g-result" id="d2g-no-result" aria-live="off"></div>
+    </div>
+  </div>
+  <div class="d2g-controls">
+    <label class="form-label" for="d2g-no-x">B 的左下角 x <output id="d2g-no-x-value" aria-live="off">2.00 m</output><input class="form-range" id="d2g-no-x" type="range" min="-250" max="300" step="5" value="200" aria-valuetext="2.00 米"></label>
+    <label class="form-label" for="d2g-no-y">B 的左下角 y <output id="d2g-no-y-value" aria-live="off">0.00 m</output><input class="form-range" id="d2g-no-y" type="range" min="-250" max="300" step="5" value="0" aria-valuetext="0.00 米"></label>
+  </div>
+  <div class="viz-row" role="group" aria-label="比较典型摆放"><button class="btn" type="button" data-d2g-no-preset="overlap">内部重叠</button><button class="btn" type="button" data-d2g-no-preset="edge">刚好接边</button><button class="btn" type="button" data-d2g-no-preset="gap">相隔一段</button><button class="btn" type="button" data-d2g-no-preset="above">上下分离</button></div>
+  <p class="d2g-note">这里检查的是<strong>当前这一种摆放</strong>。当前 OR 为假，只说明这次摆放重叠；要声称整个问题无解，还需排除所有允许的摆放。边界接触允许，所以用 ≤。</p>
+  <div class="sr-only" id="d2g-no-live" role="status" aria-live="polite"></div>
+</div>

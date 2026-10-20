@@ -1,0 +1,20 @@
+<div id="day2-preferences" class="d2l">
+  <div class="d2l-heading"><h3>先留下合法方案，再比较偏好</h3><span class="d2l-method">有限候选枚举</span></div>
+  <p class="d2l-intro">门宽 D 只能从 0.60–1.40 m 中每隔 0.10 m 选一个值。先试“硬条件冲突”，再调整期望门宽，观察偏好能否改变硬条件的交集。</p>
+  <div class="d2l-controls">
+    <label class="d2l-label" for="d2l-pref-cap"><span>空间允许的最大门宽 <output id="d2l-pref-cap-value" aria-live="off">1.20 m</output></span><input id="d2l-pref-cap" type="range" min="60" max="140" step="10" value="120"></label>
+    <label class="d2l-label" for="d2l-pref-robot"><span>机器人宽度 <output id="d2l-pref-robot-value" aria-live="off">0.60 m</output></span><input id="d2l-pref-robot" type="range" min="50" max="110" step="10" value="60"></label>
+    <label class="d2l-label" for="d2l-pref-margin"><span>每侧要求的余量 <output id="d2l-pref-margin-value" aria-live="off">0.10 m</output></span><input id="d2l-pref-margin" type="range" min="0" max="20" step="5" value="10"></label>
+    <label class="d2l-label" for="d2l-pref-desired"><span>期望门宽 · 可让步的偏好 <output id="d2l-pref-desired-value" aria-live="off">1.10 m</output></span><input id="d2l-pref-desired" type="range" min="60" max="140" step="10" value="110"></label>
+  </div>
+  <div id="d2l-pref-formula" class="d2l-code">硬条件：D ≥ 0.60 + 2 × 0.10；D ≤ 1.20（m）</div>
+  <svg class="d2l-pref-plot" role="img" aria-labelledby="d2l-pref-title d2l-pref-desc"><title id="d2l-pref-title">有限门宽候选中的合法值与偏好选择</title><desc id="d2l-pref-desc">先排除小于机器人宽度加双侧余量、或超过空间上限的门宽，再在剩余候选中比较偏好。</desc></svg>
+  <div class="d2l-buttons" role="group" aria-label="仅改变可让步的偏好排序"><button class="d2l-button" type="button" data-d2l-pref-strategy="desired" aria-pressed="true">偏好 1 · 接近期望门宽</button><button class="d2l-button" type="button" data-d2l-pref-strategy="compact" aria-pressed="false">退让到偏好 2 · 取较小合法门宽</button></div>
+  <p id="d2l-pref-objective" class="d2l-explanation">在合法候选中，最小化 |D − 期望门宽|；距离相同时选较小门宽。</p>
+  <div id="d2l-pref-candidates" class="d2l-candidates" aria-label="九个门宽候选的逐项判定"></div>
+  <div class="d2l-result"><div><span class="d2l-small-label">满足硬条件的候选</span><strong id="d2l-pref-feasible">5 个</strong></div><div><span id="d2l-pref-badge" class="d2l-badge" data-kind="sat">有限域中有解</span><p id="d2l-pref-result">按当前偏好选择 D = 1.10 m。</p></div></div>
+  <div class="d2l-buttons" role="group" aria-label="选择门宽候选例子"><button class="d2l-button" type="button" data-d2l-pref-preset="feasible">条件可满足</button><button class="d2l-button" type="button" data-d2l-pref-preset="conflict">硬条件冲突</button></div>
+  <p id="d2l-pref-change" class="d2l-change">可以调整输入；界面会写明改变的是硬条件还是偏好。</p>
+  <p class="d2l-boundary">本图只对九个门宽候选枚举与排序，没有调用 Z3 / Optimize。门宽和余量仅描述静态尺寸条件，未验证路径或物理执行。切换偏好不会自动放宽硬条件；“无解”只针对这里明确给定的离散候选模型。</p>
+  <div id="d2l-pref-status" class="d2l-sr" role="status" aria-live="polite" aria-atomic="true"></div>
+</div>

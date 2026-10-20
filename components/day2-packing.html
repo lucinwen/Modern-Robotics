@@ -1,0 +1,23 @@
+<div id="day2-packing" class="d2g-root">
+  <div class="d2g-heading"><strong>面积放得下，形状也放得下吗？</strong><span>两间固定 2 m × 2 m 的房间，完整放进外框</span></div>
+  <div class="d2g-workbench">
+    <div class="d2g-picture">
+      <svg class="d2g-scene" role="img" aria-labelledby="d2g-pack-title d2g-pack-desc"><title id="d2g-pack-title">外框中的两个方形房间</title><desc id="d2g-pack-desc">改变外框宽高。可行时显示一种完整在框内且内部不重叠的摆放；不可行时显示两种被边界排除的分离方向。</desc></svg>
+      <div class="d2g-legend"><span><i class="d2g-key-a"></i>房间 A</span><span><i class="d2g-key-b"></i>房间 B</span><span><i class="d2g-key-frame"></i>外框</span></div>
+      <div class="viz-row d2g-layout-choice" role="group" aria-label="查看一种候选分离方向"><button class="btn" type="button" data-d2g-pack-layout="horizontal" aria-pressed="true">看左右摆放</button><button class="btn" type="button" data-d2g-pack-layout="vertical" aria-pressed="false">看上下摆放</button></div>
+    </div>
+    <div class="d2g-proof">
+      <div class="d2g-result" id="d2g-pack-result" aria-live="off"></div>
+      <div class="d2g-metric"><span>外框面积</span><strong id="d2g-pack-area">12.00 m²</strong><span>两房面积之和：8.00 m²</span></div>
+      <ol class="d2g-truth-list" id="d2g-pack-conditions" aria-label="完整装入两房的几何条件"></ol>
+      <p class="d2g-explanation" id="d2g-pack-explanation"></p>
+    </div>
+  </div>
+  <div class="d2g-controls">
+    <label class="form-label" for="d2g-pack-w">外框宽 W <output id="d2g-pack-w-value" aria-live="off">4.00 m</output><input class="form-range" id="d2g-pack-w" type="range" min="100" max="600" step="5" value="400" aria-valuetext="4.00 米"></label>
+    <label class="form-label" for="d2g-pack-h">外框高 H <output id="d2g-pack-h-value" aria-live="off">3.00 m</output><input class="form-range" id="d2g-pack-h" type="range" min="100" max="600" step="5" value="300" aria-valuetext="3.00 米"></label>
+  </div>
+  <div class="viz-row" role="group" aria-label="比较外框尺寸"><button class="btn" type="button" data-d2g-pack-preset="wide">4 × 3</button><button class="btn" type="button" data-d2g-pack-preset="square">3 × 3</button><button class="btn" type="button" data-d2g-pack-preset="tall">3 × 4</button><button class="btn" type="button" data-d2g-pack-preset="thin">1.5 × 6</button></div>
+  <details class="d2g-details"><summary>展开这类两方块问题的完整判定</summary><p>先保证单个房间装得下：W ≥ 2 且 H ≥ 2。非重叠的四个方向归为两组：左右分离需要 W ≥ 4；上下分离需要 H ≥ 4。因此存在解，当且仅当：</p><p class="d2g-formula">W ≥ 2 ∧ H ≥ 2 ∧ (W ≥ 4 ∨ H ≥ 4)</p><p>这条结论只针对<strong>两个固定 2 × 2、轴对齐、允许接边</strong>的方块。位置变量可以连续取值。图中滑条只是方便选取尺寸，判定依据是上述解析条件，浏览器没有在运行通用 Z3 求解器。</p></details>
+  <div class="sr-only" id="d2g-pack-live" role="status" aria-live="polite"></div>
+</div>

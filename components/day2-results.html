@@ -1,0 +1,38 @@
+<div id="day2-results" class="d2r-root">
+  <div class="d2r-error" hidden role="alert"></div>
+  <div class="d2r-content">
+    <div class="d2r-heading"><strong>先看输入，再打开本次实际输出</strong><span>六个独立案例 · 可自由切换，切换后结果重新折叠</span></div>
+    <div class="d2r-case-buttons" id="d2r-case-buttons" role="group" aria-label="选择六例中的一个案例"></div>
+    <h3 class="d2r-case-title" id="d2r-case-title"></h3>
+    <div class="d2r-case-layout">
+      <div class="d2r-case-picture">
+        <svg class="d2r-case-scene" role="img" aria-labelledby="d2r-case-svg-title d2r-case-svg-description"><title id="d2r-case-svg-title">当前案例的输入几何</title><desc id="d2r-case-svg-description">展开记录前只显示外框与要求；展开可满足结果后才绘制实际模型中的房间坐标。</desc></svg>
+        <p class="d2r-figure-note" id="d2r-figure-note"></p>
+      </div>
+      <div class="d2r-case-input">
+        <dl class="d2r-input-facts" id="d2r-input-facts"></dl>
+        <details class="d2r-constraints" open><summary>当前变量与全部断言</summary><p class="d2r-variables" id="d2r-case-variables"></p><ol id="d2r-case-constraints"></ol></details>
+      </div>
+    </div>
+    <div class="d2r-prediction">
+      <label class="form-label" for="d2r-prediction-choice">我的预测<select class="form-select" id="d2r-prediction-choice"><option value="unsure">我还不确定</option><option value="sat">sat · 至少存在一个模型</option><option value="unsat">unsat · 当前断言不可同时满足</option><option value="unknown">unknown · 本次求解未判定</option></select></label>
+      <label class="form-label" for="d2r-prediction-reason">决定结果的条件是什么？<textarea class="form-control" id="d2r-prediction-reason" rows="2" placeholder="先写一句自己的推理，再展开记录。"></textarea></label>
+    </div>
+    <p class="d2r-footnote">这里的预测在当前页面内暂存，刷新会清空；需要保留的解释可以记录到页末个人笔记。</p>
+    <div class="d2r-reveal-row"><button class="btn btn-primary" id="d2r-reveal" type="button" aria-expanded="false" aria-controls="d2r-result-panel">展开真实运行记录</button><span>查看的是固定记录，不会在浏览器里重新求解。</span></div>
+    <div class="d2r-result-panel" id="d2r-result-panel" hidden>
+      <div class="d2r-result-heading"><strong id="d2r-actual-status"></strong><span id="d2r-actual-time"></span></div>
+      <p class="d2r-prediction-comparison" id="d2r-prediction-comparison"></p>
+      <div class="d2r-result-grid">
+        <div><h4>本次满足模型</h4><div id="d2r-model-content"></div></div>
+        <div><h4>本次冲突核心</h4><div id="d2r-core-content"></div></div>
+      </div>
+      <p class="d2r-scope" id="d2r-result-scope"></p>
+      <p class="d2r-check-note" id="d2r-check-note"></p>
+      <details class="d2r-raw"><summary>查看这一例的完整 JSON</summary><pre><code id="d2r-case-json"></code></pre></details>
+    </div>
+    <p class="d2r-environment" id="d2r-results-environment"></p>
+    <p class="d2r-footnote">模型坐标、核心顺序和单次耗时与这次环境对应。数据标记为教程制作环境运行，不是学习者本人已完成的实验。</p>
+    <div class="sr-only" id="d2r-results-live" role="status" aria-live="polite"></div>
+  </div>
+</div>

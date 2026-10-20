@@ -1,0 +1,11 @@
+<div id="day2-incremental" class="d2l">
+  <div class="d2l-heading"><h3>把临时条件装进一层“试验盒”</h3><span class="d2l-method">push / pop 示意</span></div>
+  <p class="d2l-intro">x 是整数，基础条件为 x ≥ 2。依次点击 push、添加 x ≤ 1、check、pop、check，观察临时层怎样影响结果。</p>
+  <div class="d2l-buttons" role="group" aria-label="管理增量约束栈"><button class="d2l-button" type="button" data-d2l-stack-action="push">push · 开一层</button><button class="d2l-button" type="button" data-d2l-stack-action="pop" disabled>pop · 撤回顶层</button><button class="d2l-button d2l-button-primary" type="button" data-d2l-stack-action="check">check · 检查</button><button class="d2l-button" type="button" data-d2l-stack-action="reset">重新开始</button></div>
+  <div class="d2l-stack-layout"><div><span class="d2l-small-label">当前断言栈 · x : Int</span><div id="d2l-stack-layers" class="d2l-stack-layers"><div class="d2l-stack-layer"><strong>基础层</strong><span>x ≥ 2</span></div></div></div><div class="d2l-stack-add"><span class="d2l-small-label">向当前临时层添加</span><div class="d2l-buttons"><button class="d2l-button" type="button" data-d2l-stack-add="upper1" disabled>x ≤ 1</button><button class="d2l-button" type="button" data-d2l-stack-add="lower4" disabled>x ≥ 4</button><button class="d2l-button" type="button" data-d2l-stack-add="upper6" disabled>x ≤ 6</button></div><p id="d2l-stack-hint">先 push，再添加临时条件。</p></div></div>
+  <svg class="d2l-stack-plot" role="img" aria-labelledby="d2l-stack-title d2l-stack-desc"><title id="d2l-stack-title">当前所有断言的数轴交集</title><desc id="d2l-stack-desc">基础层和各临时层的断言同时成立；移除顶层后，恢复由剩余断言定义的区间。</desc></svg>
+  <div class="d2l-result"><div><span class="d2l-small-label">当前所有断言的交集</span><strong id="d2l-stack-interval">x ≥ 2</strong></div><div><span id="d2l-stack-badge" class="d2l-badge" data-kind="pending">尚未 check</span><p id="d2l-stack-result">点击 check，记录一次本例的解析判定。</p></div></div>
+  <details class="d2l-details"><summary>查看本轮操作顺序</summary><ol id="d2l-stack-history" class="d2l-history"><li>基础层：add(x ≥ 2)</li></ol></details>
+  <p class="d2l-boundary">pop 撤回对应临时层里的全部断言，基础层仍在。这里最多开两层；Z3 的 push/pop 同样用于管理断言作用域。本图实时画交集，check 按整数区间解析，不是实际 Z3 调用。</p>
+  <div id="d2l-stack-status" class="d2l-sr" role="status" aria-live="polite" aria-atomic="true"></div>
+</div>

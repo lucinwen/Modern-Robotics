@@ -86,8 +86,15 @@ figure { margin: 0; }
 .header-actions a { color: var(--foreground); text-decoration: none; }
 .edition { color: var(--muted-foreground); font-size: 11px; letter-spacing: .08em; }
 .page-shell { max-width: 1420px; margin: 0 auto; display: grid; grid-template-columns: 242px minmax(0, 1fr); gap: clamp(32px, 5vw, 86px); padding: 0 38px; }
-.sidebar { position: sticky; top: 112px; align-self: start; padding-top: 46px; padding-bottom: 28px; }
+.sidebar { position: sticky; top: 112px; align-self: start; padding-top: 46px; padding-bottom: 28px; max-height: calc(100vh - 112px); overflow-y: auto; scrollbar-width: thin; }
 .sidebar-intro { margin-bottom: 24px; }
+.course-switcher { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 28px; }
+.course-switcher a { display: grid; gap: 5px; padding: 11px 10px; border: 1px solid var(--border); border-radius: 6px; text-decoration: none; color: var(--muted-foreground); font-size: 11px; line-height: 1.5; }
+.course-switcher a strong { font-family: Consolas, monospace; font-size: 11px; letter-spacing: .05em; }
+.course-switcher a[aria-current="page"] { background: var(--accent); border-color: var(--input); color: var(--accent-foreground); }
+.course-switcher a:hover { background: var(--muted); color: var(--foreground); }
+.next-lesson { display: grid; gap: 10px; margin-top: 35px; padding: 25px 0; border-bottom: 1px solid var(--border); }
+.next-lesson a { text-decoration: none; font-size: 18px; }
 .eyebrow { display: block; font-size: 11px; letter-spacing: .13em; line-height: 1.5; color: var(--muted-foreground); font-weight: 550; }
 .sidebar-intro strong { display: block; font-size: 15px; margin-top: 12px; }
 .lesson-nav { display: grid; gap: 5px; }
@@ -216,7 +223,7 @@ textarea.form-control { margin-top: 10px; min-height: 180px; }
 }
 @media (max-width: 900px) {
   .page-shell { grid-template-columns: minmax(0, 1fr); padding: 0 28px; gap: 0; }
-  .sidebar { position: static; padding: 22px 0 0; }
+  .sidebar { position: static; padding: 22px 0 0; max-height: none; overflow: visible; }
   .sidebar-intro, .sidebar-note { display: none; }
   .lesson-nav { display: flex; flex-wrap: wrap; gap: 6px; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
   .lesson-nav a { padding: 7px 10px; font-size: 12px; gap: 6px; }

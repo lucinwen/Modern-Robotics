@@ -1,0 +1,964 @@
+{
+  "schema_version": 1,
+  "environment": {
+    "python": "3.12.14",
+    "z3": "5.3.1",
+    "z3_solver_package": "5.3.1.0",
+    "platform": "Linux x86_64",
+    "generated_at_utc": "2026-10-20T09:10:53.802956+00:00",
+    "reproduction_command": "python examples/day-02/run_examples.py --output my-day-02-results.json",
+    "elapsed_ms_scope": "仅 check() 调用；原 MiniLab 子进程另行注明。单次耗时不是性能基准。"
+  },
+  "provenance": {
+    "kind": "assistant_environment_run",
+    "note": "AI 辅助制作教程时在执行环境中真实运行；不是学习者的本机实测或个人完成记录。",
+    "plan_revision": "de6fd9cb352370863e94d64d775c4f5236ed38fc"
+  },
+  "cases": [
+    {
+      "status": "sat",
+      "elapsed_ms": 0.523378,
+      "model": {
+        "x_a": 0,
+        "y_a": 0,
+        "x_b": 2,
+        "y_b": 0
+      },
+      "unsat_core": [],
+      "reason_unknown": null,
+      "constraints": [
+        {
+          "label": "a_inside",
+          "formula": "And(x_a >= 0, y_a >= 0, x_a + 2 <= 4, y_a + 2 <= 3)"
+        },
+        {
+          "label": "b_inside",
+          "formula": "And(x_b >= 0, y_b >= 0, x_b + 2 <= 4, y_b + 2 <= 3)"
+        },
+        {
+          "label": "no_overlap",
+          "formula": "Or(x_a + 2 <= x_b,\n   x_b + 2 <= x_a,\n   y_a + 2 <= y_b,\n   y_b + 2 <= y_a)"
+        }
+      ],
+      "model_satisfies_formulas": true,
+      "id": "S1",
+      "title": "2 间 2×2 房间放入 4×3 边界",
+      "expected_status": "sat",
+      "input": {
+        "width": 4,
+        "height": 3,
+        "room_count": 2,
+        "room_width": 2,
+        "room_height": 2,
+        "unit": "m",
+        "coordinate_sort": "Int",
+        "rotation_allowed": false,
+        "boundary_touch_allowed": true
+      },
+      "variables": [
+        {
+          "name": "x_a",
+          "sort": "Int"
+        },
+        {
+          "name": "y_a",
+          "sort": "Int"
+        },
+        {
+          "name": "x_b",
+          "sort": "Int"
+        },
+        {
+          "name": "y_b",
+          "sort": "Int"
+        }
+      ],
+      "scope": "固定尺寸、轴对齐、允许接边的二维盒布局；没有门、机器人或运动约束。",
+      "view_geometry": {
+        "container": {
+          "width": 4,
+          "height": 3
+        },
+        "rooms": [
+          {
+            "label": "A",
+            "x": 0,
+            "y": 0,
+            "width": 2,
+            "height": 2
+          },
+          {
+            "label": "B",
+            "x": 2,
+            "y": 0,
+            "width": 2,
+            "height": 2
+          }
+        ],
+        "required_room_count": 2,
+        "required_room_size": {
+          "width": 2,
+          "height": 2
+        }
+      },
+      "independent_geometry_check": {
+        "inside": true,
+        "no_internal_overlap": true
+      }
+    },
+    {
+      "status": "sat",
+      "elapsed_ms": 0.263737,
+      "model": {
+        "x_a": 0,
+        "y_a": 2,
+        "x_b": 0,
+        "y_b": 0
+      },
+      "unsat_core": [],
+      "reason_unknown": null,
+      "constraints": [
+        {
+          "label": "a_inside",
+          "formula": "And(x_a >= 0, y_a >= 0, x_a + 2 <= 5, y_a + 2 <= 5)"
+        },
+        {
+          "label": "b_inside",
+          "formula": "And(x_b >= 0, y_b >= 0, x_b + 2 <= 5, y_b + 2 <= 5)"
+        },
+        {
+          "label": "no_overlap",
+          "formula": "Or(x_a + 2 <= x_b,\n   x_b + 2 <= x_a,\n   y_a + 2 <= y_b,\n   y_b + 2 <= y_a)"
+        }
+      ],
+      "model_satisfies_formulas": true,
+      "id": "S2",
+      "title": "2 间 2×2 房间放入 5×5 边界",
+      "expected_status": "sat",
+      "input": {
+        "width": 5,
+        "height": 5,
+        "room_count": 2,
+        "room_width": 2,
+        "room_height": 2,
+        "unit": "m",
+        "coordinate_sort": "Int",
+        "rotation_allowed": false,
+        "boundary_touch_allowed": true
+      },
+      "variables": [
+        {
+          "name": "x_a",
+          "sort": "Int"
+        },
+        {
+          "name": "y_a",
+          "sort": "Int"
+        },
+        {
+          "name": "x_b",
+          "sort": "Int"
+        },
+        {
+          "name": "y_b",
+          "sort": "Int"
+        }
+      ],
+      "scope": "固定尺寸、轴对齐、允许接边的二维盒布局；没有门、机器人或运动约束。",
+      "view_geometry": {
+        "container": {
+          "width": 5,
+          "height": 5
+        },
+        "rooms": [
+          {
+            "label": "A",
+            "x": 0,
+            "y": 2,
+            "width": 2,
+            "height": 2
+          },
+          {
+            "label": "B",
+            "x": 0,
+            "y": 0,
+            "width": 2,
+            "height": 2
+          }
+        ],
+        "required_room_count": 2,
+        "required_room_size": {
+          "width": 2,
+          "height": 2
+        }
+      },
+      "independent_geometry_check": {
+        "inside": true,
+        "no_internal_overlap": true
+      }
+    },
+    {
+      "status": "sat",
+      "elapsed_ms": 0.181584,
+      "model": {
+        "x_a": 0,
+        "y_a": 0
+      },
+      "unsat_core": [],
+      "reason_unknown": null,
+      "constraints": [
+        {
+          "label": "a_inside",
+          "formula": "And(x_a >= 0, y_a >= 0, x_a + 2 <= 2, y_a + 2 <= 2)"
+        }
+      ],
+      "model_satisfies_formulas": true,
+      "id": "S3",
+      "title": "1 间 2×2 房间放入 2×2 边界",
+      "expected_status": "sat",
+      "input": {
+        "width": 2,
+        "height": 2,
+        "room_count": 1,
+        "room_width": 2,
+        "room_height": 2,
+        "unit": "m",
+        "coordinate_sort": "Int",
+        "rotation_allowed": false,
+        "boundary_touch_allowed": true
+      },
+      "variables": [
+        {
+          "name": "x_a",
+          "sort": "Int"
+        },
+        {
+          "name": "y_a",
+          "sort": "Int"
+        }
+      ],
+      "scope": "固定尺寸、轴对齐、允许接边的二维盒布局；没有门、机器人或运动约束。",
+      "view_geometry": {
+        "container": {
+          "width": 2,
+          "height": 2
+        },
+        "rooms": [
+          {
+            "label": "A",
+            "x": 0,
+            "y": 0,
+            "width": 2,
+            "height": 2
+          }
+        ],
+        "required_room_count": 1,
+        "required_room_size": {
+          "width": 2,
+          "height": 2
+        }
+      },
+      "independent_geometry_check": {
+        "inside": true,
+        "no_internal_overlap": true
+      }
+    },
+    {
+      "status": "unsat",
+      "elapsed_ms": 0.31236,
+      "model": null,
+      "unsat_core": [
+        "a_inside",
+        "b_inside",
+        "no_overlap"
+      ],
+      "reason_unknown": null,
+      "constraints": [
+        {
+          "label": "a_inside",
+          "formula": "And(x_a >= 0, y_a >= 0, x_a + 2 <= 3, y_a + 2 <= 3)"
+        },
+        {
+          "label": "b_inside",
+          "formula": "And(x_b >= 0, y_b >= 0, x_b + 2 <= 3, y_b + 2 <= 3)"
+        },
+        {
+          "label": "no_overlap",
+          "formula": "Or(x_a + 2 <= x_b,\n   x_b + 2 <= x_a,\n   y_a + 2 <= y_b,\n   y_b + 2 <= y_a)"
+        }
+      ],
+      "returned_core_rechecked_unsat": true,
+      "id": "U1",
+      "title": "2 间 2×2 房间放入 3×3 边界",
+      "expected_status": "unsat",
+      "input": {
+        "width": 3,
+        "height": 3,
+        "room_count": 2,
+        "room_width": 2,
+        "room_height": 2,
+        "unit": "m",
+        "coordinate_sort": "Int",
+        "rotation_allowed": false,
+        "boundary_touch_allowed": true
+      },
+      "variables": [
+        {
+          "name": "x_a",
+          "sort": "Int"
+        },
+        {
+          "name": "y_a",
+          "sort": "Int"
+        },
+        {
+          "name": "x_b",
+          "sort": "Int"
+        },
+        {
+          "name": "y_b",
+          "sort": "Int"
+        }
+      ],
+      "scope": "固定尺寸、轴对齐、允许接边的二维盒布局；没有门、机器人或运动约束。",
+      "view_geometry": {
+        "container": {
+          "width": 3,
+          "height": 3
+        },
+        "rooms": [],
+        "required_room_count": 2,
+        "required_room_size": {
+          "width": 2,
+          "height": 2
+        }
+      }
+    },
+    {
+      "status": "unsat",
+      "elapsed_ms": 0.209445,
+      "model": null,
+      "unsat_core": [
+        "a_inside"
+      ],
+      "reason_unknown": null,
+      "constraints": [
+        {
+          "label": "a_inside",
+          "formula": "And(x_a >= 0, y_a >= 0, x_a + 2 <= 1, y_a + 2 <= 3)"
+        }
+      ],
+      "returned_core_rechecked_unsat": true,
+      "id": "U2",
+      "title": "1 间 2×2 房间放入 1×3 边界",
+      "expected_status": "unsat",
+      "input": {
+        "width": 1,
+        "height": 3,
+        "room_count": 1,
+        "room_width": 2,
+        "room_height": 2,
+        "unit": "m",
+        "coordinate_sort": "Int",
+        "rotation_allowed": false,
+        "boundary_touch_allowed": true
+      },
+      "variables": [
+        {
+          "name": "x_a",
+          "sort": "Int"
+        },
+        {
+          "name": "y_a",
+          "sort": "Int"
+        }
+      ],
+      "scope": "固定尺寸、轴对齐、允许接边的二维盒布局；没有门、机器人或运动约束。",
+      "view_geometry": {
+        "container": {
+          "width": 1,
+          "height": 3
+        },
+        "rooms": [],
+        "required_room_count": 1,
+        "required_room_size": {
+          "width": 2,
+          "height": 2
+        }
+      }
+    },
+    {
+      "status": "unsat",
+      "elapsed_ms": 0.153231,
+      "model": null,
+      "unsat_core": [
+        "minimum_clearance",
+        "available_opening"
+      ],
+      "reason_unknown": null,
+      "constraints": [
+        {
+          "label": "minimum_clearance",
+          "formula": "4/5 <= door_width"
+        },
+        {
+          "label": "available_opening",
+          "formula": "1/2 >= door_width"
+        }
+      ],
+      "returned_core_rechecked_unsat": true,
+      "id": "U3",
+      "title": "门宽下限 0.8 m 与上限 0.5 m 冲突",
+      "expected_status": "unsat",
+      "input": {
+        "minimum_width": "0.8",
+        "maximum_width": "0.5",
+        "unit": "m"
+      },
+      "variables": [
+        {
+          "name": "door_width",
+          "sort": "Real"
+        }
+      ],
+      "scope": "只比较一维门净宽上下界，不检查门的位置或机器人路径。",
+      "view_interval": {
+        "lower": 0.8,
+        "upper": 0.5
+      }
+    }
+  ],
+  "extra": {
+    "incremental": {
+      "steps": [
+        {
+          "operation": "add(x >= 2, x <= 6); check()",
+          "scope_depth": 0,
+          "assertions": [
+            "x >= 2",
+            "x <= 6"
+          ],
+          "status": "sat",
+          "elapsed_ms": 4.593302,
+          "model": {
+            "x": 2
+          },
+          "unsat_core": [],
+          "reason_unknown": null
+        },
+        {
+          "operation": "push(); add(x <= 1); check()",
+          "scope_depth": 1,
+          "assertions": [
+            "x >= 2",
+            "x <= 6",
+            "x <= 1"
+          ],
+          "status": "unsat",
+          "elapsed_ms": 0.136986,
+          "model": null,
+          "unsat_core": [],
+          "reason_unknown": null
+        },
+        {
+          "operation": "pop(); check()",
+          "scope_depth": 0,
+          "assertions": [
+            "x >= 2",
+            "x <= 6"
+          ],
+          "status": "sat",
+          "elapsed_ms": 0.047291,
+          "model": {
+            "x": 2
+          },
+          "unsat_core": [],
+          "reason_unknown": null
+        }
+      ],
+      "note": "pop 撤回匹配 push 后新增的断言；不是删任意历史条件。"
+    },
+    "assumptions": {
+      "background_assertions": [
+        "Implies(need_clearance, 4/5 <= door_width)",
+        "Implies(wall_limit, 1/2 >= door_width)"
+      ],
+      "steps": [
+        {
+          "active_assumptions": [
+            "need_clearance",
+            "wall_limit"
+          ],
+          "status": "unsat",
+          "elapsed_ms": 0.220903,
+          "model": null,
+          "unsat_core": [
+            "need_clearance",
+            "wall_limit"
+          ],
+          "reason_unknown": null
+        },
+        {
+          "active_assumptions": [
+            "need_clearance"
+          ],
+          "status": "sat",
+          "elapsed_ms": 0.047211,
+          "model": {
+            "door_width": "4/5",
+            "need_clearance": true,
+            "wall_limit": false
+          },
+          "unsat_core": [],
+          "reason_unknown": null
+        },
+        {
+          "active_assumptions": [
+            "need_clearance",
+            "wall_limit"
+          ],
+          "status": "unsat",
+          "elapsed_ms": 0.121553,
+          "model": null,
+          "unsat_core": [
+            "need_clearance",
+            "wall_limit"
+          ],
+          "reason_unknown": null
+        }
+      ],
+      "note": "未作为 assumption 传入的开关没有被要求为真；这不等于永久删除其 Implies 公式。"
+    },
+    "core_granularity": {
+      "fine": {
+        "status": "unsat",
+        "elapsed_ms": 0.13961,
+        "model": null,
+        "unsat_core": [
+          "x_upper",
+          "x_lower"
+        ],
+        "reason_unknown": null,
+        "constraints": [
+          {
+            "label": "x_lower",
+            "formula": "x >= 2"
+          },
+          {
+            "label": "x_upper",
+            "formula": "x <= 1"
+          }
+        ],
+        "returned_core_rechecked_unsat": true
+      },
+      "grouped": {
+        "status": "unsat",
+        "elapsed_ms": 0.148433,
+        "model": null,
+        "unsat_core": [
+          "x_policy"
+        ],
+        "reason_unknown": null,
+        "constraints": [
+          {
+            "label": "x_policy",
+            "formula": "And(x >= 2, x <= 1)"
+          }
+        ],
+        "returned_core_rechecked_unsat": true
+      },
+      "two_independent_conflicts": {
+        "status": "unsat",
+        "elapsed_ms": 0.19263,
+        "model": null,
+        "unsat_core": [
+          "x_upper",
+          "x_lower"
+        ],
+        "reason_unknown": null,
+        "constraints": [
+          {
+            "label": "x_lower",
+            "formula": "x >= 2"
+          },
+          {
+            "label": "x_upper",
+            "formula": "x <= 1"
+          },
+          {
+            "label": "y_lower",
+            "formula": "y >= 4"
+          },
+          {
+            "label": "y_upper",
+            "formula": "y <= 3"
+          },
+          {
+            "label": "x_loose_upper",
+            "formula": "x <= 10"
+          }
+        ],
+        "returned_core_rechecked_unsat": true
+      },
+      "alternative_conflict_subsets": [
+        {
+          "status": "unsat",
+          "elapsed_ms": 0.142935,
+          "model": null,
+          "unsat_core": [
+            "x_lower",
+            "x_upper"
+          ],
+          "reason_unknown": null,
+          "constraints": [
+            {
+              "label": "x_lower",
+              "formula": "x >= 2"
+            },
+            {
+              "label": "x_upper",
+              "formula": "x <= 1"
+            }
+          ],
+          "returned_core_rechecked_unsat": true
+        },
+        {
+          "status": "unsat",
+          "elapsed_ms": 0.236266,
+          "model": null,
+          "unsat_core": [
+            "y_upper",
+            "y_lower"
+          ],
+          "reason_unknown": null,
+          "constraints": [
+            {
+              "label": "y_lower",
+              "formula": "y >= 4"
+            },
+            {
+              "label": "y_upper",
+              "formula": "y <= 3"
+            }
+          ],
+          "returned_core_rechecked_unsat": true
+        }
+      ],
+      "after_removing_one_returned_label": {
+        "removed_label": "x_upper",
+        "status": "unsat",
+        "elapsed_ms": 0.160312,
+        "model": null,
+        "unsat_core": [
+          "y_lower",
+          "y_upper"
+        ],
+        "reason_unknown": null,
+        "constraints": [
+          {
+            "label": "x_lower",
+            "formula": "x >= 2"
+          },
+          {
+            "label": "y_lower",
+            "formula": "y >= 4"
+          },
+          {
+            "label": "y_upper",
+            "formula": "y <= 3"
+          },
+          {
+            "label": "x_loose_upper",
+            "formula": "x <= 10"
+          }
+        ],
+        "returned_core_rechecked_unsat": true
+      },
+      "redundant_candidate": {
+        "candidate_labels": [
+          "x_lower",
+          "x_upper",
+          "y_lower",
+          "y_upper",
+          "x_loose_upper"
+        ],
+        "candidate_status": "unsat",
+        "removable_label": "x_loose_upper",
+        "after_removing_redundant_label_status": "unsat",
+        "provenance": "人工选取的不可满足子集，再用 Z3 核对；并非声称 Z3 返回了这五个标签。"
+      },
+      "untracked_background": {
+        "background": [
+          "x >= 2"
+        ],
+        "tracked": [
+          {
+            "label": "tracked_upper",
+            "formula": "x <= 1"
+          }
+        ],
+        "status": "unsat",
+        "elapsed_ms": 0.277528,
+        "model": null,
+        "unsat_core": [
+          "tracked_upper"
+        ],
+        "reason_unknown": null,
+        "note": "核心标签必须连同未跟踪的背景断言理解；x <= 1 单独并不矛盾。"
+      },
+      "note": "返回的 core 不是唯一根因或删除清单；标签打包粒度会改变核心的呈现粒度。"
+    },
+    "unknown": {
+      "id": "UNKNOWN",
+      "title": "官方教程中的非多项式例子",
+      "variables": [
+        {
+          "name": "x",
+          "sort": "Real"
+        }
+      ],
+      "constraints": [
+        {
+          "label": null,
+          "formula": "2**x == 3"
+        }
+      ],
+      "timeout_ms": 3000,
+      "status": "unknown",
+      "elapsed_ms": 1.310663,
+      "model": null,
+      "unsat_core": [],
+      "reason_unknown": "unknown",
+      "note": "如实保存当前版本结果与 reason_unknown。设置时间上限不代表本次触发超时。",
+      "source": "https://github.com/microsoft/z3guide/blob/main/website/docs-programming/02%20-%20Z3%20Python/01%20-%20Introduction.md#solvers"
+    },
+    "optimization": {
+      "cases": [
+        {
+          "hard_minimum_cm": 80,
+          "hard_maximum_cm": 120,
+          "preferred_width_cm": 100,
+          "solver": {
+            "status": "sat",
+            "elapsed_ms": 4.43982,
+            "model": {
+              "width_cm": 120
+            },
+            "unsat_core": [],
+            "reason_unknown": null
+          },
+          "optimize": {
+            "status": "sat",
+            "elapsed_ms": 7.84894,
+            "model": {
+              "width_cm": 100
+            },
+            "unsat_core": [],
+            "reason_unknown": null,
+            "distance_from_preferred_cm": 0
+          }
+        },
+        {
+          "hard_minimum_cm": 80,
+          "hard_maximum_cm": 90,
+          "preferred_width_cm": 100,
+          "solver": {
+            "status": "sat",
+            "elapsed_ms": 4.170505,
+            "model": {
+              "width_cm": 80
+            },
+            "unsat_core": [],
+            "reason_unknown": null
+          },
+          "optimize": {
+            "status": "sat",
+            "elapsed_ms": 0.553453,
+            "model": {
+              "width_cm": 90
+            },
+            "unsat_core": [],
+            "reason_unknown": null,
+            "distance_from_preferred_cm": 10
+          }
+        },
+        {
+          "hard_minimum_cm": 80,
+          "hard_maximum_cm": 70,
+          "preferred_width_cm": 100,
+          "solver": {
+            "status": "unsat",
+            "elapsed_ms": 1.358224,
+            "model": null,
+            "unsat_core": [],
+            "reason_unknown": null
+          },
+          "optimize": {
+            "status": "unsat",
+            "elapsed_ms": 0.945923,
+            "model": null,
+            "unsat_core": [],
+            "reason_unknown": null
+          }
+        }
+      ],
+      "objective": "minimize(abs(width_cm - 100))",
+      "note": "Solver 给一个满足硬条件的模型；Optimize 在相同硬条件中优化偏好。硬条件自身冲突时仍无解。"
+    },
+    "postcheck": {
+      "solver_case_id": "S1",
+      "solver_status": "sat",
+      "model": {
+        "x_a": 0,
+        "y_a": 0,
+        "x_b": 2,
+        "y_b": 0
+      },
+      "not_encoded": [
+        "door_width",
+        "robot_width",
+        "door_contact",
+        "motion_path"
+      ],
+      "independent_check": {
+        "name": "门净宽与机器人宽度的一维比较",
+        "door_width_m": 0.5,
+        "robot_width_m": 0.6,
+        "extra_margin_m": 0,
+        "passes": false
+      },
+      "conclusion": "布局公式有模型，但该输入的门宽检查失败；没有进行路径或物理执行验证。"
+    },
+    "continuous_comparison": {
+      "status": "unsat",
+      "elapsed_ms": 0.298369,
+      "model": null,
+      "unsat_core": [
+        "b_inside",
+        "a_inside",
+        "no_overlap"
+      ],
+      "reason_unknown": null,
+      "constraints": [
+        {
+          "label": "a_inside",
+          "formula": "And(x_a >= 0, y_a >= 0, x_a + 2 <= 3, y_a + 2 <= 3)"
+        },
+        {
+          "label": "b_inside",
+          "formula": "And(x_b >= 0, y_b >= 0, x_b + 2 <= 3, y_b + 2 <= 3)"
+        },
+        {
+          "label": "no_overlap",
+          "formula": "Or(x_a + 2 <= x_b,\n   x_b + 2 <= x_a,\n   y_a + 2 <= y_b,\n   y_b + 2 <= y_a)"
+        }
+      ],
+      "returned_core_rechecked_unsat": true,
+      "id": "U1-Real",
+      "title": "2 间 2×2 房间放入 3×3 边界",
+      "expected_status": "unsat",
+      "input": {
+        "width": 3,
+        "height": 3,
+        "room_count": 2,
+        "room_width": 2,
+        "room_height": 2,
+        "unit": "m",
+        "coordinate_sort": "Real",
+        "rotation_allowed": false,
+        "boundary_touch_allowed": true
+      },
+      "variables": [
+        {
+          "name": "x_a",
+          "sort": "Real"
+        },
+        {
+          "name": "y_a",
+          "sort": "Real"
+        },
+        {
+          "name": "x_b",
+          "sort": "Real"
+        },
+        {
+          "name": "y_b",
+          "sort": "Real"
+        }
+      ],
+      "scope": "固定尺寸、轴对齐、允许接边的二维盒布局；没有门、机器人或运动约束。",
+      "view_geometry": {
+        "container": {
+          "width": 3,
+          "height": 3
+        },
+        "rooms": [],
+        "required_room_count": 2,
+        "required_room_size": {
+          "width": 2,
+          "height": 2
+        }
+      }
+    },
+    "upstream_minilab": {
+      "status": "executed",
+      "source_blob_sha": "2cb1e01141b6d983c2e6e55b28d407c363604e83",
+      "source_revision": "de6fd9cb352370863e94d64d775c4f5236ed38fc",
+      "source_url": "https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/minilab/z3_demo.py",
+      "runs": [
+        {
+          "width": 4,
+          "stdout_json": {
+            "building_width": 4,
+            "status": "sat",
+            "model": {
+              "x_a": 0,
+              "y_a": 0,
+              "x_b": 2,
+              "y_b": 0
+            },
+            "scope": "2d_integer_rectangles_only"
+          },
+          "elapsed_ms_including_process_startup": 84.419883
+        },
+        {
+          "width": 3,
+          "stdout_json": {
+            "building_width": 3,
+            "status": "unsat",
+            "unsat_core": [
+              "a_inside",
+              "b_inside",
+              "no_overlap"
+            ],
+            "warning": "A core need not be unique or minimum"
+          },
+          "elapsed_ms_including_process_startup": 82.842158
+        },
+        {
+          "width": 5,
+          "stdout_json": {
+            "building_width": 5,
+            "status": "sat",
+            "model": {
+              "x_a": 0,
+              "y_a": 0,
+              "x_b": 2,
+              "y_b": 0
+            },
+            "scope": "2d_integer_rectangles_only"
+          },
+          "elapsed_ms_including_process_startup": 93.733321
+        }
+      ]
+    }
+  },
+  "verification": {
+    "six_expected_statuses_matched": true,
+    "sat_models_satisfy_asserted_formulas": true,
+    "sat_geometry_checked_independently": true,
+    "returned_tracked_cores_rechecked": true,
+    "incremental_and_assumption_sequences_checked": true,
+    "physical_execution_tested": false
+  }
+}

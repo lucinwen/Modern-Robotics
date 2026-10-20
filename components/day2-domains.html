@@ -1,0 +1,19 @@
+<div id="day2-domains" class="d2l">
+  <div class="d2l-heading"><h3>同一条数轴，换一种变量类型</h3><span class="d2l-method">区间解析示意</span></div>
+  <p class="d2l-intro">先保留 2.2 ≤ x ≤ 2.8，比较实数与整数。数轴上“允许哪些值”，也是公式的一部分。</p>
+  <div class="d2l-buttons" role="group" aria-label="选择 x 的变量类型">
+    <button class="d2l-button" type="button" data-d2l-domain="Real" aria-pressed="true">Real · 实数</button>
+    <button class="d2l-button" type="button" data-d2l-domain="Int" aria-pressed="false">Int · 整数</button>
+  </div>
+  <svg class="d2l-domain-plot" role="img" aria-labelledby="d2l-domain-title d2l-domain-desc"><title id="d2l-domain-title">实数区间与允许的整数点</title><desc id="d2l-domain-desc">相同上下界下，实数可以取区间中的任意值；整数只能取落入区间的整数点。</desc></svg>
+  <div class="d2l-controls">
+    <label class="d2l-label" for="d2l-domain-lower"><span>下界 L <output id="d2l-domain-lower-value" aria-live="off">2.2</output></span><input id="d2l-domain-lower" type="range" min="-1" max="5" step="0.1" value="2.2"></label>
+    <label class="d2l-label" for="d2l-domain-upper"><span>上界 U <output id="d2l-domain-upper-value" aria-live="off">2.8</output></span><input id="d2l-domain-upper" type="range" min="-1" max="5" step="0.1" value="2.8"></label>
+  </div>
+  <div class="d2l-result"><div><span class="d2l-small-label">当前声明与断言</span><strong id="d2l-domain-formula">x : Real；2.2 ≤ x ≤ 2.8</strong></div><div><span id="d2l-domain-badge" class="d2l-badge" data-kind="sat">有满足值</span><p id="d2l-domain-result">例如 x = 2.5。这只是一个满足赋值。</p></div></div>
+  <p id="d2l-domain-comparison" class="d2l-explanation">实数域中有满足值；整数域中没有落入区间的整数。</p>
+  <div class="d2l-buttons" role="group" aria-label="切换数轴例子"><button class="d2l-button" type="button" data-d2l-domain-preset="fraction">2.2 到 2.8</button><button class="d2l-button" type="button" data-d2l-domain-preset="singleton">刚好等于 3</button><button class="d2l-button" type="button" data-d2l-domain-preset="conflict">下界大于上界</button></div>
+  <details class="d2l-details"><summary>Bool 又是什么？试两个真假开关</summary><p>Bool 只有 True（真）与 False（假）。下面只编码“门未锁，或有钥匙”这个条件。</p><div class="d2l-buttons"><label class="d2l-check" for="d2l-bool-locked"><input id="d2l-bool-locked" type="checkbox" checked>门已上锁</label><label class="d2l-check" for="d2l-bool-key"><input id="d2l-bool-key" type="checkbox">有钥匙</label></div><div class="d2l-code">Or(Not(locked), has_key)</div><p id="d2l-bool-result">False：门已锁，而且没有钥匙。</p><p class="d2l-boundary">这条布尔规则没有编码开锁能力、门洞尺寸或运动路径，不能据此宣布整个通行任务成功。</p></details>
+  <p class="d2l-boundary">滑条只用于选上下界；Real 仍表示区间中的所有实数。此处按一元闭区间直接计算，没有调用浏览器内 Z3。模型是一个满足赋值，不保证唯一。</p>
+  <div id="d2l-domain-status" class="d2l-sr" role="status" aria-live="polite" aria-atomic="true"></div>
+</div>

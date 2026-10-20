@@ -1,0 +1,19 @@
+<div id="day2-pipeline" class="d2r-root">
+  <div class="d2r-error" hidden role="alert"></div>
+  <div class="d2r-content">
+    <div class="d2r-heading"><strong>同一条流程，四种证据停在哪里？</strong><span>实际预运行记录回看 · 按钮不启动 Z3</span></div>
+    <div class="d2r-mode-buttons" role="group" aria-label="选择求解与检查记录">
+      <button class="btn" type="button" data-d2r-mode="layout" aria-pressed="true">布局 SAT + 几何复核</button>
+      <button class="btn" type="button" data-d2r-mode="unsat" aria-pressed="false">打包 UNSAT</button>
+      <button class="btn" type="button" data-d2r-mode="unknown" aria-pressed="false">UNKNOWN</button>
+      <button class="btn" type="button" data-d2r-mode="postcheck" aria-pressed="false">SAT 后门宽拒绝</button>
+    </div>
+    <ol class="d2r-pipeline" id="d2r-pipeline-stages" aria-label="输入、编码、求解、独立检查与执行的证据状态"></ol>
+    <div class="d2r-insight" id="d2r-pipeline-insight" aria-live="off"></div>
+    <p class="d2r-measurement" id="d2r-pipeline-measurement"></p>
+    <details class="d2r-raw"><summary>查看当前记录的原始字段</summary><pre><code id="d2r-pipeline-json"></code></pre></details>
+    <p class="d2r-environment" id="d2r-pipeline-environment"></p>
+    <p class="d2r-footnote">记录来自本教程制作环境的真实运行；它没有代替你的本机实验，也没有进行机器人物理执行。</p>
+    <div class="sr-only" id="d2r-pipeline-live" role="status" aria-live="polite"></div>
+  </div>
+</div>
