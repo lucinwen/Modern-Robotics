@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check both lessons, local links, embedded records, and JavaScript syntax."""
+"""Check all lessons, local links, embedded records, and JavaScript syntax."""
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import urlsplit, unquote
@@ -14,6 +14,11 @@ ROOT = Path(__file__).resolve().parents[1]
 EXPECTED = {
     'index.html': ['dof-rigid-body', 'dof-three-points', 'dof-cspace-explorer', 'mr-workspace', 'mr-frames-rotation', 'mr-active-passive', 'mr-homogeneous-transform', 'day1-point-cloud', 'day1-room-validation'],
     'day-02.html': ['day2-domains', 'day2-nonoverlap', 'day2-packing', 'day2-contact', 'day2-pipeline', 'day2-incremental', 'day2-core', 'day2-preferences', 'day2-results'],
+    'day-03.html': ['day3-layers', 'day3-state', 'day3-actions', 'day3-domain', 'day3-search', 'day3-fsm', 'day3-clearance', 'day3-reach', 'day3-feedback', 'day3-records', 'day3-checkpoint'],
+}
+RECORDED_DATA = {
+    'day-02.html': ('Day 2', 'data/day-02-z3-results.json'),
+    'day-03.html': ('Day 3', 'data/day-03-results.json'),
 }
 
 class Page(HTMLParser):
@@ -64,7 +69,7 @@ def main():
                 issues.append(filename + ': unresolved accessible reference: ' + ref)
         for root_id in EXPECTED[filename]:
             if root_id not in ids:
-                issues.append(filename + ': missing interactive lesson: ' + root_id)
+                issues.append(filename + ': missing interactive region: ' + root_id)
         if re.search(r'\{\{(?:component|data):', page_text):
             issues.append(filename + ': unexpanded placeholder.')
         if not re.search(r'<html\s+lang="zh-CN"', page_text):
@@ -75,14 +80,15 @@ def main():
         for block in page.json_blocks:
             try:
                 parsed = json.loads(block)
-                if filename == 'day-02.html':
-                    original = json.loads((ROOT / 'data/day-02-z3-results.json').read_text(encoding='utf-8'))
+                if filename in RECORDED_DATA:
+                    label, source = RECORDED_DATA[filename]
+                    original = json.loads((ROOT / source).read_text(encoding='utf-8'))
                     if parsed != original:
-                        issues.append('Day 2 embedded records differ from their source JSON.')
+                        issues.append(label + ' embedded records differ from their source JSON.')
             except (ValueError, OSError) as error:
                 issues.append(filename + ': invalid embedded record data: ' + str(error))
-        if filename == 'day-02.html' and len(page.json_blocks) != 1:
-            issues.append('Day 2 must embed exactly one recorded-data block.')
+        if filename in RECORDED_DATA and len(page.json_blocks) != 1:
+            issues.append(RECORDED_DATA[filename][0] + ' must embed exactly one recorded-data block.')
 
     def check_link(link, source):
         u = urlsplit(link)
@@ -122,7 +128,7 @@ def main():
         print('\n'.join(issues))
         return 1
     count = sum(len(roots) for roots in EXPECTED.values())
-    print(f'PASS: {len(pages)} lesson pages; {count} interactive lessons; local links, per-page IDs, accessibility references, embedded records, compiled source, theme variables, and JavaScript syntax.')
+    print(f'PASS: {len(pages)} lesson pages; {count} interactive regions (Day 3: 10 knowledge visualizations + 1 practice area); local links, per-page IDs, accessibility references, embedded records, compiled source, theme variables, and JavaScript syntax.')
     if not node:
         print('Node unavailable: JavaScript syntax check was skipped.')
     return 0

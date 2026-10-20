@@ -93,6 +93,7 @@ figure { margin: 0; }
 .course-switcher a strong { font-family: Consolas, monospace; font-size: 11px; letter-spacing: .05em; }
 .course-switcher a[aria-current="page"] { background: var(--accent); border-color: var(--input); color: var(--accent-foreground); }
 .course-switcher a:hover { background: var(--muted); color: var(--foreground); }
+.course-switcher a:last-child:nth-child(3) { grid-column: 1 / -1; }
 .next-lesson { display: grid; gap: 10px; margin-top: 35px; padding: 25px 0; border-bottom: 1px solid var(--border); }
 .next-lesson a { text-decoration: none; font-size: 18px; }
 .eyebrow { display: block; font-size: 11px; letter-spacing: .13em; line-height: 1.5; color: var(--muted-foreground); font-weight: 550; }

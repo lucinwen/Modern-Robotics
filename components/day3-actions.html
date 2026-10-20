@@ -1,0 +1,22 @@
+<div id="day3-actions" class="d3s">
+  <div class="d3s-heading"><h3>先核对条件，再允许世界改变</h3><span class="d3s-method">手动推演 4 种动作</span></div>
+  <p class="d3s-intro">初态先选“开门”并尝试执行。看它为什么被拒绝；再依次尝试解锁、开门、移动和拿杯。</p>
+  <label class="d3s-label" for="d3s-actions-preset">选择一个起点<select id="d3s-actions-preset" class="d3s-select"><option value="success">标准初态 · 钥匙与能力齐全</option><option value="missing_key">缺少钥匙 · 其他条件相同</option><option value="no_grasp">没有拿杯能力 · 其他条件相同</option><option value="already_open">门一开始就打开了</option></select></label>
+  <div class="d3s-world-layout">
+    <div class="d3s-scene-panel"><svg class="d3s-scene" role="img" aria-labelledby="d3s-actions-scene-title d3s-actions-scene-desc"><title id="d3s-actions-scene-title">手动动作推演的当前状态</title><desc id="d3s-actions-scene-desc">当前状态随合法动作更新，失败尝试不会修改世界。</desc></svg><div class="d3s-goal"><span>目标</span><code>holding(r,cup)</code><strong id="d3s-actions-goal"></strong></div></div>
+    <div class="d3s-action-preparation">
+      <span class="d3s-small-label">先选择要尝试的动作</span>
+      <div class="d3s-buttons" role="group" aria-label="选择动作"><button type="button" class="d3s-button" data-d3s-action="unlock" aria-pressed="false">解锁</button><button type="button" class="d3s-button" data-d3s-action="open" aria-pressed="true">开门</button><button type="button" class="d3s-button" data-d3s-action="move" aria-pressed="false">移动</button><button type="button" class="d3s-button" data-d3s-action="pickup" aria-pressed="false">拿杯</button></div>
+      <code class="d3s-action-raw" id="d3s-actions-selected"></code>
+      <ul class="d3s-preconditions" id="d3s-actions-preconditions"></ul>
+      <p class="d3s-explanation" id="d3s-actions-readiness"></p>
+    </div>
+  </div>
+  <div class="d3s-buttons"><button type="button" class="d3s-button d3s-button-primary" id="d3s-actions-try">尝试执行所选动作</button><button type="button" class="d3s-button" id="d3s-actions-undo" disabled>撤回上次迁移</button><button type="button" class="d3s-button" id="d3s-actions-reset">恢复所选初态</button></div>
+  <div class="d3s-callout" id="d3s-actions-message">目前还没有执行动作。即使条件不满足，也可以尝试并查看拒绝原因。</div>
+  <div class="d3s-diff" id="d3s-actions-diff" hidden><div><h4>新增为真</h4><ul class="d3s-fact-chips" id="d3s-actions-added"></ul></div><div><h4>从真事实中删除</h4><ul class="d3s-fact-chips" id="d3s-actions-deleted"></ul></div></div>
+  <details class="d3s-details" id="d3s-actions-unchanged-box" hidden><summary>哪些事实没有变？</summary><ul class="d3s-fact-chips" id="d3s-actions-unchanged"></ul></details>
+  <details class="d3s-details"><summary>查看已经发生的合法迁移</summary><ol class="d3s-history" id="d3s-actions-history"><li>尚未迁移。</li></ol></details>
+  <p class="d3s-boundary">每次尝试只核对这里列出的符号前置。移动还需要实际通道与运动检查，拿杯还需要真实可达、抓取和控制证据。本组件与上一个快照组件各自独立。</p>
+  <div class="d3s-sr" id="d3s-actions-live" role="status" aria-live="polite" aria-atomic="true"></div>
+</div>

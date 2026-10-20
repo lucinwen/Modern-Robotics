@@ -1,0 +1,30 @@
+<div id="day3-clearance" class="d3g-root">
+  <div class="d3g-heading"><strong>门能容下机器人，当前中心线也要选对</strong><span>俯视图 · 圆盘身体 · 门已经打开 · 只检查这个门截面</span></div>
+  <div class="d3g-workbench">
+    <div class="d3g-picture">
+      <svg class="d3g-scene d3g-clearance-scene" role="img" aria-labelledby="d3g-clearance-title d3g-clearance-desc"><title id="d3g-clearance-title">门洞与机器人中心允许区间</title><desc id="d3g-clearance-desc">墙上的缺口是门洞，实心圆表示圆盘机器人，虚线圆额外包含每侧余量。绿色短线表示穿门时机器人中心允许经过的位置。</desc></svg>
+      <div class="d3g-legend"><span><i class="d3g-key-body"></i>身体</span><span><i class="d3g-key-safe"></i>中心允许区间</span><span><i class="d3g-key-margin"></i>身体加余量</span></div>
+    </div>
+    <div class="d3g-proof">
+      <ol class="d3g-truth-list" id="d3g-clearance-checks" aria-label="存在性与当前位置分别检查"></ol>
+      <div class="d3g-result" id="d3g-clearance-result" aria-live="off"></div>
+      <p class="d3g-explanation" id="d3g-clearance-explanation"></p>
+    </div>
+  </div>
+  <div class="d3g-controls">
+    <label class="form-label" for="d3g-clearance-door">门净宽 d <output id="d3g-clearance-door-value" aria-live="off">0.90 m</output><input class="form-range" id="d3g-clearance-door" type="range" min="30" max="140" step="5" value="90"></label>
+    <label class="form-label" for="d3g-clearance-body">圆盘直径 b <output id="d3g-clearance-body-value" aria-live="off">0.60 m</output><input class="form-range" id="d3g-clearance-body" type="range" min="20" max="100" step="5" value="60"></label>
+    <label class="form-label" for="d3g-clearance-margin">每侧余量 s <output id="d3g-clearance-margin-value" aria-live="off">0.10 m</output><input class="form-range" id="d3g-clearance-margin" type="range" min="0" max="30" step="5" value="10"></label>
+    <label class="form-label" for="d3g-clearance-offset">中心相对门中点的偏移 c <output id="d3g-clearance-offset-value" aria-live="off">0.00 m</output><input class="form-range" id="d3g-clearance-offset" type="range" min="-80" max="80" step="5" value="0"></label>
+  </div>
+  <div class="viz-row" role="group" aria-label="比较净宽和中心位置"><button class="btn" type="button" data-d3g-clearance="aligned">居中通过</button><button class="btn" type="button" data-d3g-clearance="offcenter">门够宽，但线偏了</button><button class="btn" type="button" data-d3g-clearance="narrow">门本身太窄</button><button class="btn" type="button" data-d3g-clearance="touch">零余量、恰好贴边</button></div>
+  <details class="d3g-details"><summary>图上的绿色区间从哪里来？</summary><p>把门洞写为 [L, U]。圆盘半径是 b/2，左右都要留 s，所以中心必须满足 <strong>L + b/2 + s ≤ c ≤ U − b/2 − s</strong>。这个区间非空，等价于 d ≥ b + 2s。当前中心还必须落在区间里。</p><p>滑条内部使用厘米数值，显示为米；端点采用“≥ / ≤”，允许等号。本模型是圆盘通过一条固定直门缝，不涉及旋转瘦身、门扇运动、墙厚、转弯或动力学。零余量只是明确允许贴边的数学示例。</p></details>
+  <details class="d3g-details d3g-path-details"><summary>再看一步：起点和终点都安全，途中也安全吗？</summary>
+    <div class="d3g-heading"><strong>同一起终点，两条不同折线</strong><span>圆盘机器人半径 0.20 m；圆障碍半径 0.35 m；额外余量 0.05 m</span></div>
+    <svg class="d3g-path-scene" role="img" aria-labelledby="d3g-path-title d3g-path-desc"><title id="d3g-path-title">直线路径与绕障路径的连续几何检查</title><desc id="d3g-path-desc">起点和终点都位于圆形障碍之外。直线路径穿过障碍，预先给定的绕行折线避开障碍。每段都按点到线段的最小距离检查整个线段。</desc></svg>
+    <div class="viz-row" role="group" aria-label="选择一条待检查的轨迹"><button class="btn" type="button" data-d3g-path="straight" aria-pressed="true">检查直线</button><button class="btn" type="button" data-d3g-path="detour" aria-pressed="false">检查给定绕行折线</button></div>
+    <div class="d3g-result" id="d3g-path-result" aria-live="off"></div><p id="d3g-path-explanation" class="d3g-explanation"></p>
+    <p class="d3g-note">这里对每条线段计算到圆障碍中心的最小距离，再比较 0.35 + 0.20 + 0.05 = 0.60 m，并非只抽查几个采样点。只比较两条已给定的路径，没有自动搜索所有路线，也没有检查其他墙体、时间和机器人控制。</p>
+  </details>
+  <div class="sr-only" id="d3g-clearance-live" role="status" aria-live="polite"></div>
+</div>

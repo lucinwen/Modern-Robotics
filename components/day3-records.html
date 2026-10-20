@@ -1,0 +1,31 @@
+<div id="day3-records" class="d3p-root">
+  <div class="d3p-record-error" role="alert" hidden></div>
+  <div class="d3p-record-content">
+    <div class="d3p-heading"><strong>先读输入，再核对本次实际输出</strong><span>真实 PDDL 搜索与原 MiniLab 规则记录，各自显示检查范围</span></div>
+    <div class="d3p-tabs" role="group" aria-label="选择实验类别"><button class="btn" type="button" data-d3p-record-kind="planning" aria-pressed="true">PDDL · 搜索动作序列</button><button class="btn" type="button" data-d3p-record-kind="minilab" aria-pressed="false">MiniLab · 检查受限规则</button></div>
+    <label class="form-label" for="d3p-record-case">选择一个实际运行案例<select class="form-select" id="d3p-record-case"></select></label>
+    <h3 id="d3p-record-title"></h3><ul id="d3p-record-changes" class="d3p-changes"></ul>
+    <p class="d3p-small" id="d3p-record-input-scope"></p>
+    <details class="d3p-details"><summary>先查看完整输入与目标</summary><pre class="d3-code"><code id="d3p-record-input"></code></pre></details>
+    <label class="form-label" for="d3p-record-prediction">我的预测与理由<textarea class="form-control" id="d3p-record-prediction" rows="2" placeholder="关键条件是什么？哪一个模块会发现它？"></textarea></label>
+    <p class="d3p-small">此处预测只在当前页面暂存；需要保留时可复制到页末笔记。</p>
+    <button class="btn btn-primary" id="d3p-record-reveal" type="button" aria-expanded="false" aria-controls="d3p-record-output">展开这次真实记录</button>
+    <div id="d3p-record-output" class="d3p-record-output" hidden>
+      <div class="d3p-result-line"><strong id="d3p-record-status"></strong><span id="d3p-record-time"></span></div>
+      <p id="d3p-record-interpretation"></p>
+      <p class="d3p-small" id="d3p-record-reason" hidden></p>
+      <div id="d3p-record-planning">
+        <div id="d3p-record-plan" class="d3p-plan-ribbon" aria-label="本次返回的动作序列"></div>
+        <div id="d3p-record-trace-controls" class="d3p-tabs"><button class="btn" id="d3p-record-prev" type="button">上一步状态</button><span id="d3p-record-step" class="d3p-small"></span><button class="btn" id="d3p-record-next" type="button">下一步状态</button></div>
+        <svg id="d3p-record-world" class="d3p-world" role="img" aria-labelledby="d3p-record-world-title d3p-record-world-desc"><title id="d3p-record-world-title">真实计划的符号状态示意</title><desc id="d3p-record-world-desc">画面根据本次记录的事实集合更新，不是机器人物理轨迹。</desc></svg>
+        <p id="d3p-record-world-note" class="d3p-small"></p>
+        <div class="d3p-effect-grid"><div><h4>本步新增</h4><div id="d3p-record-added"></div></div><div><h4>本步删除</h4><div id="d3p-record-removed"></div></div></div>
+        <details class="d3p-details"><summary>此刻的完整事实</summary><div id="d3p-record-facts" class="d3p-facts"></div></details>
+      </div>
+      <div class="d3p-focus"><strong>后续检查与执行</strong><p id="d3p-record-geometry"></p><p class="d3p-small" id="d3p-record-execution"></p></div>
+      <details class="d3p-details"><summary>这一例的完整原始 JSON</summary><pre class="d3-code"><code id="d3p-record-json"></code></pre></details>
+    </div>
+    <p class="d3p-small" id="d3p-record-environment"></p>
+  </div>
+  <div id="d3p-record-live" class="sr-only" role="status" aria-live="polite"></div>
+</div>

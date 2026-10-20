@@ -1,0 +1,2157 @@
+{
+  "schema_version": 1,
+  "environment": {
+    "python": "3.12.14",
+    "pyperplan": "2.1",
+    "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+    "generated_at_utc": "2026-10-20T09:42:53.221127+00:00"
+  },
+  "provenance": {
+    "plan_repository": "venividici/14plan",
+    "plan_revision": "de6fd9cb352370863e94d64d775c4f5236ed38fc",
+    "upstream_validate_blob": "4cbe22b923d770147e931f610fc00e0d79df96a0",
+    "upstream_file": "minilab/validate.py",
+    "pyperplan_source": "https://github.com/aibasel/pyperplan",
+    "scope": "教程制作环境中的真实程序运行；合成输入；没有用户本机或物理机器人运行。",
+    "search": "pyperplan.search.breadth_first_search",
+    "grounding_options": {
+      "remove_statics_from_initial_state": false,
+      "remove_irrelevant_operators": false
+    },
+    "elapsed_ms_definition": "planning: BFS call only; minilab: analyze call only"
+  },
+  "planning_cases": [
+    {
+      "id": "success",
+      "title": "钥匙与四种能力齐全",
+      "changes": [
+        "标准初态：门锁着，机器人在 A，杯子在 B。"
+      ],
+      "problem_file": "pddl/problem-success.pddl",
+      "source_files": {
+        "domain_git_blob_sha": "6b2864d1a331cf68074268aa3fd9df89171a5eed",
+        "problem_git_blob_sha": "cafa3d52aa1a435aae50a7a263ccb54f9ee6456a"
+      },
+      "expected_status": "plan_found",
+      "status": "plan_found",
+      "plan_length": 4,
+      "initial_facts": [
+        "(at r a)",
+        "(can-move r)",
+        "(can-open r)",
+        "(can-pickup r)",
+        "(can-unlock r)",
+        "(connected a b d)",
+        "(connected b a d)",
+        "(door-side d a)",
+        "(door-side d b)",
+        "(fits k d)",
+        "(graspable cup)",
+        "(handempty r)",
+        "(has-key r k)",
+        "(item-at cup b)",
+        "(locked d)"
+      ],
+      "goal": [
+        "(holding r cup)"
+      ],
+      "plan": [
+        {
+          "raw": "(unlock r d k a)",
+          "name": "unlock",
+          "args": [
+            "r",
+            "d",
+            "k",
+            "a"
+          ],
+          "pre": [
+            "(at r a)",
+            "(can-unlock r)",
+            "(door-side d a)",
+            "(fits k d)",
+            "(has-key r k)",
+            "(locked d)"
+          ],
+          "add": [
+            "(unlocked d)"
+          ],
+          "del": [
+            "(locked d)"
+          ],
+          "grounded_preconditions": [
+            "(at r a)",
+            "(locked d)"
+          ]
+        },
+        {
+          "raw": "(open r d a)",
+          "name": "open",
+          "args": [
+            "r",
+            "d",
+            "a"
+          ],
+          "pre": [
+            "(at r a)",
+            "(can-open r)",
+            "(door-side d a)",
+            "(unlocked d)"
+          ],
+          "add": [
+            "(opened d)"
+          ],
+          "del": [],
+          "grounded_preconditions": [
+            "(at r a)",
+            "(unlocked d)"
+          ]
+        },
+        {
+          "raw": "(move r a b d)",
+          "name": "move",
+          "args": [
+            "r",
+            "a",
+            "b",
+            "d"
+          ],
+          "pre": [
+            "(at r a)",
+            "(can-move r)",
+            "(connected a b d)",
+            "(opened d)"
+          ],
+          "add": [
+            "(at r b)"
+          ],
+          "del": [
+            "(at r a)"
+          ],
+          "grounded_preconditions": [
+            "(at r a)",
+            "(opened d)"
+          ]
+        },
+        {
+          "raw": "(pickup r cup b)",
+          "name": "pickup",
+          "args": [
+            "r",
+            "cup",
+            "b"
+          ],
+          "pre": [
+            "(at r b)",
+            "(can-pickup r)",
+            "(graspable cup)",
+            "(handempty r)",
+            "(item-at cup b)"
+          ],
+          "add": [
+            "(holding r cup)"
+          ],
+          "del": [
+            "(handempty r)",
+            "(item-at cup b)"
+          ],
+          "grounded_preconditions": [
+            "(at r b)",
+            "(handempty r)",
+            "(item-at cup b)"
+          ]
+        }
+      ],
+      "states": [
+        [
+          "(at r a)",
+          "(can-move r)",
+          "(can-open r)",
+          "(can-pickup r)",
+          "(can-unlock r)",
+          "(connected a b d)",
+          "(connected b a d)",
+          "(door-side d a)",
+          "(door-side d b)",
+          "(fits k d)",
+          "(graspable cup)",
+          "(handempty r)",
+          "(has-key r k)",
+          "(item-at cup b)",
+          "(locked d)"
+        ],
+        [
+          "(at r a)",
+          "(can-move r)",
+          "(can-open r)",
+          "(can-pickup r)",
+          "(can-unlock r)",
+          "(connected a b d)",
+          "(connected b a d)",
+          "(door-side d a)",
+          "(door-side d b)",
+          "(fits k d)",
+          "(graspable cup)",
+          "(handempty r)",
+          "(has-key r k)",
+          "(item-at cup b)",
+          "(unlocked d)"
+        ],
+        [
+          "(at r a)",
+          "(can-move r)",
+          "(can-open r)",
+          "(can-pickup r)",
+          "(can-unlock r)",
+          "(connected a b d)",
+          "(connected b a d)",
+          "(door-side d a)",
+          "(door-side d b)",
+          "(fits k d)",
+          "(graspable cup)",
+          "(handempty r)",
+          "(has-key r k)",
+          "(item-at cup b)",
+          "(opened d)",
+          "(unlocked d)"
+        ],
+        [
+          "(at r b)",
+          "(can-move r)",
+          "(can-open r)",
+          "(can-pickup r)",
+          "(can-unlock r)",
+          "(connected a b d)",
+          "(connected b a d)",
+          "(door-side d a)",
+          "(door-side d b)",
+          "(fits k d)",
+          "(graspable cup)",
+          "(handempty r)",
+          "(has-key r k)",
+          "(item-at cup b)",
+          "(opened d)",
+          "(unlocked d)"
+        ],
+        [
+          "(at r b)",
+          "(can-move r)",
+          "(can-open r)",
+          "(can-pickup r)",
+          "(can-unlock r)",
+          "(connected a b d)",
+          "(connected b a d)",
+          "(door-side d a)",
+          "(door-side d b)",
+          "(fits k d)",
+          "(graspable cup)",
+          "(has-key r k)",
+          "(holding r cup)",
+          "(opened d)",
+          "(unlocked d)"
+        ]
+      ],
+      "trace": [
+        {
+          "step": 1,
+          "action": "(unlock r d k a)",
+          "removed": [
+            "(locked d)"
+          ],
+          "added": [
+            "(unlocked d)"
+          ]
+        },
+        {
+          "step": 2,
+          "action": "(open r d a)",
+          "removed": [],
+          "added": [
+            "(opened d)"
+          ]
+        },
+        {
+          "step": 3,
+          "action": "(move r a b d)",
+          "removed": [
+            "(at r a)"
+          ],
+          "added": [
+            "(at r b)"
+          ]
+        },
+        {
+          "step": 4,
+          "action": "(pickup r cup b)",
+          "removed": [
+            "(handempty r)",
+            "(item-at cup b)"
+          ],
+          "added": [
+            "(holding r cup)"
+          ]
+        }
+      ],
+      "plan_validated_against_source_actions": true,
+      "state_invariant_checks": [
+        {
+          "one_robot_room": true,
+          "exactly_one_lock_status": true,
+          "opened_implies_unlocked": true,
+          "cup_has_one_location_or_is_held": true,
+          "hand_matches_cup_state": true
+        },
+        {
+          "one_robot_room": true,
+          "exactly_one_lock_status": true,
+          "opened_implies_unlocked": true,
+          "cup_has_one_location_or_is_held": true,
+          "hand_matches_cup_state": true
+        },
+        {
+          "one_robot_room": true,
+          "exactly_one_lock_status": true,
+          "opened_implies_unlocked": true,
+          "cup_has_one_location_or_is_held": true,
+          "hand_matches_cup_state": true
+        },
+        {
+          "one_robot_room": true,
+          "exactly_one_lock_status": true,
+          "opened_implies_unlocked": true,
+          "cup_has_one_location_or_is_held": true,
+          "hand_matches_cup_state": true
+        },
+        {
+          "one_robot_room": true,
+          "exactly_one_lock_status": true,
+          "opened_implies_unlocked": true,
+          "cup_has_one_location_or_is_held": true,
+          "hand_matches_cup_state": true
+        }
+      ],
+      "search_exhausted": false,
+      "expanded_states": 5,
+      "grounded_operator_count": 8,
+      "elapsed_ms": 0.140601,
+      "parse_ground_ms": 2.078658,
+      "search_log": [
+        "Goal reached. Start extraction of solution.",
+        "5 Nodes expanded"
+      ],
+      "geometry_check": {
+        "checked": true,
+        "passes": true,
+        "method": "declared_door_width_only",
+        "input": {
+          "door_width_m": 0.9,
+          "robot_width_m": 0.6,
+          "extra_margin_m": 0.0
+        },
+        "reason": "本例门宽数值条件成立。",
+        "scope": "仅比较声明的净宽与身体宽度；无路径、碰撞、门扇或真实执行验证。"
+      },
+      "execution_status": "not_run",
+      "scope": "finite_fully_observed_deterministic_typed_strips_domain_only_no_continuous_motion_or_physical_execution"
+    },
+    {
+      "id": "missing_key",
+      "title": "缺少钥匙",
+      "changes": [
+        "仅删除初态中的 (has-key r k)，没有拾钥匙或替代开锁动作。"
+      ],
+      "problem_file": "pddl/problem-missing-key.pddl",
+      "source_files": {
+        "domain_git_blob_sha": "6b2864d1a331cf68074268aa3fd9df89171a5eed",
+        "problem_git_blob_sha": "8f0ad6bcf727e232aa147424e7c7297a8d024ed5"
+      },
+      "expected_status": "no_plan",
+      "status": "no_plan",
+      "plan_length": null,
+      "initial_facts": [
+        "(at r a)",
+        "(can-move r)",
+        "(can-open r)",
+        "(can-pickup r)",
+        "(can-unlock r)",
+        "(connected a b d)",
+        "(connected b a d)",
+        "(door-side d a)",
+        "(door-side d b)",
+        "(fits k d)",
+        "(graspable cup)",
+        "(handempty r)",
+        "(item-at cup b)",
+        "(locked d)"
+      ],
+      "goal": [
+        "(holding r cup)"
+      ],
+      "plan": [],
+      "states": [
+        [
+          "(at r a)",
+          "(can-move r)",
+          "(can-open r)",
+          "(can-pickup r)",
+          "(can-unlock r)",
+          "(connected a b d)",
+          "(connected b a d)",
+          "(door-side d a)",
+          "(door-side d b)",
+          "(fits k d)",
+          "(graspable cup)",
+          "(handempty r)",
+          "(item-at cup b)",
+          "(locked d)"
+        ]
+      ],
+      "trace": [],
+      "plan_validated_against_source_actions": false,
+      "state_invariant_checks": [
+        {
+          "one_robot_room": true,
+          "exactly_one_lock_status": true,
+          "opened_implies_unlocked": true,
+          "cup_has_one_location_or_is_held": true,
+          "hand_matches_cup_state": true
+        }
+      ],
+      "search_exhausted": true,
+      "expanded_states": 1,
+      "grounded_operator_count": 6,
+      "elapsed_ms": 0.062193,
+      "parse_ground_ms": 0.867735,
+      "search_log": [
+        "No operators left. Task unsolvable.",
+        "1 Nodes expanded"
+      ],
+      "geometry_check": {
+        "checked": false,
+        "passes": null,
+        "method": "declared_door_width_only",
+        "input": {
+          "door_width_m": 0.9,
+          "robot_width_m": 0.6,
+          "extra_margin_m": 0.0
+        },
+        "reason": "没有找到候选计划，未进入计划的后验门宽检查。",
+        "scope": "仅比较声明的净宽与身体宽度；无路径、碰撞、门扇或真实执行验证。"
+      },
+      "execution_status": "not_run",
+      "scope": "finite_fully_observed_deterministic_typed_strips_domain_only_no_continuous_motion_or_physical_execution"
+    },
+    {
+      "id": "missing_unlock",
+      "title": "有钥匙但缺少开锁能力",
+      "changes": [
+        "仅删除 (can-unlock r)，其余初态保持标准条件。"
+      ],
+      "problem_file": "pddl/problem-missing-unlock.pddl",
+      "source_files": {
+        "domain_git_blob_sha": "6b2864d1a331cf68074268aa3fd9df89171a5eed",
+        "problem_git_blob_sha": "d68a913c2090d28dc4cc74bacbc40ecbae40d188"
+      },
+      "expected_status": "no_plan",
+      "status": "no_plan",
+      "plan_length": null,
+      "initial_facts": [
+        "(at r a)",
+        "(can-move r)",
+        "(can-open r)",
+        "(can-pickup r)",
+        "(connected a b d)",
+        "(connected b a d)",
+        "(door-side d a)",
+        "(door-side d b)",
+        "(fits k d)",
+        "(graspable cup)",
+        "(handempty r)",
+        "(has-key r k)",
+        "(item-at cup b)",
+        "(locked d)"
+      ],
+      "goal": [
+        "(holding r cup)"
+      ],
+      "plan": [],
+      "states": [
+        [
+          "(at r a)",
+          "(can-move r)",
+          "(can-open r)",
+          "(can-pickup r)",
+          "(connected a b d)",
+          "(connected b a d)",
+          "(door-side d a)",
+          "(door-side d b)",
+          "(fits k d)",
+          "(graspable cup)",
+          "(handempty r)",
+          "(has-key r k)",
+          "(item-at cup b)",
+          "(locked d)"
+        ]
+      ],
+      "trace": [],
+      "plan_validated_against_source_actions": false,
+      "state_invariant_checks": [
+        {
+          "one_robot_room": true,
+          "exactly_one_lock_status": true,
+          "opened_implies_unlocked": true,
+          "cup_has_one_location_or_is_held": true,
+          "hand_matches_cup_state": true
+        }
+      ],
+      "search_exhausted": true,
+      "expanded_states": 1,
+      "grounded_operator_count": 6,
+      "elapsed_ms": 0.060441,
+      "parse_ground_ms": 0.846684,
+      "search_log": [
+        "No operators left. Task unsolvable.",
+        "1 Nodes expanded"
+      ],
+      "geometry_check": {
+        "checked": false,
+        "passes": null,
+        "method": "declared_door_width_only",
+        "input": {
+          "door_width_m": 0.9,
+          "robot_width_m": 0.6,
+          "extra_margin_m": 0.0
+        },
+        "reason": "没有找到候选计划，未进入计划的后验门宽检查。",
+        "scope": "仅比较声明的净宽与身体宽度；无路径、碰撞、门扇或真实执行验证。"
+      },
+      "execution_status": "not_run",
+      "scope": "finite_fully_observed_deterministic_typed_strips_domain_only_no_continuous_motion_or_physical_execution"
+    },
+    {
+      "id": "missing_open",
+      "title": "能解锁，但缺少开门能力",
+      "changes": [
+        "仅删除 (can-open r)；解锁不会自动把 opened 变真。"
+      ],
+      "problem_file": "pddl/problem-missing-open.pddl",
+      "source_files": {
+        "domain_git_blob_sha": "6b2864d1a331cf68074268aa3fd9df89171a5eed",
+        "problem_git_blob_sha": "31baf5da17a38e3ff8d2a038b8b79a725fc155f7"
+      },
+      "expected_status": "no_plan",
+      "status": "no_plan",
+      "plan_length": null,
+      "initial_facts": [
+        "(at r a)",
+        "(can-move r)",
+        "(can-pickup r)",
+        "(can-unlock r)",
+        "(connected a b d)",
+        "(connected b a d)",
+        "(door-side d a)",
+        "(door-side d b)",
+        "(fits k d)",
+        "(graspable cup)",
+        "(handempty r)",
+        "(has-key r k)",
+        "(item-at cup b)",
+        "(locked d)"
+      ],
+      "goal": [
+        "(holding r cup)"
+      ],
+      "plan": [],
+      "states": [
+        [
+          "(at r a)",
+          "(can-move r)",
+          "(can-pickup r)",
+          "(can-unlock r)",
+          "(connected a b d)",
+          "(connected b a d)",
+          "(door-side d a)",
+          "(door-side d b)",
+          "(fits k d)",
+          "(graspable cup)",
+          "(handempty r)",
+          "(has-key r k)",
+          "(item-at cup b)",
+          "(locked d)"
+        ]
+      ],
+      "trace": [],
+      "plan_validated_against_source_actions": false,
+      "state_invariant_checks": [
+        {
+          "one_robot_room": true,
+          "exactly_one_lock_status": true,
+          "opened_implies_unlocked": true,
+          "cup_has_one_location_or_is_held": true,
+          "hand_matches_cup_state": true
+        }
+      ],
+      "search_exhausted": true,
+      "expanded_states": 2,
+      "grounded_operator_count": 6,
+      "elapsed_ms": 0.057437,
+      "parse_ground_ms": 0.745081,
+      "search_log": [
+        "No operators left. Task unsolvable.",
+        "2 Nodes expanded"
+      ],
+      "geometry_check": {
+        "checked": false,
+        "passes": null,
+        "method": "declared_door_width_only",
+        "input": {
+          "door_width_m": 0.9,
+          "robot_width_m": 0.6,
+          "extra_margin_m": 0.0
+        },
+        "reason": "没有找到候选计划，未进入计划的后验门宽检查。",
+        "scope": "仅比较声明的净宽与身体宽度；无路径、碰撞、门扇或真实执行验证。"
+      },
+      "execution_status": "not_run",
+      "scope": "finite_fully_observed_deterministic_typed_strips_domain_only_no_continuous_motion_or_physical_execution"
+    },
+    {
+      "id": "no_grasp",
+      "title": "缺少抓取能力",
+      "changes": [
+        "仅删除 (can-pickup r)，物体仍声明为 graspable。"
+      ],
+      "problem_file": "pddl/problem-no-grasp.pddl",
+      "source_files": {
+        "domain_git_blob_sha": "6b2864d1a331cf68074268aa3fd9df89171a5eed",
+        "problem_git_blob_sha": "79e45bb381236a8d52dd1c2e3f2a7ffc4323d2b1"
+      },
+      "expected_status": "no_plan",
+      "status": "no_plan",
+      "plan_length": null,
+      "initial_facts": [
+        "(at r a)",
+        "(can-move r)",
+        "(can-open r)",
+        "(can-unlock r)",
+        "(connected a b d)",
+        "(connected b a d)",
+        "(door-side d a)",
+        "(door-side d b)",
+        "(fits k d)",
+        "(graspable cup)",
+        "(handempty r)",
+        "(has-key r k)",
+        "(item-at cup b)",
+        "(locked d)"
+      ],
+      "goal": [
+        "(holding r cup)"
+      ],
+      "plan": [],
+      "states": [
+        [
+          "(at r a)",
+          "(can-move r)",
+          "(can-open r)",
+          "(can-unlock r)",
+          "(connected a b d)",
+          "(connected b a d)",
+          "(door-side d a)",
+          "(door-side d b)",
+          "(fits k d)",
+          "(graspable cup)",
+          "(handempty r)",
+          "(has-key r k)",
+          "(item-at cup b)",
+          "(locked d)"
+        ]
+      ],
+      "trace": [],
+      "plan_validated_against_source_actions": false,
+      "state_invariant_checks": [
+        {
+          "one_robot_room": true,
+          "exactly_one_lock_status": true,
+          "opened_implies_unlocked": true,
+          "cup_has_one_location_or_is_held": true,
+          "hand_matches_cup_state": true
+        }
+      ],
+      "search_exhausted": true,
+      "expanded_states": 4,
+      "grounded_operator_count": 6,
+      "elapsed_ms": 0.063045,
+      "parse_ground_ms": 0.732172,
+      "search_log": [
+        "No operators left. Task unsolvable.",
+        "4 Nodes expanded"
+      ],
+      "geometry_check": {
+        "checked": false,
+        "passes": null,
+        "method": "declared_door_width_only",
+        "input": {
+          "door_width_m": 0.9,
+          "robot_width_m": 0.6,
+          "extra_margin_m": 0.0
+        },
+        "reason": "没有找到候选计划，未进入计划的后验门宽检查。",
+        "scope": "仅比较声明的净宽与身体宽度；无路径、碰撞、门扇或真实执行验证。"
+      },
+      "execution_status": "not_run",
+      "scope": "finite_fully_observed_deterministic_typed_strips_domain_only_no_continuous_motion_or_physical_execution"
+    },
+    {
+      "id": "ungraspable",
+      "title": "物体未被声明为可抓取",
+      "changes": [
+        "仅删除 (graspable cup)，机器人仍有 can-pickup。"
+      ],
+      "problem_file": "pddl/problem-ungraspable.pddl",
+      "source_files": {
+        "domain_git_blob_sha": "6b2864d1a331cf68074268aa3fd9df89171a5eed",
+        "problem_git_blob_sha": "a221630fcf17e0a4e221e1fe60a6472f27aaf981"
+      },
+      "expected_status": "no_plan",
+      "status": "no_plan",
+      "plan_length": null,
+      "initial_facts": [
+        "(at r a)",
+        "(can-move r)",
+        "(can-open r)",
+        "(can-pickup r)",
+        "(can-unlock r)",
+        "(connected a b d)",
+        "(connected b a d)",
+        "(door-side d a)",
+        "(door-side d b)",
+        "(fits k d)",
+        "(handempty r)",
+        "(has-key r k)",
+        "(item-at cup b)",
+        "(locked d)"
+      ],
+      "goal": [
+        "(holding r cup)"
+      ],
+      "plan": [],
+      "states": [
+        [
+          "(at r a)",
+          "(can-move r)",
+          "(can-open r)",
+          "(can-pickup r)",
+          "(can-unlock r)",
+          "(connected a b d)",
+          "(connected b a d)",
+          "(door-side d a)",
+          "(door-side d b)",
+          "(fits k d)",
+          "(handempty r)",
+          "(has-key r k)",
+          "(item-at cup b)",
+          "(locked d)"
+        ]
+      ],
+      "trace": [],
+      "plan_validated_against_source_actions": false,
+      "state_invariant_checks": [
+        {
+          "one_robot_room": true,
+          "exactly_one_lock_status": true,
+          "opened_implies_unlocked": true,
+          "cup_has_one_location_or_is_held": true,
+          "hand_matches_cup_state": true
+        }
+      ],
+      "search_exhausted": true,
+      "expanded_states": 4,
+      "grounded_operator_count": 6,
+      "elapsed_ms": 0.062634,
+      "parse_ground_ms": 0.707335,
+      "search_log": [
+        "No operators left. Task unsolvable.",
+        "4 Nodes expanded"
+      ],
+      "geometry_check": {
+        "checked": false,
+        "passes": null,
+        "method": "declared_door_width_only",
+        "input": {
+          "door_width_m": 0.9,
+          "robot_width_m": 0.6,
+          "extra_margin_m": 0.0
+        },
+        "reason": "没有找到候选计划，未进入计划的后验门宽检查。",
+        "scope": "仅比较声明的净宽与身体宽度；无路径、碰撞、门扇或真实执行验证。"
+      },
+      "execution_status": "not_run",
+      "scope": "finite_fully_observed_deterministic_typed_strips_domain_only_no_continuous_motion_or_physical_execution"
+    },
+    {
+      "id": "already_open",
+      "title": "初态中门已经打开",
+      "changes": [
+        "删除 locked，加入 unlocked 与 opened；无需重复解锁或开门。"
+      ],
+      "problem_file": "pddl/problem-already-open.pddl",
+      "source_files": {
+        "domain_git_blob_sha": "6b2864d1a331cf68074268aa3fd9df89171a5eed",
+        "problem_git_blob_sha": "3a3b68ef4caf8867208d8c37a763b7aa4d194e94"
+      },
+      "expected_status": "plan_found",
+      "status": "plan_found",
+      "plan_length": 2,
+      "initial_facts": [
+        "(at r a)",
+        "(can-move r)",
+        "(can-open r)",
+        "(can-pickup r)",
+        "(can-unlock r)",
+        "(connected a b d)",
+        "(connected b a d)",
+        "(door-side d a)",
+        "(door-side d b)",
+        "(fits k d)",
+        "(graspable cup)",
+        "(handempty r)",
+        "(has-key r k)",
+        "(item-at cup b)",
+        "(opened d)",
+        "(unlocked d)"
+      ],
+      "goal": [
+        "(holding r cup)"
+      ],
+      "plan": [
+        {
+          "raw": "(move r a b d)",
+          "name": "move",
+          "args": [
+            "r",
+            "a",
+            "b",
+            "d"
+          ],
+          "pre": [
+            "(at r a)",
+            "(can-move r)",
+            "(connected a b d)",
+            "(opened d)"
+          ],
+          "add": [
+            "(at r b)"
+          ],
+          "del": [
+            "(at r a)"
+          ],
+          "grounded_preconditions": [
+            "(at r a)",
+            "(opened d)"
+          ]
+        },
+        {
+          "raw": "(pickup r cup b)",
+          "name": "pickup",
+          "args": [
+            "r",
+            "cup",
+            "b"
+          ],
+          "pre": [
+            "(at r b)",
+            "(can-pickup r)",
+            "(graspable cup)",
+            "(handempty r)",
+            "(item-at cup b)"
+          ],
+          "add": [
+            "(holding r cup)"
+          ],
+          "del": [
+            "(handempty r)",
+            "(item-at cup b)"
+          ],
+          "grounded_preconditions": [
+            "(at r b)",
+            "(handempty r)",
+            "(item-at cup b)"
+          ]
+        }
+      ],
+      "states": [
+        [
+          "(at r a)",
+          "(can-move r)",
+          "(can-open r)",
+          "(can-pickup r)",
+          "(can-unlock r)",
+          "(connected a b d)",
+          "(connected b a d)",
+          "(door-side d a)",
+          "(door-side d b)",
+          "(fits k d)",
+          "(graspable cup)",
+          "(handempty r)",
+          "(has-key r k)",
+          "(item-at cup b)",
+          "(opened d)",
+          "(unlocked d)"
+        ],
+        [
+          "(at r b)",
+          "(can-move r)",
+          "(can-open r)",
+          "(can-pickup r)",
+          "(can-unlock r)",
+          "(connected a b d)",
+          "(connected b a d)",
+          "(door-side d a)",
+          "(door-side d b)",
+          "(fits k d)",
+          "(graspable cup)",
+          "(handempty r)",
+          "(has-key r k)",
+          "(item-at cup b)",
+          "(opened d)",
+          "(unlocked d)"
+        ],
+        [
+          "(at r b)",
+          "(can-move r)",
+          "(can-open r)",
+          "(can-pickup r)",
+          "(can-unlock r)",
+          "(connected a b d)",
+          "(connected b a d)",
+          "(door-side d a)",
+          "(door-side d b)",
+          "(fits k d)",
+          "(graspable cup)",
+          "(has-key r k)",
+          "(holding r cup)",
+          "(opened d)",
+          "(unlocked d)"
+        ]
+      ],
+      "trace": [
+        {
+          "step": 1,
+          "action": "(move r a b d)",
+          "removed": [
+            "(at r a)"
+          ],
+          "added": [
+            "(at r b)"
+          ]
+        },
+        {
+          "step": 2,
+          "action": "(pickup r cup b)",
+          "removed": [
+            "(handempty r)",
+            "(item-at cup b)"
+          ],
+          "added": [
+            "(holding r cup)"
+          ]
+        }
+      ],
+      "plan_validated_against_source_actions": true,
+      "state_invariant_checks": [
+        {
+          "one_robot_room": true,
+          "exactly_one_lock_status": true,
+          "opened_implies_unlocked": true,
+          "cup_has_one_location_or_is_held": true,
+          "hand_matches_cup_state": true
+        },
+        {
+          "one_robot_room": true,
+          "exactly_one_lock_status": true,
+          "opened_implies_unlocked": true,
+          "cup_has_one_location_or_is_held": true,
+          "hand_matches_cup_state": true
+        },
+        {
+          "one_robot_room": true,
+          "exactly_one_lock_status": true,
+          "opened_implies_unlocked": true,
+          "cup_has_one_location_or_is_held": true,
+          "hand_matches_cup_state": true
+        }
+      ],
+      "search_exhausted": false,
+      "expanded_states": 3,
+      "grounded_operator_count": 8,
+      "elapsed_ms": 0.070256,
+      "parse_ground_ms": 0.902378,
+      "search_log": [
+        "Goal reached. Start extraction of solution.",
+        "3 Nodes expanded"
+      ],
+      "geometry_check": {
+        "checked": true,
+        "passes": true,
+        "method": "declared_door_width_only",
+        "input": {
+          "door_width_m": 0.9,
+          "robot_width_m": 0.6,
+          "extra_margin_m": 0.0
+        },
+        "reason": "本例门宽数值条件成立。",
+        "scope": "仅比较声明的净宽与身体宽度；无路径、碰撞、门扇或真实执行验证。"
+      },
+      "execution_status": "not_run",
+      "scope": "finite_fully_observed_deterministic_typed_strips_domain_only_no_continuous_motion_or_physical_execution"
+    },
+    {
+      "id": "narrow_door",
+      "title": "符号计划存在，但门宽不足",
+      "changes": [
+        "PDDL 初态与标准例相同；独立门宽输入改为 0.50 m。"
+      ],
+      "problem_file": "pddl/problem-narrow-door.pddl",
+      "source_files": {
+        "domain_git_blob_sha": "6b2864d1a331cf68074268aa3fd9df89171a5eed",
+        "problem_git_blob_sha": "169966b953af9981bf3f68019b4eca067cf64393"
+      },
+      "expected_status": "plan_found",
+      "status": "plan_found",
+      "plan_length": 4,
+      "initial_facts": [
+        "(at r a)",
+        "(can-move r)",
+        "(can-open r)",
+        "(can-pickup r)",
+        "(can-unlock r)",
+        "(connected a b d)",
+        "(connected b a d)",
+        "(door-side d a)",
+        "(door-side d b)",
+        "(fits k d)",
+        "(graspable cup)",
+        "(handempty r)",
+        "(has-key r k)",
+        "(item-at cup b)",
+        "(locked d)"
+      ],
+      "goal": [
+        "(holding r cup)"
+      ],
+      "plan": [
+        {
+          "raw": "(unlock r d k a)",
+          "name": "unlock",
+          "args": [
+            "r",
+            "d",
+            "k",
+            "a"
+          ],
+          "pre": [
+            "(at r a)",
+            "(can-unlock r)",
+            "(door-side d a)",
+            "(fits k d)",
+            "(has-key r k)",
+            "(locked d)"
+          ],
+          "add": [
+            "(unlocked d)"
+          ],
+          "del": [
+            "(locked d)"
+          ],
+          "grounded_preconditions": [
+            "(at r a)",
+            "(locked d)"
+          ]
+        },
+        {
+          "raw": "(open r d a)",
+          "name": "open",
+          "args": [
+            "r",
+            "d",
+            "a"
+          ],
+          "pre": [
+            "(at r a)",
+            "(can-open r)",
+            "(door-side d a)",
+            "(unlocked d)"
+          ],
+          "add": [
+            "(opened d)"
+          ],
+          "del": [],
+          "grounded_preconditions": [
+            "(at r a)",
+            "(unlocked d)"
+          ]
+        },
+        {
+          "raw": "(move r a b d)",
+          "name": "move",
+          "args": [
+            "r",
+            "a",
+            "b",
+            "d"
+          ],
+          "pre": [
+            "(at r a)",
+            "(can-move r)",
+            "(connected a b d)",
+            "(opened d)"
+          ],
+          "add": [
+            "(at r b)"
+          ],
+          "del": [
+            "(at r a)"
+          ],
+          "grounded_preconditions": [
+            "(at r a)",
+            "(opened d)"
+          ]
+        },
+        {
+          "raw": "(pickup r cup b)",
+          "name": "pickup",
+          "args": [
+            "r",
+            "cup",
+            "b"
+          ],
+          "pre": [
+            "(at r b)",
+            "(can-pickup r)",
+            "(graspable cup)",
+            "(handempty r)",
+            "(item-at cup b)"
+          ],
+          "add": [
+            "(holding r cup)"
+          ],
+          "del": [
+            "(handempty r)",
+            "(item-at cup b)"
+          ],
+          "grounded_preconditions": [
+            "(at r b)",
+            "(handempty r)",
+            "(item-at cup b)"
+          ]
+        }
+      ],
+      "states": [
+        [
+          "(at r a)",
+          "(can-move r)",
+          "(can-open r)",
+          "(can-pickup r)",
+          "(can-unlock r)",
+          "(connected a b d)",
+          "(connected b a d)",
+          "(door-side d a)",
+          "(door-side d b)",
+          "(fits k d)",
+          "(graspable cup)",
+          "(handempty r)",
+          "(has-key r k)",
+          "(item-at cup b)",
+          "(locked d)"
+        ],
+        [
+          "(at r a)",
+          "(can-move r)",
+          "(can-open r)",
+          "(can-pickup r)",
+          "(can-unlock r)",
+          "(connected a b d)",
+          "(connected b a d)",
+          "(door-side d a)",
+          "(door-side d b)",
+          "(fits k d)",
+          "(graspable cup)",
+          "(handempty r)",
+          "(has-key r k)",
+          "(item-at cup b)",
+          "(unlocked d)"
+        ],
+        [
+          "(at r a)",
+          "(can-move r)",
+          "(can-open r)",
+          "(can-pickup r)",
+          "(can-unlock r)",
+          "(connected a b d)",
+          "(connected b a d)",
+          "(door-side d a)",
+          "(door-side d b)",
+          "(fits k d)",
+          "(graspable cup)",
+          "(handempty r)",
+          "(has-key r k)",
+          "(item-at cup b)",
+          "(opened d)",
+          "(unlocked d)"
+        ],
+        [
+          "(at r b)",
+          "(can-move r)",
+          "(can-open r)",
+          "(can-pickup r)",
+          "(can-unlock r)",
+          "(connected a b d)",
+          "(connected b a d)",
+          "(door-side d a)",
+          "(door-side d b)",
+          "(fits k d)",
+          "(graspable cup)",
+          "(handempty r)",
+          "(has-key r k)",
+          "(item-at cup b)",
+          "(opened d)",
+          "(unlocked d)"
+        ],
+        [
+          "(at r b)",
+          "(can-move r)",
+          "(can-open r)",
+          "(can-pickup r)",
+          "(can-unlock r)",
+          "(connected a b d)",
+          "(connected b a d)",
+          "(door-side d a)",
+          "(door-side d b)",
+          "(fits k d)",
+          "(graspable cup)",
+          "(has-key r k)",
+          "(holding r cup)",
+          "(opened d)",
+          "(unlocked d)"
+        ]
+      ],
+      "trace": [
+        {
+          "step": 1,
+          "action": "(unlock r d k a)",
+          "removed": [
+            "(locked d)"
+          ],
+          "added": [
+            "(unlocked d)"
+          ]
+        },
+        {
+          "step": 2,
+          "action": "(open r d a)",
+          "removed": [],
+          "added": [
+            "(opened d)"
+          ]
+        },
+        {
+          "step": 3,
+          "action": "(move r a b d)",
+          "removed": [
+            "(at r a)"
+          ],
+          "added": [
+            "(at r b)"
+          ]
+        },
+        {
+          "step": 4,
+          "action": "(pickup r cup b)",
+          "removed": [
+            "(handempty r)",
+            "(item-at cup b)"
+          ],
+          "added": [
+            "(holding r cup)"
+          ]
+        }
+      ],
+      "plan_validated_against_source_actions": true,
+      "state_invariant_checks": [
+        {
+          "one_robot_room": true,
+          "exactly_one_lock_status": true,
+          "opened_implies_unlocked": true,
+          "cup_has_one_location_or_is_held": true,
+          "hand_matches_cup_state": true
+        },
+        {
+          "one_robot_room": true,
+          "exactly_one_lock_status": true,
+          "opened_implies_unlocked": true,
+          "cup_has_one_location_or_is_held": true,
+          "hand_matches_cup_state": true
+        },
+        {
+          "one_robot_room": true,
+          "exactly_one_lock_status": true,
+          "opened_implies_unlocked": true,
+          "cup_has_one_location_or_is_held": true,
+          "hand_matches_cup_state": true
+        },
+        {
+          "one_robot_room": true,
+          "exactly_one_lock_status": true,
+          "opened_implies_unlocked": true,
+          "cup_has_one_location_or_is_held": true,
+          "hand_matches_cup_state": true
+        },
+        {
+          "one_robot_room": true,
+          "exactly_one_lock_status": true,
+          "opened_implies_unlocked": true,
+          "cup_has_one_location_or_is_held": true,
+          "hand_matches_cup_state": true
+        }
+      ],
+      "search_exhausted": false,
+      "expanded_states": 5,
+      "grounded_operator_count": 8,
+      "elapsed_ms": 0.068193,
+      "parse_ground_ms": 0.765061,
+      "search_log": [
+        "Goal reached. Start extraction of solution.",
+        "5 Nodes expanded"
+      ],
+      "geometry_check": {
+        "checked": true,
+        "passes": false,
+        "method": "declared_door_width_only",
+        "input": {
+          "door_width_m": 0.5,
+          "robot_width_m": 0.6,
+          "extra_margin_m": 0.0
+        },
+        "reason": "门宽 0.50 m 小于机器人宽 0.60 m；当前声明尺寸拒绝这条过门候选。",
+        "scope": "仅比较声明的净宽与身体宽度；无路径、碰撞、门扇或真实执行验证。"
+      },
+      "execution_status": "not_run",
+      "scope": "finite_fully_observed_deterministic_typed_strips_domain_only_no_continuous_motion_or_physical_execution"
+    },
+    {
+      "id": "goal_already_met",
+      "title": "初态已经拿着杯子",
+      "changes": [
+        "加入 holding；删除 item-at 与 handempty，保持物体状态一致。"
+      ],
+      "problem_file": "pddl/problem-goal-already-met.pddl",
+      "source_files": {
+        "domain_git_blob_sha": "6b2864d1a331cf68074268aa3fd9df89171a5eed",
+        "problem_git_blob_sha": "979e463bbd6aee3c8bdfc3296fa77b3e22b554a8"
+      },
+      "expected_status": "plan_found",
+      "status": "plan_found",
+      "plan_length": 0,
+      "initial_facts": [
+        "(at r a)",
+        "(can-move r)",
+        "(can-open r)",
+        "(can-pickup r)",
+        "(can-unlock r)",
+        "(connected a b d)",
+        "(connected b a d)",
+        "(door-side d a)",
+        "(door-side d b)",
+        "(fits k d)",
+        "(graspable cup)",
+        "(has-key r k)",
+        "(holding r cup)",
+        "(locked d)"
+      ],
+      "goal": [
+        "(holding r cup)"
+      ],
+      "plan": [],
+      "states": [
+        [
+          "(at r a)",
+          "(can-move r)",
+          "(can-open r)",
+          "(can-pickup r)",
+          "(can-unlock r)",
+          "(connected a b d)",
+          "(connected b a d)",
+          "(door-side d a)",
+          "(door-side d b)",
+          "(fits k d)",
+          "(graspable cup)",
+          "(has-key r k)",
+          "(holding r cup)",
+          "(locked d)"
+        ]
+      ],
+      "trace": [],
+      "plan_validated_against_source_actions": true,
+      "state_invariant_checks": [
+        {
+          "one_robot_room": true,
+          "exactly_one_lock_status": true,
+          "opened_implies_unlocked": true,
+          "cup_has_one_location_or_is_held": true,
+          "hand_matches_cup_state": true
+        }
+      ],
+      "search_exhausted": false,
+      "expanded_states": 1,
+      "grounded_operator_count": 8,
+      "elapsed_ms": 0.049414,
+      "parse_ground_ms": 0.798261,
+      "search_log": [
+        "Goal reached. Start extraction of solution.",
+        "1 Nodes expanded"
+      ],
+      "geometry_check": {
+        "checked": false,
+        "passes": null,
+        "method": "declared_door_width_only",
+        "input": {
+          "door_width_m": 0.9,
+          "robot_width_m": 0.6,
+          "extra_margin_m": 0.0
+        },
+        "reason": "本次计划不含 move，未进行过门宽度检查。",
+        "scope": "仅比较声明的净宽与身体宽度；无路径、碰撞、门扇或真实执行验证。"
+      },
+      "execution_status": "not_run",
+      "scope": "finite_fully_observed_deterministic_typed_strips_domain_only_no_continuous_motion_or_physical_execution"
+    }
+  ],
+  "minilab_cases": [
+    {
+      "id": "baseline",
+      "title": "未锁门的基线",
+      "changes": [
+        "原 checker 基线：0.90 m 门，0.60 m 机器人，move 与 grasp。"
+      ],
+      "input": {
+        "rooms": [
+          {
+            "id": "A",
+            "box": [
+              0,
+              0,
+              4,
+              4
+            ]
+          },
+          {
+            "id": "B",
+            "box": [
+              4,
+              0,
+              8,
+              4
+            ]
+          }
+        ],
+        "doors": [
+          {
+            "id": "D",
+            "between": [
+              "A",
+              "B"
+            ],
+            "width_m": 0.9,
+            "locked": false
+          }
+        ],
+        "robot": {
+          "start": "A",
+          "width_m": 0.6,
+          "capabilities": [
+            "move",
+            "grasp"
+          ],
+          "keys": []
+        },
+        "objects": [
+          {
+            "id": "cup",
+            "room": "B",
+            "graspable": true
+          }
+        ],
+        "goal": {
+          "type": "hold",
+          "object": "cup"
+        }
+      },
+      "expected_status": "rule_feasible",
+      "status": "rule_feasible",
+      "reason": "restricted graph/geometry/state rules all pass",
+      "elapsed_ms": 0.027211,
+      "raw_result": {
+        "status": "rule_feasible",
+        "reason": "restricted graph/geometry/state rules all pass",
+        "geometry_valid": true,
+        "topology_connected": true,
+        "rule_task_feasible": true,
+        "scope": "axis_aligned_2d_geometry_and_symbolic_rules_only_no_physics_or_control"
+      },
+      "input_unchanged": true,
+      "notes": [
+        "原函数只检查当前声明规则，不输出或执行 unlock/open/move/pickup 序列。",
+        "即使规则可行，输入里的 locked 字段也没有被该函数修改。"
+      ],
+      "execution_status": "not_run",
+      "scope": "axis_aligned_2d_geometry_and_symbolic_rules_only_no_physics_or_control"
+    },
+    {
+      "id": "locked_missing_key_and_skill",
+      "title": "锁门，无钥匙与开锁能力",
+      "changes": [
+        "locked=true，并声明该门使用钥匙 K。"
+      ],
+      "input": {
+        "rooms": [
+          {
+            "id": "A",
+            "box": [
+              0,
+              0,
+              4,
+              4
+            ]
+          },
+          {
+            "id": "B",
+            "box": [
+              4,
+              0,
+              8,
+              4
+            ]
+          }
+        ],
+        "doors": [
+          {
+            "id": "D",
+            "between": [
+              "A",
+              "B"
+            ],
+            "width_m": 0.9,
+            "locked": true,
+            "key": "K"
+          }
+        ],
+        "robot": {
+          "start": "A",
+          "width_m": 0.6,
+          "capabilities": [
+            "move",
+            "grasp"
+          ],
+          "keys": []
+        },
+        "objects": [
+          {
+            "id": "cup",
+            "room": "B",
+            "graspable": true
+          }
+        ],
+        "goal": {
+          "type": "hold",
+          "object": "cup"
+        }
+      },
+      "expected_status": "blocked_state",
+      "status": "blocked_state",
+      "reason": "narrow doors: locked doors: D",
+      "elapsed_ms": 0.015864,
+      "raw_result": {
+        "status": "blocked_state",
+        "reason": "narrow doors: locked doors: D",
+        "geometry_valid": true,
+        "topology_connected": true,
+        "rule_task_feasible": false,
+        "scope": "axis_aligned_2d_geometry_and_symbolic_rules_only_no_physics_or_control"
+      },
+      "input_unchanged": true,
+      "notes": [
+        "原函数只检查当前声明规则，不输出或执行 unlock/open/move/pickup 序列。",
+        "即使规则可行，输入里的 locked 字段也没有被该函数修改。",
+        "原 reason 含多余的 'narrow doors:' 前缀；本例门并不窄，保留原文而按输入及 status 解读。"
+      ],
+      "execution_status": "not_run",
+      "scope": "axis_aligned_2d_geometry_and_symbolic_rules_only_no_physics_or_control"
+    },
+    {
+      "id": "key_without_unlock_skill",
+      "title": "有钥匙，但没有开锁能力",
+      "changes": [
+        "在锁门例中，仅把 K 放入 robot.keys。"
+      ],
+      "input": {
+        "rooms": [
+          {
+            "id": "A",
+            "box": [
+              0,
+              0,
+              4,
+              4
+            ]
+          },
+          {
+            "id": "B",
+            "box": [
+              4,
+              0,
+              8,
+              4
+            ]
+          }
+        ],
+        "doors": [
+          {
+            "id": "D",
+            "between": [
+              "A",
+              "B"
+            ],
+            "width_m": 0.9,
+            "locked": true,
+            "key": "K"
+          }
+        ],
+        "robot": {
+          "start": "A",
+          "width_m": 0.6,
+          "capabilities": [
+            "move",
+            "grasp"
+          ],
+          "keys": [
+            "K"
+          ]
+        },
+        "objects": [
+          {
+            "id": "cup",
+            "room": "B",
+            "graspable": true
+          }
+        ],
+        "goal": {
+          "type": "hold",
+          "object": "cup"
+        }
+      },
+      "expected_status": "blocked_state",
+      "status": "blocked_state",
+      "reason": "narrow doors: locked doors: D",
+      "elapsed_ms": 0.010776,
+      "raw_result": {
+        "status": "blocked_state",
+        "reason": "narrow doors: locked doors: D",
+        "geometry_valid": true,
+        "topology_connected": true,
+        "rule_task_feasible": false,
+        "scope": "axis_aligned_2d_geometry_and_symbolic_rules_only_no_physics_or_control"
+      },
+      "input_unchanged": true,
+      "notes": [
+        "原函数只检查当前声明规则，不输出或执行 unlock/open/move/pickup 序列。",
+        "即使规则可行，输入里的 locked 字段也没有被该函数修改。",
+        "原 reason 含多余的 'narrow doors:' 前缀；本例门并不窄，保留原文而按输入及 status 解读。"
+      ],
+      "execution_status": "not_run",
+      "scope": "axis_aligned_2d_geometry_and_symbolic_rules_only_no_physics_or_control"
+    },
+    {
+      "id": "unlock_skill_without_key",
+      "title": "有开锁能力，但没有钥匙",
+      "changes": [
+        "在锁门例中，仅加入 unlock 能力。"
+      ],
+      "input": {
+        "rooms": [
+          {
+            "id": "A",
+            "box": [
+              0,
+              0,
+              4,
+              4
+            ]
+          },
+          {
+            "id": "B",
+            "box": [
+              4,
+              0,
+              8,
+              4
+            ]
+          }
+        ],
+        "doors": [
+          {
+            "id": "D",
+            "between": [
+              "A",
+              "B"
+            ],
+            "width_m": 0.9,
+            "locked": true,
+            "key": "K"
+          }
+        ],
+        "robot": {
+          "start": "A",
+          "width_m": 0.6,
+          "capabilities": [
+            "move",
+            "grasp",
+            "unlock"
+          ],
+          "keys": []
+        },
+        "objects": [
+          {
+            "id": "cup",
+            "room": "B",
+            "graspable": true
+          }
+        ],
+        "goal": {
+          "type": "hold",
+          "object": "cup"
+        }
+      },
+      "expected_status": "blocked_state",
+      "status": "blocked_state",
+      "reason": "narrow doors: locked doors: D",
+      "elapsed_ms": 0.008653,
+      "raw_result": {
+        "status": "blocked_state",
+        "reason": "narrow doors: locked doors: D",
+        "geometry_valid": true,
+        "topology_connected": true,
+        "rule_task_feasible": false,
+        "scope": "axis_aligned_2d_geometry_and_symbolic_rules_only_no_physics_or_control"
+      },
+      "input_unchanged": true,
+      "notes": [
+        "原函数只检查当前声明规则，不输出或执行 unlock/open/move/pickup 序列。",
+        "即使规则可行，输入里的 locked 字段也没有被该函数修改。",
+        "原 reason 含多余的 'narrow doors:' 前缀；本例门并不窄，保留原文而按输入及 status 解读。"
+      ],
+      "execution_status": "not_run",
+      "scope": "axis_aligned_2d_geometry_and_symbolic_rules_only_no_physics_or_control"
+    },
+    {
+      "id": "key_and_unlock_skill",
+      "title": "钥匙和开锁能力齐全",
+      "changes": [
+        "在仅有钥匙的例子中，再加入 unlock 能力。"
+      ],
+      "input": {
+        "rooms": [
+          {
+            "id": "A",
+            "box": [
+              0,
+              0,
+              4,
+              4
+            ]
+          },
+          {
+            "id": "B",
+            "box": [
+              4,
+              0,
+              8,
+              4
+            ]
+          }
+        ],
+        "doors": [
+          {
+            "id": "D",
+            "between": [
+              "A",
+              "B"
+            ],
+            "width_m": 0.9,
+            "locked": true,
+            "key": "K"
+          }
+        ],
+        "robot": {
+          "start": "A",
+          "width_m": 0.6,
+          "capabilities": [
+            "move",
+            "grasp",
+            "unlock"
+          ],
+          "keys": [
+            "K"
+          ]
+        },
+        "objects": [
+          {
+            "id": "cup",
+            "room": "B",
+            "graspable": true
+          }
+        ],
+        "goal": {
+          "type": "hold",
+          "object": "cup"
+        }
+      },
+      "expected_status": "rule_feasible",
+      "status": "rule_feasible",
+      "reason": "restricted graph/geometry/state rules all pass",
+      "elapsed_ms": 0.007551,
+      "raw_result": {
+        "status": "rule_feasible",
+        "reason": "restricted graph/geometry/state rules all pass",
+        "geometry_valid": true,
+        "topology_connected": true,
+        "rule_task_feasible": true,
+        "scope": "axis_aligned_2d_geometry_and_symbolic_rules_only_no_physics_or_control"
+      },
+      "input_unchanged": true,
+      "notes": [
+        "原函数只检查当前声明规则，不输出或执行 unlock/open/move/pickup 序列。",
+        "即使规则可行，输入里的 locked 字段也没有被该函数修改。"
+      ],
+      "execution_status": "not_run",
+      "scope": "axis_aligned_2d_geometry_and_symbolic_rules_only_no_physics_or_control"
+    },
+    {
+      "id": "no_grasp",
+      "title": "机器人缺少 grasp 能力",
+      "changes": [
+        "从未锁门基线中，仅移除 grasp。"
+      ],
+      "input": {
+        "rooms": [
+          {
+            "id": "A",
+            "box": [
+              0,
+              0,
+              4,
+              4
+            ]
+          },
+          {
+            "id": "B",
+            "box": [
+              4,
+              0,
+              8,
+              4
+            ]
+          }
+        ],
+        "doors": [
+          {
+            "id": "D",
+            "between": [
+              "A",
+              "B"
+            ],
+            "width_m": 0.9,
+            "locked": false
+          }
+        ],
+        "robot": {
+          "start": "A",
+          "width_m": 0.6,
+          "capabilities": [
+            "move"
+          ],
+          "keys": []
+        },
+        "objects": [
+          {
+            "id": "cup",
+            "room": "B",
+            "graspable": true
+          }
+        ],
+        "goal": {
+          "type": "hold",
+          "object": "cup"
+        }
+      },
+      "expected_status": "blocked_action",
+      "status": "blocked_action",
+      "reason": "no valid grasp under declared demo rules",
+      "elapsed_ms": 0.00707,
+      "raw_result": {
+        "status": "blocked_action",
+        "reason": "no valid grasp under declared demo rules",
+        "geometry_valid": true,
+        "topology_connected": true,
+        "rule_task_feasible": false,
+        "scope": "axis_aligned_2d_geometry_and_symbolic_rules_only_no_physics_or_control"
+      },
+      "input_unchanged": true,
+      "notes": [
+        "原函数只检查当前声明规则，不输出或执行 unlock/open/move/pickup 序列。",
+        "即使规则可行，输入里的 locked 字段也没有被该函数修改。"
+      ],
+      "execution_status": "not_run",
+      "scope": "axis_aligned_2d_geometry_and_symbolic_rules_only_no_physics_or_control"
+    },
+    {
+      "id": "ungraspable_object",
+      "title": "目标物体不可抓取",
+      "changes": [
+        "从未锁门基线中，仅把 graspable 改为 false。"
+      ],
+      "input": {
+        "rooms": [
+          {
+            "id": "A",
+            "box": [
+              0,
+              0,
+              4,
+              4
+            ]
+          },
+          {
+            "id": "B",
+            "box": [
+              4,
+              0,
+              8,
+              4
+            ]
+          }
+        ],
+        "doors": [
+          {
+            "id": "D",
+            "between": [
+              "A",
+              "B"
+            ],
+            "width_m": 0.9,
+            "locked": false
+          }
+        ],
+        "robot": {
+          "start": "A",
+          "width_m": 0.6,
+          "capabilities": [
+            "move",
+            "grasp"
+          ],
+          "keys": []
+        },
+        "objects": [
+          {
+            "id": "cup",
+            "room": "B",
+            "graspable": false
+          }
+        ],
+        "goal": {
+          "type": "hold",
+          "object": "cup"
+        }
+      },
+      "expected_status": "blocked_action",
+      "status": "blocked_action",
+      "reason": "no valid grasp under declared demo rules",
+      "elapsed_ms": 0.005979,
+      "raw_result": {
+        "status": "blocked_action",
+        "reason": "no valid grasp under declared demo rules",
+        "geometry_valid": true,
+        "topology_connected": true,
+        "rule_task_feasible": false,
+        "scope": "axis_aligned_2d_geometry_and_symbolic_rules_only_no_physics_or_control"
+      },
+      "input_unchanged": true,
+      "notes": [
+        "原函数只检查当前声明规则，不输出或执行 unlock/open/move/pickup 序列。",
+        "即使规则可行，输入里的 locked 字段也没有被该函数修改。"
+      ],
+      "execution_status": "not_run",
+      "scope": "axis_aligned_2d_geometry_and_symbolic_rules_only_no_physics_or_control"
+    },
+    {
+      "id": "narrow_door",
+      "title": "门净宽不足",
+      "changes": [
+        "从未锁门基线中，仅把门宽改为 0.50 m。"
+      ],
+      "input": {
+        "rooms": [
+          {
+            "id": "A",
+            "box": [
+              0,
+              0,
+              4,
+              4
+            ]
+          },
+          {
+            "id": "B",
+            "box": [
+              4,
+              0,
+              8,
+              4
+            ]
+          }
+        ],
+        "doors": [
+          {
+            "id": "D",
+            "between": [
+              "A",
+              "B"
+            ],
+            "width_m": 0.5,
+            "locked": false
+          }
+        ],
+        "robot": {
+          "start": "A",
+          "width_m": 0.6,
+          "capabilities": [
+            "move",
+            "grasp"
+          ],
+          "keys": []
+        },
+        "objects": [
+          {
+            "id": "cup",
+            "room": "B",
+            "graspable": true
+          }
+        ],
+        "goal": {
+          "type": "hold",
+          "object": "cup"
+        }
+      },
+      "expected_status": "blocked_geometry",
+      "status": "blocked_geometry",
+      "reason": "narrow doors: D",
+      "elapsed_ms": 0.008993,
+      "raw_result": {
+        "status": "blocked_geometry",
+        "reason": "narrow doors: D",
+        "geometry_valid": true,
+        "topology_connected": true,
+        "rule_task_feasible": false,
+        "scope": "axis_aligned_2d_geometry_and_symbolic_rules_only_no_physics_or_control"
+      },
+      "input_unchanged": true,
+      "notes": [
+        "原函数只检查当前声明规则，不输出或执行 unlock/open/move/pickup 序列。",
+        "即使规则可行，输入里的 locked 字段也没有被该函数修改。"
+      ],
+      "execution_status": "not_run",
+      "scope": "axis_aligned_2d_geometry_and_symbolic_rules_only_no_physics_or_control"
+    },
+    {
+      "id": "narrow_and_locked",
+      "title": "窄门，同时缺钥匙与开锁能力",
+      "changes": [
+        "在锁门例中，再把门宽改为 0.50 m。"
+      ],
+      "input": {
+        "rooms": [
+          {
+            "id": "A",
+            "box": [
+              0,
+              0,
+              4,
+              4
+            ]
+          },
+          {
+            "id": "B",
+            "box": [
+              4,
+              0,
+              8,
+              4
+            ]
+          }
+        ],
+        "doors": [
+          {
+            "id": "D",
+            "between": [
+              "A",
+              "B"
+            ],
+            "width_m": 0.5,
+            "locked": true,
+            "key": "K"
+          }
+        ],
+        "robot": {
+          "start": "A",
+          "width_m": 0.6,
+          "capabilities": [
+            "move",
+            "grasp"
+          ],
+          "keys": []
+        },
+        "objects": [
+          {
+            "id": "cup",
+            "room": "B",
+            "graspable": true
+          }
+        ],
+        "goal": {
+          "type": "hold",
+          "object": "cup"
+        }
+      },
+      "expected_status": "blocked_geometry",
+      "status": "blocked_geometry",
+      "reason": "narrow doors: D",
+      "elapsed_ms": 0.005338,
+      "raw_result": {
+        "status": "blocked_geometry",
+        "reason": "narrow doors: D",
+        "geometry_valid": true,
+        "topology_connected": true,
+        "rule_task_feasible": false,
+        "scope": "axis_aligned_2d_geometry_and_symbolic_rules_only_no_physics_or_control"
+      },
+      "input_unchanged": true,
+      "notes": [
+        "原函数只检查当前声明规则，不输出或执行 unlock/open/move/pickup 序列。",
+        "即使规则可行，输入里的 locked 字段也没有被该函数修改。",
+        "原程序对窄门先 continue，故此条返回没有列出锁问题；修好宽度后仍需重新检查锁条件。"
+      ],
+      "execution_status": "not_run",
+      "scope": "axis_aligned_2d_geometry_and_symbolic_rules_only_no_physics_or_control"
+    }
+  ]
+}

@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f8f7">
+  <meta name="description" content="Day 3 初学者教程：用开门拿杯子理解状态、谓词、动作、PDDL、搜索、FSM 与 TAMP。十组交互演示、真实规划实验与 35 分钟开放练习。">
+  <title>Day 03 · 让机器人一步步拿到杯子 | Modern Robotics 学习手记</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/site.css">
+  <link rel="stylesheet" href="assets/day3-page.css">
+  <link rel="stylesheet" href="assets/day3-symbolic.css">
+  <link rel="stylesheet" href="assets/day3-geometry.css">
+  <script src="assets/site.js" defer></script>
+  <script src="assets/day3-symbolic.js" defer></script>
+  <script src="assets/day3-geometry.js" defer></script>
+  <script src="assets/day3-page.js" defer></script>
+  <script src="assets/day3-records.js" defer></script>
+</head>
+<body data-lesson-key="day-03" data-lesson-title="Day 03 · 我的任务规划学习笔记" data-lesson-topic="状态、PDDL、任务与运动规划 TAMP">
+<a class="skip-link" href="#main">跳到教程正文</a>
+<header class="site-header">
+  <a class="brand" href="index.html" aria-label="返回 Modern Robotics 学习手记"><span class="brand-monogram">MR<span>.</span></span><span class="brand-name">Modern Robotics<small>可视化学习手记</small></span></a>
+  <div class="header-actions"><span class="edition">DAY 03 / 任务与运动</span><a href="https://github.com/venividici/-Modern-Robotics" target="_blank" rel="noopener noreferrer">GitHub 仓库 ↗</a><button class="btn theme-toggle" id="theme-toggle" type="button" aria-label="切换明暗主题">切换主题</button></div>
+</header>
+<div class="page-shell">
+  <aside class="sidebar" aria-label="学习导航">
+    <nav class="course-switcher" aria-label="选择学习日"><a href="index.html"><strong>DAY 01</strong><span>空间与运动</span></a><a href="day-02.html"><strong>DAY 02</strong><span>约束与求解</span></a><a href="day-03.html" aria-current="page"><strong>DAY 03</strong><span>状态与计划</span></a></nav>
+    <div class="sidebar-intro"><span class="eyebrow">从“摆得下”到“接下来做什么”</span><strong>第三天，给动作讲道理。</strong></div>
+    <nav class="lesson-nav" aria-label="本页目录">
+      <a href="#start" class="is-current" aria-current="location"><span>00</span> 先认识今天的小世界</a>
+      <a href="#world-layers"><span>01</span> 同一场景的四层信息</a>
+      <a href="#states"><span>02</span> 状态与谓词</a>
+      <a href="#actions"><span>03</span> 动作怎样改变事实</a>
+      <a href="#pddl"><span>04</span> 读懂两份 PDDL 文件</a>
+      <a href="#search"><span>05</span> 计划怎样被搜索出来</a>
+      <a href="#fsm"><span>06</span> FSM 与规划怎样配合</a>
+      <a href="#motion"><span>07</span> 身体能不能做到</a>
+      <a href="#tamp"><span>08</span> 失败怎样返回上层</a>
+      <a href="#experiments"><span>09</span> 真实计划与规则实验</a>
+      <a href="#practice"><span>10</span> 自己解释与阶段练习</a>
+      <a href="#sources"><span>↗</span> 原课程与阅读指引</a>
+    </nav>
+    <div class="sidebar-note"><span class="small-label">卡住时问这三句</span><p>现在什么是真的？<br>这个动作需要什么？<br>做完会改变什么？</p><a href="https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/DAILY/day-03.md" target="_blank" rel="noopener noreferrer">原 Day 3 学习计划 ↗</a></div>
+  </aside>
+  <main id="main">
+    <section id="start" class="hero lesson-section" data-nav>
+      <div class="eyebrow">DAY 03 / PDDL · 状态 · TAMP</div>
+      <h1>“去拿那个杯子”，<br><span>机器人该怎样一步步做？</span></h1>
+      <p class="hero-lead">你在 A 房间，杯子在 B 房间，中间的门锁着。对人来说很自然的一句话，对机器人意味着：先把世界说清楚，再找动作顺序，最后检查身体能否完成每一步。</p>
+      <div class="lesson-meta"><span>计划日 2026.10.22</span><span>10 组交互演示</span><span>真实 PDDL 实验 · 35 分钟阶段练习</span></div>
+      <a class="start-link" href="#world-layers">先看这个小场景 <span aria-hidden="true">↓</span></a>
+      <div class="opening-question"><span class="small-label">贯穿整篇的任务</span><p>从 A 房间出发，让杯子最后在机器人手里。</p><span>今天只用两个房间、一扇门、一把钥匙、一个杯子和一个机器人。新术语都回到这个例子解释。</span></div>
+      <div class="reading-guide"><h2>先读中文意思，再认识符号</h2><p>Day 1 帮你描述“在哪里、怎样转”；Day 2 帮你判断“这些空间要求能否同时满足”；今天再加上<strong>先后顺序与状态变化</strong>。门可以位置正确、宽度足够，却因为上锁而暂时不能通过。</p><p>你已有 Python 和 UE 基础，这里不重讲编程语法。遇到新词，会先用场景说明，再给最小符号、操作和核对提示。机器人学里的公式放在对应的图后面；第一次读可以先做操作，再回来读细节。</p></div>
+      <div class="d3-route"><div><span>第一段 · 第 01–04 节</span><strong>世界 → 事实 → 动作</strong><p>先能说清一句话和一个符号分别指什么。</p></div><div><span>第二段 · 第 05–08 节</span><strong>找顺序 → 查运动 → 改计划</strong><p>看懂为什么逻辑上合理，身体仍可能做不到。</p></div><div><span>第三段 · 第 09–10 节</span><strong>预测 → 实跑 → 自己解释</strong><p>保留第一版推理，再与实际输出核对。</p></div></div>
+      <details><summary>今天学到什么程度，就可以进入下一天？</summary><p>你能自己列出初态与目标，解释 unlock／open／move／pickup 的前置与效果，手推一条合法动作序列，并区分缺钥匙、缺技能、门太窄和运动搜索没找到解。今天不要求推导完整运动学，也不要求搭起真实机械臂。</p></details>
+      <p class="source-note">内容对应 <a href="#source-plan">Day 3、R04、R16</a>；R20 为选读。计划日用于课程排期，制作日期为 2026-10-20，不代表已经完成个人学习。</p>
+    </section>
+
+    <section id="world-layers" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>01</span> 在看公式之前，先看信息</div>
+      <h2>同一扇门，有四种不同的问题。</h2>
+      <p>想象你在 UE 中摆出两个房间和一扇门。画面已经能看见门，但“看见”没有说明它是否连通、是否够宽、是否打开，以及角色是否会操作它。这些信息需要分别表示。</p>
+      <div class="try-this"><span>动手看</span><p>依次切换四层信息。场景没有变，留意每层回答的问题怎样变了。然后切换“窄门”或“缺技能”，看看哪一层首先出现问题。</p></div>
+      <figure class="interactive-figure">{{component:day3-layers}}<figcaption>同一教学场景的不同描述。连通图的边表示声明的连接；它本身没有承诺门处于打开状态，也没有承诺机器人可以通过。</figcaption></figure>
+      <div class="table-wrap"><table><caption>把检查问题放回合适的位置</caption><thead><tr><th>信息</th><th>今天的例子</th><th>它还没有回答什么</th></tr></thead><tbody><tr><td>拓扑</td><td>A 与 B 由门 D 相连</td><td>门有多宽、是否锁着</td></tr><tr><td>几何</td><td>门净宽、机器人尺寸、门把高度</td><td>现在是否有钥匙、是否已开门</td></tr><tr><td>当前状态</td><td>机器人在 A，门锁着，杯子在 B</td><td>机器人具备哪些操作能力</td></tr><tr><td>动作能力</td><td>会移动、解锁、开门、抓取</td><td>这一次具体姿态和轨迹是否可行</td></tr></tbody></table></div>
+      <p>这些层会一起工作。把门加宽可以改变通行几何；给机器人一把钥匙可以改变库存状态；增加解锁动作可以改变可用能力。你需要明确改的是哪一项，才能解释为什么结果变了。</p>
+      <details class="self-check"><summary>先自己说：为什么“门在场景里”还不足以说明任务能完成？</summary><p>因为对象的存在、几何关系、当前状态和动作能力是不同信息。即使这些都合格，还要检查具体运动、接触与执行结果。真实可交互对象需要相应状态、动作接口和检查方式。</p></details>
+      <p class="source-note">对应 <a href="#source-plan">Day 3 的分层表示练习</a>。图例是本教程为开门拿杯任务构造的简化模型。</p>
+    </section>
+
+    <section id="states" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>02</span> Object · Predicate · State · Goal</div>
+      <h2>状态，就是“此刻哪些事实成立”。</h2>
+      <p>先把关注的东西命名：机器人 <code>r</code>、房间 <code>a / b</code>、门 <code>d</code>、钥匙 <code>k</code>、杯子 <code>cup</code>。这些名字指向<strong>对象</strong>。类型告诉程序哪些东西是机器人、房间、门、钥匙或可拿取物。</p>
+      <p><strong>谓词 predicate</strong> 是一句可以判断真假的描述模板。例如“谁在什么房间”写成 <code>at(谁, 房间)</code>。填上具体对象，<code>at(r, a)</code> 就是“机器人 r 在房间 a”这个可以核对真假的命题。</p>
+      <div class="d3-word-equation"><span>中文句子</span><strong>机器人在 A 房间</strong><span>说明式记法</span><code>at(r, a)</code><span>PDDL 写法</span><code>(at r a)</code></div>
+      <p>这两种符号写法在这里指同一件事。PDDL 用括号和空格表达关系，<strong>不是在调用 Python 函数，也不是让机器人移动</strong>。它只是在描述一个事实。</p>
+      <div class="try-this"><span>动手看</span><p>从初态切到“解锁后”，找出被删掉和新增的事实。再切到“开门后”：门已经解锁时，为什么还需要这一步？</p></div>
+      <figure class="interactive-figure">{{component:day3-state}}<figcaption>几张有效状态快照共享同一场景。它们展示的是符号模型中的事实；真实系统还需要传感与状态估计，把观测转换成这样的表示。</figcaption></figure>
+      <h3>不把“门没锁”和“门已打开”合成一个词</h3>
+      <p><code>locked(d)</code> 表示锁着，<code>unlocked(d)</code> 表示已经解除锁定，<code>opened(d)</code> 表示门已经打开。门解锁以后仍可以关着。今天的动作规则会维护锁定与解锁互斥，并让 opened 只在解锁后产生。</p>
+      <p>这些一致性<strong>不是 PDDL 自动理解了常识</strong>：是我们正确设置初态，并写对动作的增加与删除效果。若初态同时写“在 A”和“在 B”，规划器不会替你理解“一个机器人不能分身”。</p>
+      <h3>初态写现在；目标写想要的结果</h3>
+      <p><strong>初态 initial state</strong> 是起点的事实集合。<strong>目标 goal</strong> 是结束时必须成立的要求。本例目标只有 <code>(holding r cup)</code>：杯子在机器人手中。它没有要求“最后关门”，也没有要求“返回 A”；如果任务确实要求这些，需要继续写进目标或其他合适的约束。</p>
+      <div class="key-idea"><strong>目标不是动作清单</strong><p>“杯子在手里”描述结果；“解锁 → 开门 → 移动 → 抓取”是一条候选办法。规划要做的，是根据初态与动作规则找到办法。</p></div>
+      <details><summary>为什么没有写出来的事实，在这个模型中当作假？</summary><p>本页使用完全已知、确定性的经典规划模型，只列当前为真的事实；其他已定义的具体命题按闭世界假设视为假。例如初态没写 <code>(opened d)</code>，模型就把门当作未打开。这是模型约定。</p><p>真实相机没看见门把手，可能只是被遮挡；“没有观测到”不能直接变成“现实中不存在”。若机器人不知道门是否锁着，需要表示知识或不确定性，并考虑观察动作，已经超出本页的完全已知模型。</p></details>
+      <details><summary>有钥匙为什么又可以“手空”？</summary><p>这里的 <code>has-key</code> 表示钥匙在机器人的物品栏，可用于解锁，不占用拿杯子的那只手；<code>handempty</code> 只表示抓杯子的手空着。这是教学假设。若现实中必须同一只手拿钥匙、插锁、收起钥匙再抓杯，就需要为这些过程增加对象状态和动作。</p></details>
+      <details class="self-check"><summary>先自己说：把目标改成“杯子放在桌上”，只改一句中文够吗？</summary><p>还要把桌子和目标关系表示出来，例如 on(cup,table)，并提供能产生它的放置动作及前置条件。目标描述得出来，不代表当前动作集合一定能到达它。</p></details>
+      <p class="source-note">基本语义依据 <a href="#source-pddl">Helmert《An Introduction to PDDL》</a>；门、钥匙与手的具体约定由本教程明确给出。</p>
+    </section>
+
+    <section id="actions" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>03</span> Precondition · Add Effect · Delete Effect</div>
+      <h2>一个动作，要同时写清“能否做”和“做完变什么”。</h2>
+      <p>以进入 B 房间为例。至少要先在 A，有一条连接 A 与 B 的门，门已经打开，而且机器人有移动能力。这些“做之前必须为真”的条件叫<strong>前置条件 precondition</strong>。</p>
+      <p>符号动作成功应用后，机器人变成在 B，并且不再在 A。这些变化叫<strong>效果 effect</strong>。今天采用的 STRIPS 形式把效果分成：增加为真的事实，以及删除、不再为真的事实；没有涉及的其他事实保持不变。</p>
+      <div class="formula" role="math" aria-label="新状态等于旧状态去掉删除事实再加入新增事实">新状态 =（旧状态 − 删除的事实）∪ 新增的事实</div>
+      <p>你可以先把它理解成编辑一个事实集合：划掉旧位置，补上新位置。公式中的“减”和“并”是集合操作，不是在算房间坐标。</p>
+      <div class="try-this"><span>动手看</span><p>在初态先尝试 move，读每一项前置为什么通过或失败。再按 unlock → open → move → pickup 操作，逐步观察“新增、删除、保持不变”。</p></div>
+      <figure class="interactive-figure">{{component:day3-actions}}<figcaption>只有前置全部成立，符号状态才迁移。这里的按钮应用确定性动作模型；它没有向真实机器人发送命令。</figcaption></figure>
+      <div class="table-wrap"><table><caption>四种动作的中文合同；完整谓词与参数见可运行 PDDL</caption><thead><tr><th>动作</th><th>做之前需要</th><th>新增</th><th>删除</th></tr></thead><tbody><tr><td>unlock 解锁</td><td>在门的一侧，持有匹配钥匙，有解锁能力，门锁着</td><td>门已解锁</td><td>门锁着</td></tr><tr><td>open 开门</td><td>在门的一侧，门已解锁，有开门能力</td><td>门已打开</td><td>无</td></tr><tr><td>move 移动</td><td>在起点，声明的连接存在，门打开，有移动能力</td><td>在终点</td><td>在起点</td></tr><tr><td>pickup 抓取</td><td>与杯同房，杯被声明可抓，手空，有抓取能力</td><td>持有杯子</td><td>杯仍放在原房间、手空</td></tr></tbody></table></div>
+      <p><strong>每条条件都要问它从哪里来。</strong>“与杯同房”是粗粒度关系，不等于机械臂能碰到杯子；<code>graspable(cup)</code> 是本例给定的物体属性，也没有证明某个具体抓取姿态无碰撞。第 7 节会把这些连续空间问题接回来。</p>
+      <details><summary>open 的删除效果为空，是不是忘写“关门”？</summary><p>本例没有单独的 closed 谓词，门未打开由 opened 不在事实集合中表示。open 加入 opened 即可。若模型同时使用 closed，就需要正确删除 closed，并维持两者一致。表示方法可以不同，前提是语义一致。</p></details>
+      <details><summary>模型写了效果，现实就一定发生了吗？</summary><p>规划时，效果描述“按这个动作模型成功后，预期状态怎样变化”。执行时，电机卡住、抓取滑落或观测错误都可能使预期落空。真实系统需要检测动作结果，用最新观测更新状态，再决定是否继续或重规划。</p></details>
+      <details class="self-check"><summary>先自己说：move 只增加 at(r,b)，忘删 at(r,a)，会怎样？</summary><p>机器人会同时出现在两个房间的符号事实中。后续动作可能利用这个错误产生虚假的可行计划。问题在模型的效果定义，不能靠规划器“常识理解”补救。</p></details>
+      <p class="source-note">正负效果与未涉及事实保持不变，见 <a href="#source-pddl">PDDL 入门原讲义</a>；动作合同对应 <a href="#source-plan">Day 3 的门杯练习</a>。</p>
+    </section>
+
+    <section id="pddl" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>04</span> Domain 是规则，Problem 是这一次的题目</div>
+      <h2>把刚才的中文，写进两份文件。</h2>
+      <p><strong>PDDL</strong> 全称 Planning Domain Definition Language，是一种描述规划问题的语言。它负责把对象、状态和动作规则写清楚。<strong>规划器 planner</strong> 才是读取描述并搜索计划的程序；“写了 PDDL”与“已经求出计划”是两件事。</p>
+      <p>可以把 <strong>domain</strong> 理解成这一类任务的规则说明：有哪些类型、哪些关系、哪些动作。把 <strong>problem</strong> 理解成当前这一题：有哪些具体对象、起点是什么、最终要什么。换一个初态，通常可以继续使用同一套动作域。</p>
+      <div class="try-this"><span>动手看</span><p>在右侧切换“钥匙缺失”和“已经开门”。观察哪份文件发生了变化，再解释为什么开门动作的定义不用跟着改。</p></div>
+      <figure class="interactive-figure">{{component:day3-domain}}<figcaption>对照中文含义与 PDDL 片段。浏览器演示限定于本页的门杯模型；配套文件由实际 PDDL 解析器读取并运行。</figcaption></figure>
+      <div class="table-wrap"><table><caption>第一次读文件，先找到这七个标记</caption><thead><tr><th>位置</th><th>标记</th><th>你可以问自己</th></tr></thead><tbody><tr><td>domain</td><td><code>:types</code></td><td>世界里有哪几类对象？</td></tr><tr><td>domain</td><td><code>:predicates</code></td><td>程序可以描述哪些关系？</td></tr><tr><td>domain</td><td><code>:action</code></td><td>允许怎样改变状态？</td></tr><tr><td>action</td><td><code>:parameters / :precondition / :effect</code></td><td>作用于谁？何时能做？做完变什么？</td></tr><tr><td>problem</td><td><code>:objects</code></td><td>这一次具体有谁？</td></tr><tr><td>problem</td><td><code>:init</code></td><td>现在什么是真的？</td></tr><tr><td>problem</td><td><code>:goal</code></td><td>结束时哪些要求必须成立？</td></tr></tbody></table></div>
+      <h3>把一个动作逐行翻译回来</h3>
+      <pre class="d3-code"><code>(:action move
+  :parameters (?r - robot ?from ?to - room ?d - door)
+  :precondition (and
+    (at ?r ?from)
+    (connected ?from ?to ?d)
+    (opened ?d)
+    (can-move ?r))
+  :effect (and
+    (at ?r ?to)
+    (not (at ?r ?from))))</code></pre>
+      <p><code>?r</code> 是待填入的机器人参数，<code>?from / ?to</code> 是起点和终点参数。把它们分别填成 r、a、b、d，就得到具体动作 <code>(move r a b d)</code>。这一步叫<strong>实例化／grounding</strong>，即把“谁从哪里去哪里”的模板变成这一次的动作。</p>
+      <p><code>:effect</code> 里的 <code>(not (at ?r ?from))</code> 表示删除旧事实。它没有说“再去执行一次移动”，也没有让房间消失。代码里的连接关系是声明的符号连接；本例没有把门净宽、姿态与整条运动路径直接写进这个 move 前置。</p>
+      <details><summary>为什么只教这部分 PDDL，不一开始就放全部语法？</summary><p>这里使用带类型的 STRIPS 子集：正前置条件、增加／删除效果、有限对象、确定性瞬时动作、完全已知初态。不同规划器支持的 PDDL 扩展不同。时长、代价、数值量、条件效果或不确定性，需要相应语言与求解方法支持；先把最小例子的语义学准，再逐项扩展。</p></details>
+      <details class="self-check"><summary>先自己说：增加一间 C 房间，与增加“拿钥匙”动作，分别主要改哪里？</summary><p>新增具体房间和连接，主要修改 problem 的对象与初态；新增一种状态改变方式，需要修改 domain 的动作规则，必要时补谓词。当前域没有拿钥匙动作，因此不能假设搜索会自动发明它。</p></details>
+      <p class="source-note">来源：<a href="#source-pddl">PDDL 原讲义与指定阅读入口</a>。完整可运行代码见 <a href="examples/day-03/pddl/domain.pddl">domain.pddl</a> 与 <a href="examples/day-03/README.md">实验说明</a>。</p>
+    </section>
+
+    <section id="search" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>05</span> 从当前状态，寻找能到达目标的动作序列</div>
+      <h2>计划不是猜出来的：<br class="desktop-break">从合法动作一步步展开。</h2>
+      <p>你刚才已经手工做了规划器最核心的三件事：读当前事实，检查动作前置，计算后继状态。接下来让程序把这些步骤组织起来，查找能满足目标的路线。</p>
+      <ol class="reasoning-steps"><li><strong>从初态开始。</strong>先问目标是否已经成立；若成立，空计划就够了。</li><li><strong>列出可用动作。</strong>前置不成立的动作不能当作合法后继。</li><li><strong>应用动作，得到新状态。</strong>保留它来自哪个状态、用了哪个动作。</li><li><strong>继续展开。</strong>找到目标后沿来路还原计划；已经看过的同一状态不必反复展开。</li></ol>
+      <div class="try-this"><span>动手看</span><p>选择标准初态，逐次展开搜索。看到 move 还不可用时，找出缺少的事实。再切到“没有钥匙”，观察搜索如何结束。</p></div>
+      <figure class="interactive-figure">{{component:day3-search}}<figcaption>浏览器实际执行这个有限门杯域的广度优先搜索。它按状态而不是按屏幕位置去重；Python 实验另用 Pyperplan 读取 PDDL 并搜索。</figcaption></figure>
+      <h3>广度优先搜索 BFS，在这里是什么意思？</h3>
+      <p>先检查能用 0 步达到的状态，再检查 1 步、2 步……待展开状态放在一个<strong>先进先出队列</strong>里。每次从队头取一个，把新的后继放到队尾。这个例子有限、每个动作成本相同，因此找到的第一条计划具有最少动作步数。</p>
+      <p>“步数最少”没有自动等于路程最短、耗时最少或能耗最低。一次 move 可能实际要走很远，一次 pickup 可能要反复调整手。若你关心这些成本，要改变模型、目标和相应搜索方法。</p>
+      <h3>为什么不能把“这个动作失败”当成“整个任务无解”？</h3>
+      <p>初态直接 move 不合法，但先解锁、开门以后就可能合法。拒绝一个动作，只排除了这个时刻的这个选择。本例 BFS 会继续检查其他可达状态；当待展开队列耗尽，仍没有找到目标状态时，才报告<strong>此有限模型中没有计划</strong>。其他规划方法也可能用不同方式证明无解。</p>
+      <p>缺钥匙案例的结论依赖一个条件：当前没有拿钥匙、借钥匙、绕路或其他能产生相应前置的动作。现实中是否存在这些方法，要先把它们的条件和效果纳入模型，再重新判断。</p>
+      <details><summary>为什么还要记住“已经见过的状态”？</summary><p>门打开以后，机器人可能从 A 到 B，再从 B 回 A。若状态中的其他事实都没变，就回到了曾经见过的同一个状态。重复展开不会产生新的可能性。去重还会避免“对已经打开的门再做 open”这样的状态不变操作把搜索拖成无限循环。</p></details>
+      <details class="self-check"><summary>先自己说：目标已经在初态成立，正确答案应是几步？</summary><p>零步。空动作序列和“没有找到计划”不同：前者不需要做事就满足目标，后者表示搜索没有找到达成目标的序列。程序不能把空列表与失败混成同一个结果。</p></details>
+      <p class="source-note">任务规划作为状态搜索，见 <a href="#source-mit">MIT 官方讲义</a>；本例 BFS 与支持范围见 <a href="#source-code">Pyperplan 官方实现</a>。</p>
+    </section>
+
+    <section id="fsm" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>06</span> 执行逻辑与目标搜索，可以一起用</div>
+      <h2>FSM 管过程，规划器找办法。</h2>
+      <p><strong>有限状态机 FSM</strong> 用有限个状态和转换规则表达系统行为。你在 UE 中可能见过角色“待机、移动、交互”的状态机。进入哪个状态、收到什么事件再转到哪里，都需要定义。</p>
+      <p>例如已经拿到一条计划，执行器当前“等待开门反馈”。只有收到成功反馈才进入下一步；收到失败反馈则停止推进、更新状态或请求重规划。<strong>发出了开门请求，不等于收到了开门成功。</strong></p>
+      <div class="try-this"><span>动手看</span><p>先发出一个动作请求，再分别尝试“成功反馈”和“失败反馈”。留意计划指针什么时候前进，什么时候停在当前步骤。</p></div>
+      <figure class="interactive-figure">{{component:day3-fsm}}<figcaption>这是计划执行器的事件驱动教学状态机。反馈由你点击提供，用于理解接口；它没有读取真实传感器。</figcaption></figure>
+      <div class="table-wrap"><table><caption>这些名词的角色不同，可以组成一个系统</caption><thead><tr><th>名称</th><th>它是什么</th><th>本例承担的事情</th></tr></thead><tbody><tr><td>FSM</td><td>表示状态与转换的方式，可用于行为控制</td><td>等待反馈、继续、停止、恢复</td></tr><tr><td>PDDL</td><td>规划问题的描述语言</td><td>声明初态、目标、谓词和动作规则</td></tr><tr><td>任务规划器</td><td>根据模型求计划的程序</td><td>寻找 unlock → open → move → pickup 等序列</td></tr><tr><td>TAMP</td><td>结合任务与运动可行性的规划问题与方法体系</td><td>把离散动作选择与连续姿态／轨迹检查联动起来</td></tr></tbody></table></div>
+      <p>这不是三种互斥选项。FSM 也可以表示环境状态转换；规划得到的动作序列也可以交给 FSM 执行。有些系统还能把计划编成策略。这里的区别是<strong>当前把哪部分规则交给人写，哪部分交给搜索，怎样接收执行反馈</strong>。</p>
+      <details class="self-check"><summary>先自己说：为什么动作超时后，不能直接把预期效果写成真实状态？</summary><p>超时只说明在当前等待范围内没有确认成功。门可能没打开，也可能打开但反馈丢失。应依据后续观察确认状态；不能仅因为计划里写了 opened，就把它当成真实已发生的事实。</p></details>
+      <p class="source-note">FSM、任务级策略与规划的组合方式，见 <a href="#source-mit">MIT · Programming the Task Level</a>。</p>
+    </section>
+
+    <section id="motion" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>07</span> 从离散动作，走回连续空间</div>
+      <h2>“开门、过去、拿起”，<br class="desktop-break">还没有告诉身体怎样运动。</h2>
+      <p>到这里，符号规划器只知道机器人在某个房间、门的状态、物体属性与声明的能力。真实动作还要选择<strong>底座站在哪里、每个关节转多少、手从哪条路线接近、整段运动会不会碰撞</strong>。</p>
+      <p><strong>离散</strong>选择例如“先开门还是先拿物品”；<strong>连续</strong>量例如站位坐标、关节角和随时间变化的运动。把 move 写进计划，只选定了高层动作，不能代替这些具体量。</p>
+      <h3>第一件事：门开了，身体宽度是否放得下？</h3>
+      <p>先把机器人简化成俯视图里的圆盘。门洞沿横向的可用区间是 [L,U]，机器人直径 b，每侧留余量 s。圆盘中心必须落在 <code>[L + b/2 + s, U − b/2 − s]</code> 里，整个身体和余量才会留在门洞内。</p>
+      <div class="try-this"><span>动手看</span><p>先减小门宽，再移动机器人中心。分开回答：是否存在一个能通过的中心位置？当前选择的中心位置是否合格？展开路径对照，再看为什么起终点合法仍不够。</p></div>
+      <figure class="interactive-figure">{{component:day3-clearance}}<figcaption>圆盘、门洞与给定路径的受限二维解析检查。允许接触或余量规则在组件内明确；真实机器人形状、门扇运动和接触控制需要另外建模。</figcaption></figure>
+      <p>门宽至少为 <code>b + 2s</code>，这个中心区间才非空。它给出了当前圆盘模型的尺寸条件；如果改成能够转向的长方形机器人，允许姿态也会影响通过性，就不能把这条固定圆盘结论原样照搬。</p>
+      <h3>第二件事：手能不能到达门把？</h3>
+      <p><strong>逆运动学 IK</strong> 要解决的是：给定末端的目标位置或姿态，寻找符合要求的关节配置。Day 4 会细讲；今天先用两段手臂看懂“有目标位置”和“身体够得着”的区别。</p>
+      <div class="try-this"><span>动手看</span><p>把门把手向上移动，看看什么时候超出可达区域。再切换两种肘部姿态：同一个目标点，为什么可以对应不同关节配置？</p></div>
+      <figure class="interactive-figure">{{component:day3-reach}}<figcaption>平面两转动关节、固定基座、无关节限位的解析示意，只检查末端点位置。它没有验证末端朝向、连杆碰撞、握住门把后的开门运动或真实执行。</figcaption></figure>
+      <details><summary>愿意多走一步，再看这个环带的公式</summary><p>两杆长度为 L₁、L₂，目标到基座的距离为 r。完全伸直时最远到 L₁+L₂；允许自由折叠时，最近到 |L₁−L₂|。所以末端点的可达条件是 <code>|L₁−L₂| ≤ r ≤ L₁+L₂</code>。本图只在这个理想模型里用解析公式求肘上／肘下配置。</p><p>可达区域的中心是手臂基座，不是地面原点。基座有高度时，要先用“门把高度减基座高度”计算竖直距离。这和 Day 1 统一坐标系的要求相连。</p></details>
+      <h3>第三件事：起点和终点都合法，中间能连起来吗？</h3>
+      <p>手在起点不碰墙、在终点也不碰墙，直线过去时仍可能穿墙。<strong>运动规划</strong>需要找到符合所建模约束的整条路径或轨迹。若还关心速度、加速度与动力学，也要将相应条件纳入；一条画在图上的线没有自动提供这些保证。</p>
+      <p>再把 Day 1 的机械臂构型 q 想起来：路径可以看作一串连续变化的 q；给路径配上时间，就能描述何时处在什么配置。这里先理解“全程要检查”，不要求今天推导轨迹优化。</p>
+      <details class="self-check"><summary>先自己说：IK 求解器一次没有找到解，能断言门把绝对够不到吗？</summary><p>不能一概而论。当前解析两杆模型可以按距离边界证明点不可达；一般数值 IK 或运动规划可能因初值、局部极小、采样或时间预算没有找到解。需要区分几何证明、候选被拒绝和搜索尚未找到结果，并报告实际证据。</p></details>
+      <p class="source-note">IK、轨迹与求解失败的边界见 <a href="#source-motion">MIT · Motion Planning</a>。圆盘净宽、两杆环带与线段碰撞演示为本教程的解析实例。</p>
+    </section>
+
+    <section id="tamp" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>08</span> Task and Motion Planning · 任务与运动规划</div>
+      <h2>高层说“开门”，<br class="desktop-break">低层需要带回具体证据。</h2>
+      <p><strong>TAMP</strong> 把任务层的动作选择，与运动层的连续可行性结合起来。运动失败会影响高层选择；高层改变动作、对象或顺序，又会产生新的运动问题。两部分需要交换信息。</p>
+      <p>例如一个抓取姿态能拿起杯子，却让杯子无法穿过狭窄区域，后续搬运动作就反过来约束前面的抓取选择。为每一步分别随便找一个姿态，还不一定能拼成同一条完整计划。</p>
+      <div class="try-this"><span>动手看</span><p>先看标准世界；再选缺钥匙、窄门或把手过高，逐步推进检查。留意反馈指出的动作、对象和具体条件。若修改门宽或把手高度，再比较世界版本与重新检查结果。</p></div>
+      <figure class="interactive-figure">{{component:day3-feedback}}<figcaption>本图示范任务与运动检查之间的信息往返。它只实现明确列出的符号及解析条件，帮助读懂接口；完整 TAMP 算法还涉及连续参数搜索、动作耦合和执行监测。</figcaption></figure>
+      <h3>一个有用的失败反馈，至少说清五件事</h3>
+      <div class="d3-feedback-example"><dl><div><dt>在哪个世界</dt><dd>world-v1，门 D 的净宽为 0.50 m</dd></div><div><dt>哪个动作／对象</dt><dd>move(r,a,b,d)，通过门 D</dd></div><div><dt>哪条条件</dt><dd>圆盘机器人直径 0.60 m；此例余量为 0</dd></div><div><dt>什么证据</dt><dd>0.50 &lt; 0.60，因此这个固定圆盘无法通过该净宽</dd></div><div><dt>结论范围</dt><dd>阻止通过这扇门；不自动否定其他门、其他机器人或改变后的环境</dd></div></dl></div>
+      <p>同样叫“失败”，可能是很不同的证据。要给上层的是可解释的条件、上下文与范围，不能把一次数值求解失败扩大成“这个对象永远不能用”。</p>
+      <div class="table-wrap"><table><caption>遇到问题后，下一步应该改什么？</caption><thead><tr><th>情况</th><th>可讨论的下一步</th><th>需要保留的区别</th></tr></thead><tbody><tr><td>当前状态没有钥匙</td><td>若已有合法取钥匙动作，就把它纳入计划</td><td>缺少该动作时，当前模型不会自动发明它</td></tr><tr><td>机器人没有开锁技能</td><td>重新定义任务／能力配置，或选择已具备的替代动作</td><td>不能把“没有钥匙”和“不会开锁”混成一个条件</td></tr><tr><td>当前通道不适合该身体尺寸</td><td>若存在其他路线，可重新选择；否则讨论环境或任务修订</td><td>扩大门洞改变了世界输入，原世界并未因此被证明可行</td></tr><tr><td>某个运动候选失败</td><td>换站位、抓取或轨迹，按失败证据重新检查</td><td>未找到解与证明无解，需要不同表述</td></tr><tr><td>执行结果与预测不同</td><td>观测新状态、定位原因、重规划或停止</td><td>不能继续沿用已经过时的状态</td></tr></tbody></table></div>
+      <h3>和昨天的 Z3，应该怎样连接？</h3>
+      <p>在这个学习流程中，Z3 可以帮助检查或求解明确编码的几何与逻辑要求；PDDL 描述状态和动作，规划器搜索序列；运动模块处理姿态、碰撞与路径。它们交换结构化输入与结果。</p>
+      <p>这个分工是我们的系统设计选择，不是说“Z3 天生只能处理几何”或“PDDL 一个布尔量就能替代全部碰撞计算”。规划也可以编码成 SAT／SMT；几何检查也可以把带上下文的结果交回任务层。关键是接口中的每个字段究竟承诺了什么。</p>
+      <details class="self-check"><summary>先自己说：为什么“重新规划”与“把门加宽”不能写成同一类修复？</summary><p>重新规划通常是在既定世界、能力和目标下重新选择动作及其参数；把门加宽直接改变环境几何。若允许环境编辑，它也可以被明确定义为一个带成本、约束和验证的动作，但不能在原模型没有该动作时偷偷修改输入并声称原任务已解决。</p></details>
+      <p class="source-note">TAMP 的离散与连续耦合依据 <a href="#source-tamp">Garrett 等人的 TAMP 综述</a>与 <a href="#source-mit">MIT 课程</a>。反馈字段与门杯修订流程为本教程的具体化示例。</p>
+    </section>
+
+    <section id="experiments" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>09</span> 看真实输入、真实输出，以及它检查了什么</div>
+      <h2>把同一个小世界，<br class="desktop-break">交给真实程序跑一遍。</h2>
+      <p>这里提供两组不同用途的真实记录。第一组由 <strong>Pyperplan 读取 PDDL 并执行 BFS</strong>，展示动作序列及每一步状态。第二组运行学习仓库原来的 <strong>MiniLab 受限检查器</strong>，展示锁、钥匙、能力与几何规则的判定。</p>
+      <p>两者做的事情不同：前者实际搜索了计划；原 MiniLab 主要检查声明的条件和图上的可达性，没有生成 unlock/open/move/pickup 动作轨迹。看到相同的“可行”字样，需要继续问它验证到了哪一层。</p>
+      <div class="try-this"><span>动手看</span><p>先读输入变化，写下预测，再展开记录。重点比较“缺钥匙”“钥匙和能力齐全”“门变窄”：哪些会影响符号计划，哪些需要后面的几何检查？</p></div>
+      <figure class="interactive-figure">{{component:day3-records}}<figcaption>固定的制作环境运行记录，保留程序、版本、输入、计划或原因和耗时。交互查看记录不会重新启动 Python。</figcaption></figure>
+      <h3>为什么原 MiniLab 会把“有钥匙 + 会解锁”的锁门当作可用？</h3>
+      <p>这是它的简化规则：若钥匙匹配且声明具备 unlock 能力，就把这条门连接加入可用边。它没有真的调用开锁动作，也没有把输入的 locked 改成 false，更没有检查手臂是否能到达门把。</p>
+      <p>因此，<code>rule_feasible</code> 应读作“这些受限规则通过”。<code>blocked_state</code>、<code>blocked_action</code>、<code>blocked_geometry</code> 是这个检查器的分类，并非所有机器人系统共同规定的状态码。多个问题同时存在时，程序的检查顺序还会影响首先返回哪种原因。</p>
+      <h3>在自己环境中运行</h3>
+      <p>在下载后的仓库根目录执行以下命令。网页阅读与交互不需要安装这些依赖；这里仅供你亲手复现实验。</p>
+      <pre class="d3-code"><code>python -m pip install -r examples/day-03/requirements.txt
+python examples/day-03/run_examples.py --output day-03-my-results.json</code></pre>
+      <p>先复现，再修改一项输入。保存修改前后条件和你的首次预测，不覆盖教程制作时的记录。完整文件、各个 problem 的含义以及单独运行方法见实验说明。</p>
+      <div class="d3-downloads"><a class="btn" href="examples/day-03/README.md">实验说明</a><a class="btn" href="examples/day-03/pddl/domain.pddl">完整动作域</a><a class="btn" href="examples/day-03/run_examples.py">运行脚本</a><a class="btn" href="data/day-03-results.json">实际输出 JSON</a></div>
+      <details class="self-check"><summary>先自己说：窄门问题在 PDDL 中仍找到计划，是程序算错了吗？</summary><p>先看输入公式是否包含净宽条件。本例 PDDL 只编码所列符号关系，门变窄没有改变这些事实，因此仍可能得到同一条符号序列。后验净宽检查拒绝，说明需要补充跨层条件或修改候选，不是可以直接说规划器把已编码公式算错了。</p></details>
+      <p class="source-note">源程序、固定修订与本次环境见 <a href="examples/day-03/README.md">实验来源说明</a>。这些是教程制作环境的运行，不代表你已在自己的机器上完成操作。</p>
+    </section>
+
+    <section id="practice" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>10</span> 让每个符号都能翻译回自己的话</div>
+      <h2>最后，自己把这个机器人讲明白。</h2>
+      <p>先关掉答案，用自己的话完成下面三件小事。说不出来时，回到对应演示改一个参数，再试一次。</p>
+      <ol class="practice-list"><li><h3>一分钟定义</h3><p>不用念缩写，解释状态、目标、前置条件、效果、任务规划和运动规划。每个概念都拿门杯场景举一个例子。</p></li><li><h3>三分钟案例</h3><p>从初态开始，画出四个动作前后的事实变化；再选一个失败例，说明哪一层发现了什么证据，以及接下来允许改什么。</p></li><li><h3>两轮为什么</h3><p>第一轮解释“为什么图连通仍不够”；第二轮继续问“如果符号计划和部分几何检查都通过，为什么还需要执行监测”。保留你真正卡住的那一句。</p></li></ol>
+      <h3>Checkpoint A · 保留完整的 35 分钟</h3>
+      <p>原计划的题目是：<strong>场景图 A–D–B 连通，但门锁着，机械臂够不着把手，如何处理？</strong>下面按 8+8+8+8+3 分钟安排；先保存自己的回答，再写修订。计时只供你掌握节奏，可以暂停，不会自动判定掌握程度。</p>
+      {{component:day3-checkpoint}}
+      <details><summary>把这一篇放回原来的七段、10 小时安排</summary><div class="table-wrap"><table><caption>累计有效学习时间，不含休息；0:00 不是固定钟点</caption><thead><tr><th>阶段</th><th>对应学习操作</th></tr></thead><tbody><tr><td>00:00–00:45</td><td>闭卷复习 Day 2；用第 01–02 节区分几何、状态与能力</td></tr><tr><td>00:45–02:00</td><td>结合第 04、08 节阅读 R04 和 MIT TAMP 必要片段</td></tr><tr><td>02:00–04:00</td><td>手写谓词和四个动作，推导前置／效果与离散／连续边界</td></tr><tr><td>04:00–06:30</td><td>设计成功候选、缺钥匙／能力、运动几何失败三条路线</td></tr><tr><td>06:30–08:15</td><td>第 09 节：实际运行并逐项修改，保留预测和输出</td></tr><tr><td>08:15–09:00</td><td>闭卷解释任务规划与运动规划，画失败返回箭头</td></tr><tr><td>09:00–10:00</td><td>Checkpoint A 35 分钟，余下 25 分钟复核与准备 Day 4</td></tr></tbody></table></div><p>原资料中资源学习约 105 分钟的建议，与第 2 阶段的 75 分钟不完全相同；可将其余阅读穿插在第 3 阶段的推导里，不额外叠加到 10 小时之外。完整 MIT 讲次约 85 分钟，PDDL 选读约 25–40 分钟，按理解需要分段暂停。</p></details>
+      <div class="personal-note"><div class="note-heading"><div><span class="eyebrow">我的 Day 3 记录</span><h3>把不确定的地方留下来</h3></div><span id="note-status" class="note-status" aria-live="polite">记录保存在此浏览器</span></div><label class="form-label" for="learning-note">事实与假设 → 动作规则 → 我的预测 → 实际结果／未运行 → 修订解释</label><textarea class="form-control" id="learning-note" rows="10" placeholder="我今天最初不理解的词：&#10;我画的小世界和输入：&#10;我写的初态、目标与动作：&#10;首次预测和推理：&#10;亲手修改了哪一项：&#10;实际命令、输出或未运行：&#10;后来修订的解释：&#10;还没有检查的条件："></textarea><div class="note-actions"><button class="btn" type="button" id="export-note">导出 Day 3 笔记 .md</button><span>与前两天分开保存；个人输入不会自动上传 GitHub。</span></div></div>
+      <p>进入 Day 4 前，带上这个问题：<strong>“已知门把手的位置，怎样求机械臂关节角；求得一个姿态后，怎样判断它能安全到达？”</strong>今天的可达环带，会成为明天运动学的入口。</p>
+    </section>
+
+    <section id="sources" class="lesson-section sources-section" data-nav>
+      <div class="section-kicker"><span>↗</span> 原课程与查阅方式</div>
+      <h2>用同一个问题，回到原资料。</h2>
+      <p>本篇依据指定计划、PDDL 原讲义、MIT 官方材料与实际程序运行重新组织。门杯、圆盘和两杆手臂是明确假设的教学例子。</p>
+      <div class="course-list">
+        <article class="course-item" id="source-pddl"><span class="course-part">R04</span><div><h3>PDDL：先读结构，再读动作</h3><p>依次找 domain 的 types／predicates／action，action 的 parameters／precondition／effect，以及 problem 的 objects／init／goal。原讲义重点看对象、初态、目标和正负效果；先不扩展到全部 PDDL 语法。</p><a href="https://planning.wiki/ref/pddl/domain" target="_blank" rel="noopener noreferrer">指定 Domain 阅读 ↗</a><a href="https://planning.wiki/ref/pddl/problem" target="_blank" rel="noopener noreferrer">指定 Problem 阅读 ↗</a><a href="https://www.cs.toronto.edu/~sheila/2542/w09/A1/introtopddl2.pdf" target="_blank" rel="noopener noreferrer">Helmert 原讲义 ↗</a></div><span class="reading-label">25–40m</span></article>
+        <article class="course-item" id="source-mit"><span class="course-part">R16</span><div><h3>MIT Fall 2022 · Lecture 21 TAMP</h3><p>使用 2022 合集的 P21。带着三个问题看：任务变量是什么？连续动作需要什么输入？失败信息怎样影响下一次选择？听到不懂的公式时，先用本页门杯例子解释它在检查什么。</p><a href="https://www.bilibili.com/video/BV1dB4y1R7bS/?p=21" target="_blank" rel="noopener noreferrer">B 站指定讲次 ↗</a><a href="https://manipulation.csail.mit.edu/Fall2022/schedule.html" target="_blank" rel="noopener noreferrer">2022 官方课表与原视频入口 ↗</a><a href="https://manipulation.mit.edu/clutter.html" target="_blank" rel="noopener noreferrer">官方讲义 · Programming the Task Level ↗</a></div><span class="reading-label">约 85m</span></article>
+        <article class="course-item" id="source-motion"><span class="course-part">空间</span><div><h3>MIT · Motion Planning</h3><p>只查 Inverse Kinematics 与轨迹可行性相关定义，理解关节限位、碰撞、求解失败及整条路径的条件。完整推导留到后续学习。</p><a href="https://manipulation.mit.edu/trajectories.html" target="_blank" rel="noopener noreferrer">官方章节 ↗</a></div><span class="reading-label">按需</span></article>
+        <article class="course-item" id="source-tamp"><span class="course-part">原理</span><div><h3>Integrated Task and Motion Planning</h3><p>Garrett 等人的综述用于核对离散／连续耦合与方法边界。今天先理解问题定义和为什么需要结合两层；不要求通读全部算法。</p><a href="https://arxiv.org/abs/2010.01083" target="_blank" rel="noopener noreferrer">作者论文 ↗</a></div><span class="reading-label">选读</span></article>
+        <article class="course-item" id="source-code"><span class="course-part">代码</span><div><h3>Pyperplan 与原 MiniLab</h3><p>前者解析并搜索本例 PDDL；后者只检查原计划中的受限规则。完整版本、范围和复现步骤保存在实验目录。</p><a href="https://github.com/aibasel/pyperplan" target="_blank" rel="noopener noreferrer">Pyperplan 官方仓库 ↗</a><a href="https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/minilab/validate.py" target="_blank" rel="noopener noreferrer">原 MiniLab ↗</a><a href="examples/day-03/README.md">本教程实验说明</a></div><span class="reading-label">实操</span></article>
+        <article class="course-item" id="source-plan"><span class="course-part">计划</span><div><h3>Day 3 与 Checkpoint A</h3><p>保留原七段 10 小时安排、三类路线与 35 分钟阶段练习。R20 只作为任务成功条件的补充，不增加必修任务量。</p><a href="https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/DAILY/day-03.md" target="_blank" rel="noopener noreferrer">每日计划 ↗</a><a href="https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/TASK_GUIDES/day-03.md" target="_blank" rel="noopener noreferrer">操作手册 ↗</a><a href="https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/CHECKPOINTS.md" target="_blank" rel="noopener noreferrer">阶段练习 ↗</a><a href="https://behavior.stanford.edu/" target="_blank" rel="noopener noreferrer">R20 选读入口 ↗</a></div><span class="reading-label">对照</span></article>
+      </div>
+      <div class="source-method"><h3>资料读取与模型说明</h3><p>已核对指定讲次与官方资料。B 站视频本轮读取受限，未取得整段字幕，因此本页使用官方讲义、原始规划资料和可复现实验完成解释，不编造逐秒课程定位。MIT 在线讲义持续更新，作为原理查阅材料，不当作 2022 讲座的逐字转写。</p><p>网页状态搜索、几何演示和预运行记录分别注明实现范围。符号模型成立、局部几何通过、生成轨迹、仿真执行、真实机器人成功属于不同证据；本篇没有控制真实机器人。</p><p><a href="notes/day-03-tutorial.md">完整文字版教程</a> · <a href="notes/day-03-course-map.md">Day 3 课程对应表</a> · <a href="day-02.html">回顾 Day 2</a></p></div>
+    </section>
+    <div class="next-lesson"><span class="small-label">把三天连起来</span><a href="index.html#mr-workspace">Day 01 · 身体能到哪里？ ↑</a><a href="day-02.html#solver-status">Day 02 · 求解结果能说明什么？ ↑</a></div>
+    <footer class="site-footer"><div><strong>Modern Robotics 学习手记</strong><p>每个动作有条件，每个结论有证据。</p></div><a href="#start">回到顶部 ↑</a></footer>
+  </main>
+</div>
+<script id="day3-run-data" type="application/json">{{data:day-03-results}}</script>
+<noscript><div class="noscript-note">正文可以正常阅读。交互需要 JavaScript；实验记录和完整文字版可从页面链接查看。</div></noscript>
+</body>
+</html>

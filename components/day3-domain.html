@@ -1,0 +1,12 @@
+<div id="day3-domain" class="d3s">
+  <div class="d3s-heading"><h3>规则放一边，这一次的场景放另一边</h3><span class="d3s-method">domain / problem 对照</span></div>
+  <p class="d3s-intro">把场景从“标准初态”切成“缺钥匙”。观察右边的 <code>:init</code> 少了什么；左边的动作规则保持相同。</p>
+  <label class="d3s-label" for="d3s-domain-preset">同一动作域，换一个问题<select id="d3s-domain-preset" class="d3s-select"><option value="success">标准初态</option><option value="missing_key">缺少钥匙</option><option value="already_open">门已经打开</option></select></label>
+  <div class="d3s-domain-columns">
+    <div class="d3s-code-panel"><div class="d3s-panel-heading"><span class="d3s-small-label">DOMAIN · 通用规则</span><strong>有哪些类型、事实与动作？</strong></div><label class="d3s-label" for="d3s-domain-section">查看哪一部分？<select id="d3s-domain-section" class="d3s-select"><option value="types">:types · 对象分类</option><option value="predicates">:predicates · 允许说哪些事实</option><option value="unlock" selected>:action unlock · 解锁规则</option><option value="open">:action open · 开门规则</option><option value="move">:action move · 移动规则</option><option value="pickup">:action pickup · 拿杯规则</option></select></label><p class="d3s-explanation" id="d3s-domain-explain"></p><pre class="d3s-code"><code id="d3s-domain-code"></code></pre></div>
+    <div class="d3s-code-panel"><div class="d3s-panel-heading"><span class="d3s-small-label">PROBLEM · 本次场景</span><strong>有哪些具体对象，从哪里开始？</strong></div><label class="d3s-label" for="d3s-problem-section">查看哪一部分？<select id="d3s-problem-section" class="d3s-select"><option value="objects">:objects · 本次对象</option><option value="init" selected>:init · 初始真事实</option><option value="goal">:goal · 想满足的条件</option></select></label><p class="d3s-explanation" id="d3s-problem-explain"></p><pre class="d3s-code"><code id="d3s-problem-code"></code></pre></div>
+  </div>
+  <div class="d3s-callout" id="d3s-domain-change"></div>
+  <p class="d3s-boundary">问号表示动作参数，如 <code>?r</code>；<code>r</code> 是本次场景中的具体机器人。<code>:goal</code> 描述想得到的状态，并没有预先指定解锁、开门的顺序。这里浏览的是结构片段；完整文件见 <a href="examples/day-03/pddl/domain.pddl">domain.pddl</a> 与 <a href="examples/day-03/pddl/problem-success.pddl">标准 problem</a>。</p>
+  <div class="d3s-sr" id="d3s-domain-live" role="status" aria-live="polite" aria-atomic="true"></div>
+</div>

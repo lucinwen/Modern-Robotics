@@ -1,0 +1,12 @@
+<div id="day3-feedback" class="d3g-root">
+  <div class="d3g-heading"><strong>一次拒绝，要连同条件一起送回去</strong><span>固定四动作教学流程 · 可以逐步查看 · 没有真实机器人执行</span></div>
+  <div class="viz-row" role="group" aria-label="选择反馈场景"><button class="btn" type="button" data-d3g-feedback="standard" aria-pressed="true">条件齐全</button><button class="btn" type="button" data-d3g-feedback="missing_key" aria-pressed="false">钥匙缺失</button><button class="btn" type="button" data-d3g-feedback="narrow" aria-pressed="false">门太窄</button><button class="btn" type="button" data-d3g-feedback="high" aria-pressed="false">把手太高</button></div>
+  <div class="d3g-world-heading"><strong id="d3g-feedback-version">输入世界 v1</strong><span>机器人在 A；杯子在 B；门初始锁住且未打开</span></div>
+  <dl class="d3g-input-facts" id="d3g-feedback-inputs" aria-label="当前世界的输入"></dl>
+  <ol class="d3g-feedback-stages" id="d3g-feedback-stages" aria-label="计划、检查和反馈的六个阶段"></ol>
+  <div class="d3g-focus-panel"><span class="d3g-step-label" id="d3g-feedback-step-label"></span><h3 id="d3g-feedback-step-title"></h3><p id="d3g-feedback-step-explanation"></p><div id="d3g-feedback-evidence" class="d3g-evidence"></div></div>
+  <div class="viz-row" role="group" aria-label="控制反馈推演步骤"><button class="btn" id="d3g-feedback-previous" type="button" disabled>上一步</button><button class="btn btn-primary" id="d3g-feedback-next" type="button">下一步</button><button class="btn" id="d3g-feedback-all" type="button">查看到最后</button><button class="btn" id="d3g-feedback-reset" type="button">重新查看原输入</button></div>
+  <div class="d3g-revision"><strong>如果决定修改输入，保留原来的失败</strong><p id="d3g-feedback-revision-explanation" class="d3g-explanation"></p><button class="btn" id="d3g-feedback-revise" type="button" disabled>此例无几何修订项</button><p id="d3g-feedback-history" class="d3g-note" hidden></p></div>
+  <details class="d3g-details"><summary>为什么这里没有“一键重规划就成功”？</summary><p>当前符号域只有 unlock、open、move、pickup，没有获取钥匙、调用人类或其他通道的动作。钥匙缺失时，不能在计划中凭空多出一把钥匙；单纯再次搜索同一个域和初态，也不会创造新动作。</p><p>如果真实场景已有另一条可用路线，可以保持要求不变，寻找不同的动作序列和运动候选。若要扩大门洞或降低把手，则更改了几何输入，应记为新世界版本并重新验证；不能把新版本通过说成原版本已经通过。</p><p>本组件按固定教学规则和前两个演示的解析条件推演，不是通用 PDDL/TAMP 求解器。一次采样失败、IK 数值算法失败或规划超时通常也不足以证明所有连续方案均不存在；这里门宽与环带之外的拒绝有明确的几何条件与适用范围。</p></details>
+  <div class="sr-only" id="d3g-feedback-live" role="status" aria-live="polite"></div>
+</div>

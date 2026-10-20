@@ -1,0 +1,9 @@
+<div id="day3-layers" class="d3p-root">
+  <div class="d3p-heading"><strong>场景没换，提问的角度换了</strong><span>先选一层，再比较一个条件变化</span></div>
+  <div class="d3p-tabs" role="group" aria-label="选择场景的信息层"><button class="btn" type="button" data-d3p-layer="topology" aria-pressed="true">拓扑 · 连着吗</button><button class="btn" type="button" data-d3p-layer="geometry" aria-pressed="false">几何 · 放得下吗</button><button class="btn" type="button" data-d3p-layer="state" aria-pressed="false">状态 · 现在怎样</button><button class="btn" type="button" data-d3p-layer="ability" aria-pressed="false">能力 · 会哪些动作</button></div>
+  <label class="form-label" for="d3p-layer-case">比较一个输入<select class="form-select" id="d3p-layer-case"><option value="standard">门锁着，钥匙与能力齐全</option><option value="missing-key">只拿走钥匙</option><option value="missing-open">只去掉开门能力</option><option value="narrow">只把门从 0.90 m 改为 0.50 m</option></select></label>
+  <svg id="d3p-layer-scene" class="d3p-world" role="img" aria-labelledby="d3p-layer-title d3p-layer-desc"><title id="d3p-layer-title">两个房间与一扇门的分层表示</title><desc id="d3p-layer-desc">机器人在 A，杯子在 B，中间门 D 锁着。可切换查看连接、尺寸、事实或能力。</desc></svg>
+  <div class="d3p-focus"><h3 id="d3p-layer-question"></h3><p id="d3p-layer-answer"></p><p class="d3p-small" id="d3p-layer-limit"></p></div>
+  <p class="d3p-small">每个演示有独立输入。本图用俯视示意表达关系，不模拟门扇接触或机器人控制。</p>
+  <div id="d3p-layer-live" class="sr-only" role="status" aria-live="polite"></div>
+</div>

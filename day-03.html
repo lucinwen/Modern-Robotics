@@ -1,0 +1,2599 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f8f7">
+  <meta name="description" content="Day 3 初学者教程：用开门拿杯子理解状态、谓词、动作、PDDL、搜索、FSM 与 TAMP。十组交互演示、真实规划实验与 35 分钟开放练习。">
+  <title>Day 03 · 让机器人一步步拿到杯子 | Modern Robotics 学习手记</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/site.css">
+  <link rel="stylesheet" href="assets/day3-page.css">
+  <link rel="stylesheet" href="assets/day3-symbolic.css">
+  <link rel="stylesheet" href="assets/day3-geometry.css">
+  <script src="assets/site.js" defer></script>
+  <script src="assets/day3-symbolic.js" defer></script>
+  <script src="assets/day3-geometry.js" defer></script>
+  <script src="assets/day3-page.js" defer></script>
+  <script src="assets/day3-records.js" defer></script>
+</head>
+<body data-lesson-key="day-03" data-lesson-title="Day 03 · 我的任务规划学习笔记" data-lesson-topic="状态、PDDL、任务与运动规划 TAMP">
+<a class="skip-link" href="#main">跳到教程正文</a>
+<header class="site-header">
+  <a class="brand" href="index.html" aria-label="返回 Modern Robotics 学习手记"><span class="brand-monogram">MR<span>.</span></span><span class="brand-name">Modern Robotics<small>可视化学习手记</small></span></a>
+  <div class="header-actions"><span class="edition">DAY 03 / 任务与运动</span><a href="https://github.com/venividici/-Modern-Robotics" target="_blank" rel="noopener noreferrer">GitHub 仓库 ↗</a><button class="btn theme-toggle" id="theme-toggle" type="button" aria-label="切换明暗主题">切换主题</button></div>
+</header>
+<div class="page-shell">
+  <aside class="sidebar" aria-label="学习导航">
+    <nav class="course-switcher" aria-label="选择学习日"><a href="index.html"><strong>DAY 01</strong><span>空间与运动</span></a><a href="day-02.html"><strong>DAY 02</strong><span>约束与求解</span></a><a href="day-03.html" aria-current="page"><strong>DAY 03</strong><span>状态与计划</span></a></nav>
+    <div class="sidebar-intro"><span class="eyebrow">从“摆得下”到“接下来做什么”</span><strong>第三天，给动作讲道理。</strong></div>
+    <nav class="lesson-nav" aria-label="本页目录">
+      <a href="#start" class="is-current" aria-current="location"><span>00</span> 先认识今天的小世界</a>
+      <a href="#world-layers"><span>01</span> 同一场景的四层信息</a>
+      <a href="#states"><span>02</span> 状态与谓词</a>
+      <a href="#actions"><span>03</span> 动作怎样改变事实</a>
+      <a href="#pddl"><span>04</span> 读懂两份 PDDL 文件</a>
+      <a href="#search"><span>05</span> 计划怎样被搜索出来</a>
+      <a href="#fsm"><span>06</span> FSM 与规划怎样配合</a>
+      <a href="#motion"><span>07</span> 身体能不能做到</a>
+      <a href="#tamp"><span>08</span> 失败怎样返回上层</a>
+      <a href="#experiments"><span>09</span> 真实计划与规则实验</a>
+      <a href="#practice"><span>10</span> 自己解释与阶段练习</a>
+      <a href="#sources"><span>↗</span> 原课程与阅读指引</a>
+    </nav>
+    <div class="sidebar-note"><span class="small-label">卡住时问这三句</span><p>现在什么是真的？<br>这个动作需要什么？<br>做完会改变什么？</p><a href="https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/DAILY/day-03.md" target="_blank" rel="noopener noreferrer">原 Day 3 学习计划 ↗</a></div>
+  </aside>
+  <main id="main">
+    <section id="start" class="hero lesson-section" data-nav>
+      <div class="eyebrow">DAY 03 / PDDL · 状态 · TAMP</div>
+      <h1>“去拿那个杯子”，<br><span>机器人该怎样一步步做？</span></h1>
+      <p class="hero-lead">你在 A 房间，杯子在 B 房间，中间的门锁着。对人来说很自然的一句话，对机器人意味着：先把世界说清楚，再找动作顺序，最后检查身体能否完成每一步。</p>
+      <div class="lesson-meta"><span>计划日 2026.10.22</span><span>10 组交互演示</span><span>真实 PDDL 实验 · 35 分钟阶段练习</span></div>
+      <a class="start-link" href="#world-layers">先看这个小场景 <span aria-hidden="true">↓</span></a>
+      <div class="opening-question"><span class="small-label">贯穿整篇的任务</span><p>从 A 房间出发，让杯子最后在机器人手里。</p><span>今天只用两个房间、一扇门、一把钥匙、一个杯子和一个机器人。新术语都回到这个例子解释。</span></div>
+      <div class="reading-guide"><h2>先读中文意思，再认识符号</h2><p>Day 1 帮你描述“在哪里、怎样转”；Day 2 帮你判断“这些空间要求能否同时满足”；今天再加上<strong>先后顺序与状态变化</strong>。门可以位置正确、宽度足够，却因为上锁而暂时不能通过。</p><p>你已有 Python 和 UE 基础，这里不重讲编程语法。遇到新词，会先用场景说明，再给最小符号、操作和核对提示。机器人学里的公式放在对应的图后面；第一次读可以先做操作，再回来读细节。</p></div>
+      <div class="d3-route"><div><span>第一段 · 第 01–04 节</span><strong>世界 → 事实 → 动作</strong><p>先能说清一句话和一个符号分别指什么。</p></div><div><span>第二段 · 第 05–08 节</span><strong>找顺序 → 查运动 → 改计划</strong><p>看懂为什么逻辑上合理，身体仍可能做不到。</p></div><div><span>第三段 · 第 09–10 节</span><strong>预测 → 实跑 → 自己解释</strong><p>保留第一版推理，再与实际输出核对。</p></div></div>
+      <details><summary>今天学到什么程度，就可以进入下一天？</summary><p>你能自己列出初态与目标，解释 unlock／open／move／pickup 的前置与效果，手推一条合法动作序列，并区分缺钥匙、缺技能、门太窄和运动搜索没找到解。今天不要求推导完整运动学，也不要求搭起真实机械臂。</p></details>
+      <p class="source-note">内容对应 <a href="#source-plan">Day 3、R04、R16</a>；R20 为选读。计划日用于课程排期，制作日期为 2026-10-20，不代表已经完成个人学习。</p>
+    </section>
+
+    <section id="world-layers" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>01</span> 在看公式之前，先看信息</div>
+      <h2>同一扇门，有四种不同的问题。</h2>
+      <p>想象你在 UE 中摆出两个房间和一扇门。画面已经能看见门，但“看见”没有说明它是否连通、是否够宽、是否打开，以及角色是否会操作它。这些信息需要分别表示。</p>
+      <div class="try-this"><span>动手看</span><p>依次切换四层信息。场景没有变，留意每层回答的问题怎样变了。然后切换“窄门”或“缺技能”，看看哪一层首先出现问题。</p></div>
+      <figure class="interactive-figure"><div id="day3-layers" class="d3p-root">
+  <div class="d3p-heading"><strong>场景没换，提问的角度换了</strong><span>先选一层，再比较一个条件变化</span></div>
+  <div class="d3p-tabs" role="group" aria-label="选择场景的信息层"><button class="btn" type="button" data-d3p-layer="topology" aria-pressed="true">拓扑 · 连着吗</button><button class="btn" type="button" data-d3p-layer="geometry" aria-pressed="false">几何 · 放得下吗</button><button class="btn" type="button" data-d3p-layer="state" aria-pressed="false">状态 · 现在怎样</button><button class="btn" type="button" data-d3p-layer="ability" aria-pressed="false">能力 · 会哪些动作</button></div>
+  <label class="form-label" for="d3p-layer-case">比较一个输入<select class="form-select" id="d3p-layer-case"><option value="standard">门锁着，钥匙与能力齐全</option><option value="missing-key">只拿走钥匙</option><option value="missing-open">只去掉开门能力</option><option value="narrow">只把门从 0.90 m 改为 0.50 m</option></select></label>
+  <svg id="d3p-layer-scene" class="d3p-world" role="img" aria-labelledby="d3p-layer-title d3p-layer-desc"><title id="d3p-layer-title">两个房间与一扇门的分层表示</title><desc id="d3p-layer-desc">机器人在 A，杯子在 B，中间门 D 锁着。可切换查看连接、尺寸、事实或能力。</desc></svg>
+  <div class="d3p-focus"><h3 id="d3p-layer-question"></h3><p id="d3p-layer-answer"></p><p class="d3p-small" id="d3p-layer-limit"></p></div>
+  <p class="d3p-small">每个演示有独立输入。本图用俯视示意表达关系，不模拟门扇接触或机器人控制。</p>
+  <div id="d3p-layer-live" class="sr-only" role="status" aria-live="polite"></div>
+</div><figcaption>同一教学场景的不同描述。连通图的边表示声明的连接；它本身没有承诺门处于打开状态，也没有承诺机器人可以通过。</figcaption></figure>
+      <div class="table-wrap"><table><caption>把检查问题放回合适的位置</caption><thead><tr><th>信息</th><th>今天的例子</th><th>它还没有回答什么</th></tr></thead><tbody><tr><td>拓扑</td><td>A 与 B 由门 D 相连</td><td>门有多宽、是否锁着</td></tr><tr><td>几何</td><td>门净宽、机器人尺寸、门把高度</td><td>现在是否有钥匙、是否已开门</td></tr><tr><td>当前状态</td><td>机器人在 A，门锁着，杯子在 B</td><td>机器人具备哪些操作能力</td></tr><tr><td>动作能力</td><td>会移动、解锁、开门、抓取</td><td>这一次具体姿态和轨迹是否可行</td></tr></tbody></table></div>
+      <p>这些层会一起工作。把门加宽可以改变通行几何；给机器人一把钥匙可以改变库存状态；增加解锁动作可以改变可用能力。你需要明确改的是哪一项，才能解释为什么结果变了。</p>
+      <details class="self-check"><summary>先自己说：为什么“门在场景里”还不足以说明任务能完成？</summary><p>因为对象的存在、几何关系、当前状态和动作能力是不同信息。即使这些都合格，还要检查具体运动、接触与执行结果。真实可交互对象需要相应状态、动作接口和检查方式。</p></details>
+      <p class="source-note">对应 <a href="#source-plan">Day 3 的分层表示练习</a>。图例是本教程为开门拿杯任务构造的简化模型。</p>
+    </section>
+
+    <section id="states" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>02</span> Object · Predicate · State · Goal</div>
+      <h2>状态，就是“此刻哪些事实成立”。</h2>
+      <p>先把关注的东西命名：机器人 <code>r</code>、房间 <code>a / b</code>、门 <code>d</code>、钥匙 <code>k</code>、杯子 <code>cup</code>。这些名字指向<strong>对象</strong>。类型告诉程序哪些东西是机器人、房间、门、钥匙或可拿取物。</p>
+      <p><strong>谓词 predicate</strong> 是一句可以判断真假的描述模板。例如“谁在什么房间”写成 <code>at(谁, 房间)</code>。填上具体对象，<code>at(r, a)</code> 就是“机器人 r 在房间 a”这个可以核对真假的命题。</p>
+      <div class="d3-word-equation"><span>中文句子</span><strong>机器人在 A 房间</strong><span>说明式记法</span><code>at(r, a)</code><span>PDDL 写法</span><code>(at r a)</code></div>
+      <p>这两种符号写法在这里指同一件事。PDDL 用括号和空格表达关系，<strong>不是在调用 Python 函数，也不是让机器人移动</strong>。它只是在描述一个事实。</p>
+      <div class="try-this"><span>动手看</span><p>从初态切到“解锁后”，找出被删掉和新增的事实。再切到“开门后”：门已经解锁时，为什么还需要这一步？</p></div>
+      <figure class="interactive-figure"><div id="day3-state" class="d3s">
+  <div class="d3s-heading"><h3>同一个房间，五张“此刻的快照”</h3><span class="d3s-method">观察状态，不是播放机器人实测</span></div>
+  <p class="d3s-intro">先点“已解锁”，再点“门已打开”。看图中的门和右侧事实：这两张快照究竟差在哪里？</p>
+  <div class="d3s-buttons" role="group" aria-label="选择状态快照">
+    <button type="button" class="d3s-button" data-d3s-snapshot="0" aria-pressed="true">① 初态</button>
+    <button type="button" class="d3s-button" data-d3s-snapshot="1" aria-pressed="false">② 已解锁</button>
+    <button type="button" class="d3s-button" data-d3s-snapshot="2" aria-pressed="false">③ 门已打开</button>
+    <button type="button" class="d3s-button" data-d3s-snapshot="3" aria-pressed="false">④ 进入 B</button>
+    <button type="button" class="d3s-button" data-d3s-snapshot="4" aria-pressed="false">⑤ 拿到杯子</button>
+  </div>
+  <div class="d3s-world-layout">
+    <div class="d3s-scene-panel"><svg class="d3s-scene" role="img" aria-labelledby="d3s-state-scene-title d3s-state-scene-desc"><title id="d3s-state-scene-title">两房间中的状态快照</title><desc id="d3s-state-scene-desc">机器人在 A，杯子在 B，门 D 上锁，钥匙在机器人的物品栏。</desc></svg><p class="d3s-boundary">示意图不按比例；R 是机器人，C 是杯子，K 是物品栏中的钥匙。持有钥匙不占用抓杯子的手。</p></div>
+    <div><span class="d3s-small-label">这张快照里，哪些说法是真的？</span><ul class="d3s-truth-list" id="d3s-state-truth"></ul></div>
+  </div>
+  <div class="d3s-callout" id="d3s-state-explanation"></div>
+  <div class="d3s-goal"><span>今天的目标</span><code>(holding r cup)</code><strong id="d3s-state-goal"></strong></div>
+  <details class="d3s-details"><summary>展开完整事实清单：状态里还有什么？</summary><p>这里列出的事实为真。连通关系、钥匙匹配和能力也是模型的一部分，只是在这组动作中保持不变。</p><ul class="d3s-fact-chips" id="d3s-state-facts"></ul></details>
+  <p class="d3s-boundary">本例采用完全已知的闭世界状态：没有列出的事实按假处理。真实机器人“还没观察到门是否上锁”，不能因此直接认定门未上锁。</p>
+  <div class="d3s-sr" id="d3s-state-live" role="status" aria-live="polite" aria-atomic="true"></div>
+</div><figcaption>几张有效状态快照共享同一场景。它们展示的是符号模型中的事实；真实系统还需要传感与状态估计，把观测转换成这样的表示。</figcaption></figure>
+      <h3>不把“门没锁”和“门已打开”合成一个词</h3>
+      <p><code>locked(d)</code> 表示锁着，<code>unlocked(d)</code> 表示已经解除锁定，<code>opened(d)</code> 表示门已经打开。门解锁以后仍可以关着。今天的动作规则会维护锁定与解锁互斥，并让 opened 只在解锁后产生。</p>
+      <p>这些一致性<strong>不是 PDDL 自动理解了常识</strong>：是我们正确设置初态，并写对动作的增加与删除效果。若初态同时写“在 A”和“在 B”，规划器不会替你理解“一个机器人不能分身”。</p>
+      <h3>初态写现在；目标写想要的结果</h3>
+      <p><strong>初态 initial state</strong> 是起点的事实集合。<strong>目标 goal</strong> 是结束时必须成立的要求。本例目标只有 <code>(holding r cup)</code>：杯子在机器人手中。它没有要求“最后关门”，也没有要求“返回 A”；如果任务确实要求这些，需要继续写进目标或其他合适的约束。</p>
+      <div class="key-idea"><strong>目标不是动作清单</strong><p>“杯子在手里”描述结果；“解锁 → 开门 → 移动 → 抓取”是一条候选办法。规划要做的，是根据初态与动作规则找到办法。</p></div>
+      <details><summary>为什么没有写出来的事实，在这个模型中当作假？</summary><p>本页使用完全已知、确定性的经典规划模型，只列当前为真的事实；其他已定义的具体命题按闭世界假设视为假。例如初态没写 <code>(opened d)</code>，模型就把门当作未打开。这是模型约定。</p><p>真实相机没看见门把手，可能只是被遮挡；“没有观测到”不能直接变成“现实中不存在”。若机器人不知道门是否锁着，需要表示知识或不确定性，并考虑观察动作，已经超出本页的完全已知模型。</p></details>
+      <details><summary>有钥匙为什么又可以“手空”？</summary><p>这里的 <code>has-key</code> 表示钥匙在机器人的物品栏，可用于解锁，不占用拿杯子的那只手；<code>handempty</code> 只表示抓杯子的手空着。这是教学假设。若现实中必须同一只手拿钥匙、插锁、收起钥匙再抓杯，就需要为这些过程增加对象状态和动作。</p></details>
+      <details class="self-check"><summary>先自己说：把目标改成“杯子放在桌上”，只改一句中文够吗？</summary><p>还要把桌子和目标关系表示出来，例如 on(cup,table)，并提供能产生它的放置动作及前置条件。目标描述得出来，不代表当前动作集合一定能到达它。</p></details>
+      <p class="source-note">基本语义依据 <a href="#source-pddl">Helmert《An Introduction to PDDL》</a>；门、钥匙与手的具体约定由本教程明确给出。</p>
+    </section>
+
+    <section id="actions" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>03</span> Precondition · Add Effect · Delete Effect</div>
+      <h2>一个动作，要同时写清“能否做”和“做完变什么”。</h2>
+      <p>以进入 B 房间为例。至少要先在 A，有一条连接 A 与 B 的门，门已经打开，而且机器人有移动能力。这些“做之前必须为真”的条件叫<strong>前置条件 precondition</strong>。</p>
+      <p>符号动作成功应用后，机器人变成在 B，并且不再在 A。这些变化叫<strong>效果 effect</strong>。今天采用的 STRIPS 形式把效果分成：增加为真的事实，以及删除、不再为真的事实；没有涉及的其他事实保持不变。</p>
+      <div class="formula" role="math" aria-label="新状态等于旧状态去掉删除事实再加入新增事实">新状态 =（旧状态 − 删除的事实）∪ 新增的事实</div>
+      <p>你可以先把它理解成编辑一个事实集合：划掉旧位置，补上新位置。公式中的“减”和“并”是集合操作，不是在算房间坐标。</p>
+      <div class="try-this"><span>动手看</span><p>在初态先尝试 move，读每一项前置为什么通过或失败。再按 unlock → open → move → pickup 操作，逐步观察“新增、删除、保持不变”。</p></div>
+      <figure class="interactive-figure"><div id="day3-actions" class="d3s">
+  <div class="d3s-heading"><h3>先核对条件，再允许世界改变</h3><span class="d3s-method">手动推演 4 种动作</span></div>
+  <p class="d3s-intro">初态先选“开门”并尝试执行。看它为什么被拒绝；再依次尝试解锁、开门、移动和拿杯。</p>
+  <label class="d3s-label" for="d3s-actions-preset">选择一个起点<select id="d3s-actions-preset" class="d3s-select"><option value="success">标准初态 · 钥匙与能力齐全</option><option value="missing_key">缺少钥匙 · 其他条件相同</option><option value="no_grasp">没有拿杯能力 · 其他条件相同</option><option value="already_open">门一开始就打开了</option></select></label>
+  <div class="d3s-world-layout">
+    <div class="d3s-scene-panel"><svg class="d3s-scene" role="img" aria-labelledby="d3s-actions-scene-title d3s-actions-scene-desc"><title id="d3s-actions-scene-title">手动动作推演的当前状态</title><desc id="d3s-actions-scene-desc">当前状态随合法动作更新，失败尝试不会修改世界。</desc></svg><div class="d3s-goal"><span>目标</span><code>holding(r,cup)</code><strong id="d3s-actions-goal"></strong></div></div>
+    <div class="d3s-action-preparation">
+      <span class="d3s-small-label">先选择要尝试的动作</span>
+      <div class="d3s-buttons" role="group" aria-label="选择动作"><button type="button" class="d3s-button" data-d3s-action="unlock" aria-pressed="false">解锁</button><button type="button" class="d3s-button" data-d3s-action="open" aria-pressed="true">开门</button><button type="button" class="d3s-button" data-d3s-action="move" aria-pressed="false">移动</button><button type="button" class="d3s-button" data-d3s-action="pickup" aria-pressed="false">拿杯</button></div>
+      <code class="d3s-action-raw" id="d3s-actions-selected"></code>
+      <ul class="d3s-preconditions" id="d3s-actions-preconditions"></ul>
+      <p class="d3s-explanation" id="d3s-actions-readiness"></p>
+    </div>
+  </div>
+  <div class="d3s-buttons"><button type="button" class="d3s-button d3s-button-primary" id="d3s-actions-try">尝试执行所选动作</button><button type="button" class="d3s-button" id="d3s-actions-undo" disabled>撤回上次迁移</button><button type="button" class="d3s-button" id="d3s-actions-reset">恢复所选初态</button></div>
+  <div class="d3s-callout" id="d3s-actions-message">目前还没有执行动作。即使条件不满足，也可以尝试并查看拒绝原因。</div>
+  <div class="d3s-diff" id="d3s-actions-diff" hidden><div><h4>新增为真</h4><ul class="d3s-fact-chips" id="d3s-actions-added"></ul></div><div><h4>从真事实中删除</h4><ul class="d3s-fact-chips" id="d3s-actions-deleted"></ul></div></div>
+  <details class="d3s-details" id="d3s-actions-unchanged-box" hidden><summary>哪些事实没有变？</summary><ul class="d3s-fact-chips" id="d3s-actions-unchanged"></ul></details>
+  <details class="d3s-details"><summary>查看已经发生的合法迁移</summary><ol class="d3s-history" id="d3s-actions-history"><li>尚未迁移。</li></ol></details>
+  <p class="d3s-boundary">每次尝试只核对这里列出的符号前置。移动还需要实际通道与运动检查，拿杯还需要真实可达、抓取和控制证据。本组件与上一个快照组件各自独立。</p>
+  <div class="d3s-sr" id="d3s-actions-live" role="status" aria-live="polite" aria-atomic="true"></div>
+</div><figcaption>只有前置全部成立，符号状态才迁移。这里的按钮应用确定性动作模型；它没有向真实机器人发送命令。</figcaption></figure>
+      <div class="table-wrap"><table><caption>四种动作的中文合同；完整谓词与参数见可运行 PDDL</caption><thead><tr><th>动作</th><th>做之前需要</th><th>新增</th><th>删除</th></tr></thead><tbody><tr><td>unlock 解锁</td><td>在门的一侧，持有匹配钥匙，有解锁能力，门锁着</td><td>门已解锁</td><td>门锁着</td></tr><tr><td>open 开门</td><td>在门的一侧，门已解锁，有开门能力</td><td>门已打开</td><td>无</td></tr><tr><td>move 移动</td><td>在起点，声明的连接存在，门打开，有移动能力</td><td>在终点</td><td>在起点</td></tr><tr><td>pickup 抓取</td><td>与杯同房，杯被声明可抓，手空，有抓取能力</td><td>持有杯子</td><td>杯仍放在原房间、手空</td></tr></tbody></table></div>
+      <p><strong>每条条件都要问它从哪里来。</strong>“与杯同房”是粗粒度关系，不等于机械臂能碰到杯子；<code>graspable(cup)</code> 是本例给定的物体属性，也没有证明某个具体抓取姿态无碰撞。第 7 节会把这些连续空间问题接回来。</p>
+      <details><summary>open 的删除效果为空，是不是忘写“关门”？</summary><p>本例没有单独的 closed 谓词，门未打开由 opened 不在事实集合中表示。open 加入 opened 即可。若模型同时使用 closed，就需要正确删除 closed，并维持两者一致。表示方法可以不同，前提是语义一致。</p></details>
+      <details><summary>模型写了效果，现实就一定发生了吗？</summary><p>规划时，效果描述“按这个动作模型成功后，预期状态怎样变化”。执行时，电机卡住、抓取滑落或观测错误都可能使预期落空。真实系统需要检测动作结果，用最新观测更新状态，再决定是否继续或重规划。</p></details>
+      <details class="self-check"><summary>先自己说：move 只增加 at(r,b)，忘删 at(r,a)，会怎样？</summary><p>机器人会同时出现在两个房间的符号事实中。后续动作可能利用这个错误产生虚假的可行计划。问题在模型的效果定义，不能靠规划器“常识理解”补救。</p></details>
+      <p class="source-note">正负效果与未涉及事实保持不变，见 <a href="#source-pddl">PDDL 入门原讲义</a>；动作合同对应 <a href="#source-plan">Day 3 的门杯练习</a>。</p>
+    </section>
+
+    <section id="pddl" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>04</span> Domain 是规则，Problem 是这一次的题目</div>
+      <h2>把刚才的中文，写进两份文件。</h2>
+      <p><strong>PDDL</strong> 全称 Planning Domain Definition Language，是一种描述规划问题的语言。它负责把对象、状态和动作规则写清楚。<strong>规划器 planner</strong> 才是读取描述并搜索计划的程序；“写了 PDDL”与“已经求出计划”是两件事。</p>
+      <p>可以把 <strong>domain</strong> 理解成这一类任务的规则说明：有哪些类型、哪些关系、哪些动作。把 <strong>problem</strong> 理解成当前这一题：有哪些具体对象、起点是什么、最终要什么。换一个初态，通常可以继续使用同一套动作域。</p>
+      <div class="try-this"><span>动手看</span><p>在右侧切换“钥匙缺失”和“已经开门”。观察哪份文件发生了变化，再解释为什么开门动作的定义不用跟着改。</p></div>
+      <figure class="interactive-figure"><div id="day3-domain" class="d3s">
+  <div class="d3s-heading"><h3>规则放一边，这一次的场景放另一边</h3><span class="d3s-method">domain / problem 对照</span></div>
+  <p class="d3s-intro">把场景从“标准初态”切成“缺钥匙”。观察右边的 <code>:init</code> 少了什么；左边的动作规则保持相同。</p>
+  <label class="d3s-label" for="d3s-domain-preset">同一动作域，换一个问题<select id="d3s-domain-preset" class="d3s-select"><option value="success">标准初态</option><option value="missing_key">缺少钥匙</option><option value="already_open">门已经打开</option></select></label>
+  <div class="d3s-domain-columns">
+    <div class="d3s-code-panel"><div class="d3s-panel-heading"><span class="d3s-small-label">DOMAIN · 通用规则</span><strong>有哪些类型、事实与动作？</strong></div><label class="d3s-label" for="d3s-domain-section">查看哪一部分？<select id="d3s-domain-section" class="d3s-select"><option value="types">:types · 对象分类</option><option value="predicates">:predicates · 允许说哪些事实</option><option value="unlock" selected>:action unlock · 解锁规则</option><option value="open">:action open · 开门规则</option><option value="move">:action move · 移动规则</option><option value="pickup">:action pickup · 拿杯规则</option></select></label><p class="d3s-explanation" id="d3s-domain-explain"></p><pre class="d3s-code"><code id="d3s-domain-code"></code></pre></div>
+    <div class="d3s-code-panel"><div class="d3s-panel-heading"><span class="d3s-small-label">PROBLEM · 本次场景</span><strong>有哪些具体对象，从哪里开始？</strong></div><label class="d3s-label" for="d3s-problem-section">查看哪一部分？<select id="d3s-problem-section" class="d3s-select"><option value="objects">:objects · 本次对象</option><option value="init" selected>:init · 初始真事实</option><option value="goal">:goal · 想满足的条件</option></select></label><p class="d3s-explanation" id="d3s-problem-explain"></p><pre class="d3s-code"><code id="d3s-problem-code"></code></pre></div>
+  </div>
+  <div class="d3s-callout" id="d3s-domain-change"></div>
+  <p class="d3s-boundary">问号表示动作参数，如 <code>?r</code>；<code>r</code> 是本次场景中的具体机器人。<code>:goal</code> 描述想得到的状态，并没有预先指定解锁、开门的顺序。这里浏览的是结构片段；完整文件见 <a href="examples/day-03/pddl/domain.pddl">domain.pddl</a> 与 <a href="examples/day-03/pddl/problem-success.pddl">标准 problem</a>。</p>
+  <div class="d3s-sr" id="d3s-domain-live" role="status" aria-live="polite" aria-atomic="true"></div>
+</div><figcaption>对照中文含义与 PDDL 片段。浏览器演示限定于本页的门杯模型；配套文件由实际 PDDL 解析器读取并运行。</figcaption></figure>
+      <div class="table-wrap"><table><caption>第一次读文件，先找到这七个标记</caption><thead><tr><th>位置</th><th>标记</th><th>你可以问自己</th></tr></thead><tbody><tr><td>domain</td><td><code>:types</code></td><td>世界里有哪几类对象？</td></tr><tr><td>domain</td><td><code>:predicates</code></td><td>程序可以描述哪些关系？</td></tr><tr><td>domain</td><td><code>:action</code></td><td>允许怎样改变状态？</td></tr><tr><td>action</td><td><code>:parameters / :precondition / :effect</code></td><td>作用于谁？何时能做？做完变什么？</td></tr><tr><td>problem</td><td><code>:objects</code></td><td>这一次具体有谁？</td></tr><tr><td>problem</td><td><code>:init</code></td><td>现在什么是真的？</td></tr><tr><td>problem</td><td><code>:goal</code></td><td>结束时哪些要求必须成立？</td></tr></tbody></table></div>
+      <h3>把一个动作逐行翻译回来</h3>
+      <pre class="d3-code"><code>(:action move
+  :parameters (?r - robot ?from ?to - room ?d - door)
+  :precondition (and
+    (at ?r ?from)
+    (connected ?from ?to ?d)
+    (opened ?d)
+    (can-move ?r))
+  :effect (and
+    (at ?r ?to)
+    (not (at ?r ?from))))</code></pre>
+      <p><code>?r</code> 是待填入的机器人参数，<code>?from / ?to</code> 是起点和终点参数。把它们分别填成 r、a、b、d，就得到具体动作 <code>(move r a b d)</code>。这一步叫<strong>实例化／grounding</strong>，即把“谁从哪里去哪里”的模板变成这一次的动作。</p>
+      <p><code>:effect</code> 里的 <code>(not (at ?r ?from))</code> 表示删除旧事实。它没有说“再去执行一次移动”，也没有让房间消失。代码里的连接关系是声明的符号连接；本例没有把门净宽、姿态与整条运动路径直接写进这个 move 前置。</p>
+      <details><summary>为什么只教这部分 PDDL，不一开始就放全部语法？</summary><p>这里使用带类型的 STRIPS 子集：正前置条件、增加／删除效果、有限对象、确定性瞬时动作、完全已知初态。不同规划器支持的 PDDL 扩展不同。时长、代价、数值量、条件效果或不确定性，需要相应语言与求解方法支持；先把最小例子的语义学准，再逐项扩展。</p></details>
+      <details class="self-check"><summary>先自己说：增加一间 C 房间，与增加“拿钥匙”动作，分别主要改哪里？</summary><p>新增具体房间和连接，主要修改 problem 的对象与初态；新增一种状态改变方式，需要修改 domain 的动作规则，必要时补谓词。当前域没有拿钥匙动作，因此不能假设搜索会自动发明它。</p></details>
+      <p class="source-note">来源：<a href="#source-pddl">PDDL 原讲义与指定阅读入口</a>。完整可运行代码见 <a href="examples/day-03/pddl/domain.pddl">domain.pddl</a> 与 <a href="examples/day-03/README.md">实验说明</a>。</p>
+    </section>
+
+    <section id="search" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>05</span> 从当前状态，寻找能到达目标的动作序列</div>
+      <h2>计划不是猜出来的：<br class="desktop-break">从合法动作一步步展开。</h2>
+      <p>你刚才已经手工做了规划器最核心的三件事：读当前事实，检查动作前置，计算后继状态。接下来让程序把这些步骤组织起来，查找能满足目标的路线。</p>
+      <ol class="reasoning-steps"><li><strong>从初态开始。</strong>先问目标是否已经成立；若成立，空计划就够了。</li><li><strong>列出可用动作。</strong>前置不成立的动作不能当作合法后继。</li><li><strong>应用动作，得到新状态。</strong>保留它来自哪个状态、用了哪个动作。</li><li><strong>继续展开。</strong>找到目标后沿来路还原计划；已经看过的同一状态不必反复展开。</li></ol>
+      <div class="try-this"><span>动手看</span><p>选择标准初态，逐次展开搜索。看到 move 还不可用时，找出缺少的事实。再切到“没有钥匙”，观察搜索如何结束。</p></div>
+      <figure class="interactive-figure"><div id="day3-search" class="d3s">
+  <div class="d3s-heading"><h3>让程序按层寻找动作序列</h3><span class="d3s-method">本有限状态域的真实 BFS</span></div>
+  <p class="d3s-intro">每点一次，程序从等待队列取出一个状态，先检查目标，再尝试本例的动作。观察不满足前置的动作被拒绝、重复状态被跳过。</p>
+  <label class="d3s-label" for="d3s-search-preset">先预测：这个起点能到达目标吗？<select id="d3s-search-preset" class="d3s-select"><option value="success">标准初态 · 门上锁，钥匙与能力齐全</option><option value="missing_key">缺少钥匙</option><option value="no_grasp">没有拿杯能力</option><option value="already_open">门一开始就打开了</option></select></label>
+  <div class="d3s-buttons"><button type="button" class="d3s-button d3s-button-primary" id="d3s-search-step">展开下一个状态</button><button type="button" class="d3s-button" id="d3s-search-run">运行到结果</button><button type="button" class="d3s-button" id="d3s-search-reset">从初态重来</button></div>
+  <div class="d3s-search-summary"><div><span class="d3s-small-label">已发现不同状态</span><strong id="d3s-search-seen">1</strong></div><div><span class="d3s-small-label">已取出检查</span><strong id="d3s-search-expanded">0</strong></div><div><span class="d3s-small-label">现在的结论</span><strong id="d3s-search-status">尚在搜索</strong></div></div>
+  <div class="d3s-queue"><span class="d3s-small-label">等待队列 · 左侧先取出</span><div id="d3s-search-queue" class="d3s-queue-items"></div></div>
+  <div class="d3s-search-columns"><div><span class="d3s-small-label">按动作数分层的已发现状态</span><div class="d3s-levels" id="d3s-search-levels"></div></div><div><span class="d3s-small-label">本次取出的状态</span><div class="d3s-current-state" id="d3s-search-current"></div><details class="d3s-details"><summary>完整状态事实</summary><ul class="d3s-fact-chips" id="d3s-search-facts"></ul></details></div></div>
+  <details class="d3s-details" open><summary>本次各动作为什么被保留或排除？</summary><ul class="d3s-search-candidates" id="d3s-search-candidates"></ul></details>
+  <div class="d3s-callout" id="d3s-search-explanation"></div>
+  <div id="d3s-search-plan-box" hidden><h4 class="d3s-plan-heading">沿父节点回溯，得到这个候选计划</h4><ol class="d3s-plan" id="d3s-search-plan"></ol></div>
+  <p class="d3s-boundary">这段 JavaScript 对页面明确给出的两房间、一个门和四类动作进行完整前向搜索，没有读取任意 PDDL 文件。每个动作代价均为 1，因此 BFS 找到最少动作数的符号计划；这不等于时间最短或运动最省。只有队列穷尽且未发现目标，才报告这个有限模型无计划。</p>
+  <div class="d3s-sr" id="d3s-search-live" role="status" aria-live="polite" aria-atomic="true"></div>
+</div><figcaption>浏览器实际执行这个有限门杯域的广度优先搜索。它按状态而不是按屏幕位置去重；Python 实验另用 Pyperplan 读取 PDDL 并搜索。</figcaption></figure>
+      <h3>广度优先搜索 BFS，在这里是什么意思？</h3>
+      <p>先检查能用 0 步达到的状态，再检查 1 步、2 步……待展开状态放在一个<strong>先进先出队列</strong>里。每次从队头取一个，把新的后继放到队尾。这个例子有限、每个动作成本相同，因此找到的第一条计划具有最少动作步数。</p>
+      <p>“步数最少”没有自动等于路程最短、耗时最少或能耗最低。一次 move 可能实际要走很远，一次 pickup 可能要反复调整手。若你关心这些成本，要改变模型、目标和相应搜索方法。</p>
+      <h3>为什么不能把“这个动作失败”当成“整个任务无解”？</h3>
+      <p>初态直接 move 不合法，但先解锁、开门以后就可能合法。拒绝一个动作，只排除了这个时刻的这个选择。本例 BFS 会继续检查其他可达状态；当待展开队列耗尽，仍没有找到目标状态时，才报告<strong>此有限模型中没有计划</strong>。其他规划方法也可能用不同方式证明无解。</p>
+      <p>缺钥匙案例的结论依赖一个条件：当前没有拿钥匙、借钥匙、绕路或其他能产生相应前置的动作。现实中是否存在这些方法，要先把它们的条件和效果纳入模型，再重新判断。</p>
+      <details><summary>为什么还要记住“已经见过的状态”？</summary><p>门打开以后，机器人可能从 A 到 B，再从 B 回 A。若状态中的其他事实都没变，就回到了曾经见过的同一个状态。重复展开不会产生新的可能性。去重还会避免“对已经打开的门再做 open”这样的状态不变操作把搜索拖成无限循环。</p></details>
+      <details class="self-check"><summary>先自己说：目标已经在初态成立，正确答案应是几步？</summary><p>零步。空动作序列和“没有找到计划”不同：前者不需要做事就满足目标，后者表示搜索没有找到达成目标的序列。程序不能把空列表与失败混成同一个结果。</p></details>
+      <p class="source-note">任务规划作为状态搜索，见 <a href="#source-mit">MIT 官方讲义</a>；本例 BFS 与支持范围见 <a href="#source-code">Pyperplan 官方实现</a>。</p>
+    </section>
+
+    <section id="fsm" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>06</span> 执行逻辑与目标搜索，可以一起用</div>
+      <h2>FSM 管过程，规划器找办法。</h2>
+      <p><strong>有限状态机 FSM</strong> 用有限个状态和转换规则表达系统行为。你在 UE 中可能见过角色“待机、移动、交互”的状态机。进入哪个状态、收到什么事件再转到哪里，都需要定义。</p>
+      <p>例如已经拿到一条计划，执行器当前“等待开门反馈”。只有收到成功反馈才进入下一步；收到失败反馈则停止推进、更新状态或请求重规划。<strong>发出了开门请求，不等于收到了开门成功。</strong></p>
+      <div class="try-this"><span>动手看</span><p>先发出一个动作请求，再分别尝试“成功反馈”和“失败反馈”。留意计划指针什么时候前进，什么时候停在当前步骤。</p></div>
+      <figure class="interactive-figure"><div id="day3-fsm" class="d3p-root">
+  <div class="d3p-heading"><strong>动作请求之后，先等到反馈</strong><span>预先给定四步计划 · 由你提供教学反馈事件</span></div>
+  <div class="d3p-executor-layout">
+    <svg id="d3p-fsm-scene" class="d3p-fsm-diagram" viewBox="0 0 560 310" role="img" aria-labelledby="d3p-fsm-title d3p-fsm-desc"><title id="d3p-fsm-title">计划执行器的有限状态机</title><desc id="d3p-fsm-desc">准备时可发出动作，随后等待反馈。成功反馈推进计划；失败进入待复核状态，重新确认状态后才能继续。最后一步成功后结束。</desc></svg>
+    <div><span class="small-label">已经选定的动作序列</span><ol id="d3p-fsm-plan" class="d3p-plan-list"></ol><p id="d3p-fsm-pointer" class="d3p-small"></p></div>
+  </div>
+  <div class="d3p-tabs" role="group" aria-label="给执行器一个事件"><button class="btn btn-primary" type="button" id="d3p-fsm-send">发出当前动作请求</button><button class="btn" type="button" id="d3p-fsm-success">收到成功反馈</button><button class="btn" type="button" id="d3p-fsm-failure">收到失败反馈</button><button class="btn" type="button" id="d3p-fsm-observe">演示：重新确认上一状态</button><button class="btn" type="button" id="d3p-fsm-reset">从初态重来</button></div>
+  <div class="d3p-focus"><strong id="d3p-fsm-status"></strong><p id="d3p-fsm-explanation"></p></div>
+  <details class="d3p-details"><summary>查看事件记录</summary><ol id="d3p-fsm-log" class="d3p-event-log"></ol></details>
+  <p class="d3p-small">这里不自动“假装成功”。你点击的反馈是示例输入。失败后保留计划进度，不宣称真实世界未变化；实际系统还需要观测、校验和相应恢复策略。</p>
+  <div id="d3p-fsm-live" class="sr-only" role="status" aria-live="polite"></div>
+</div><figcaption>这是计划执行器的事件驱动教学状态机。反馈由你点击提供，用于理解接口；它没有读取真实传感器。</figcaption></figure>
+      <div class="table-wrap"><table><caption>这些名词的角色不同，可以组成一个系统</caption><thead><tr><th>名称</th><th>它是什么</th><th>本例承担的事情</th></tr></thead><tbody><tr><td>FSM</td><td>表示状态与转换的方式，可用于行为控制</td><td>等待反馈、继续、停止、恢复</td></tr><tr><td>PDDL</td><td>规划问题的描述语言</td><td>声明初态、目标、谓词和动作规则</td></tr><tr><td>任务规划器</td><td>根据模型求计划的程序</td><td>寻找 unlock → open → move → pickup 等序列</td></tr><tr><td>TAMP</td><td>结合任务与运动可行性的规划问题与方法体系</td><td>把离散动作选择与连续姿态／轨迹检查联动起来</td></tr></tbody></table></div>
+      <p>这不是三种互斥选项。FSM 也可以表示环境状态转换；规划得到的动作序列也可以交给 FSM 执行。有些系统还能把计划编成策略。这里的区别是<strong>当前把哪部分规则交给人写，哪部分交给搜索，怎样接收执行反馈</strong>。</p>
+      <details class="self-check"><summary>先自己说：为什么动作超时后，不能直接把预期效果写成真实状态？</summary><p>超时只说明在当前等待范围内没有确认成功。门可能没打开，也可能打开但反馈丢失。应依据后续观察确认状态；不能仅因为计划里写了 opened，就把它当成真实已发生的事实。</p></details>
+      <p class="source-note">FSM、任务级策略与规划的组合方式，见 <a href="#source-mit">MIT · Programming the Task Level</a>。</p>
+    </section>
+
+    <section id="motion" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>07</span> 从离散动作，走回连续空间</div>
+      <h2>“开门、过去、拿起”，<br class="desktop-break">还没有告诉身体怎样运动。</h2>
+      <p>到这里，符号规划器只知道机器人在某个房间、门的状态、物体属性与声明的能力。真实动作还要选择<strong>底座站在哪里、每个关节转多少、手从哪条路线接近、整段运动会不会碰撞</strong>。</p>
+      <p><strong>离散</strong>选择例如“先开门还是先拿物品”；<strong>连续</strong>量例如站位坐标、关节角和随时间变化的运动。把 move 写进计划，只选定了高层动作，不能代替这些具体量。</p>
+      <h3>第一件事：门开了，身体宽度是否放得下？</h3>
+      <p>先把机器人简化成俯视图里的圆盘。门洞沿横向的可用区间是 [L,U]，机器人直径 b，每侧留余量 s。圆盘中心必须落在 <code>[L + b/2 + s, U − b/2 − s]</code> 里，整个身体和余量才会留在门洞内。</p>
+      <div class="try-this"><span>动手看</span><p>先减小门宽，再移动机器人中心。分开回答：是否存在一个能通过的中心位置？当前选择的中心位置是否合格？展开路径对照，再看为什么起终点合法仍不够。</p></div>
+      <figure class="interactive-figure"><div id="day3-clearance" class="d3g-root">
+  <div class="d3g-heading"><strong>门能容下机器人，当前中心线也要选对</strong><span>俯视图 · 圆盘身体 · 门已经打开 · 只检查这个门截面</span></div>
+  <div class="d3g-workbench">
+    <div class="d3g-picture">
+      <svg class="d3g-scene d3g-clearance-scene" role="img" aria-labelledby="d3g-clearance-title d3g-clearance-desc"><title id="d3g-clearance-title">门洞与机器人中心允许区间</title><desc id="d3g-clearance-desc">墙上的缺口是门洞，实心圆表示圆盘机器人，虚线圆额外包含每侧余量。绿色短线表示穿门时机器人中心允许经过的位置。</desc></svg>
+      <div class="d3g-legend"><span><i class="d3g-key-body"></i>身体</span><span><i class="d3g-key-safe"></i>中心允许区间</span><span><i class="d3g-key-margin"></i>身体加余量</span></div>
+    </div>
+    <div class="d3g-proof">
+      <ol class="d3g-truth-list" id="d3g-clearance-checks" aria-label="存在性与当前位置分别检查"></ol>
+      <div class="d3g-result" id="d3g-clearance-result" aria-live="off"></div>
+      <p class="d3g-explanation" id="d3g-clearance-explanation"></p>
+    </div>
+  </div>
+  <div class="d3g-controls">
+    <label class="form-label" for="d3g-clearance-door">门净宽 d <output id="d3g-clearance-door-value" aria-live="off">0.90 m</output><input class="form-range" id="d3g-clearance-door" type="range" min="30" max="140" step="5" value="90"></label>
+    <label class="form-label" for="d3g-clearance-body">圆盘直径 b <output id="d3g-clearance-body-value" aria-live="off">0.60 m</output><input class="form-range" id="d3g-clearance-body" type="range" min="20" max="100" step="5" value="60"></label>
+    <label class="form-label" for="d3g-clearance-margin">每侧余量 s <output id="d3g-clearance-margin-value" aria-live="off">0.10 m</output><input class="form-range" id="d3g-clearance-margin" type="range" min="0" max="30" step="5" value="10"></label>
+    <label class="form-label" for="d3g-clearance-offset">中心相对门中点的偏移 c <output id="d3g-clearance-offset-value" aria-live="off">0.00 m</output><input class="form-range" id="d3g-clearance-offset" type="range" min="-80" max="80" step="5" value="0"></label>
+  </div>
+  <div class="viz-row" role="group" aria-label="比较净宽和中心位置"><button class="btn" type="button" data-d3g-clearance="aligned">居中通过</button><button class="btn" type="button" data-d3g-clearance="offcenter">门够宽，但线偏了</button><button class="btn" type="button" data-d3g-clearance="narrow">门本身太窄</button><button class="btn" type="button" data-d3g-clearance="touch">零余量、恰好贴边</button></div>
+  <details class="d3g-details"><summary>图上的绿色区间从哪里来？</summary><p>把门洞写为 [L, U]。圆盘半径是 b/2，左右都要留 s，所以中心必须满足 <strong>L + b/2 + s ≤ c ≤ U − b/2 − s</strong>。这个区间非空，等价于 d ≥ b + 2s。当前中心还必须落在区间里。</p><p>滑条内部使用厘米数值，显示为米；端点采用“≥ / ≤”，允许等号。本模型是圆盘通过一条固定直门缝，不涉及旋转瘦身、门扇运动、墙厚、转弯或动力学。零余量只是明确允许贴边的数学示例。</p></details>
+  <details class="d3g-details d3g-path-details"><summary>再看一步：起点和终点都安全，途中也安全吗？</summary>
+    <div class="d3g-heading"><strong>同一起终点，两条不同折线</strong><span>圆盘机器人半径 0.20 m；圆障碍半径 0.35 m；额外余量 0.05 m</span></div>
+    <svg class="d3g-path-scene" role="img" aria-labelledby="d3g-path-title d3g-path-desc"><title id="d3g-path-title">直线路径与绕障路径的连续几何检查</title><desc id="d3g-path-desc">起点和终点都位于圆形障碍之外。直线路径穿过障碍，预先给定的绕行折线避开障碍。每段都按点到线段的最小距离检查整个线段。</desc></svg>
+    <div class="viz-row" role="group" aria-label="选择一条待检查的轨迹"><button class="btn" type="button" data-d3g-path="straight" aria-pressed="true">检查直线</button><button class="btn" type="button" data-d3g-path="detour" aria-pressed="false">检查给定绕行折线</button></div>
+    <div class="d3g-result" id="d3g-path-result" aria-live="off"></div><p id="d3g-path-explanation" class="d3g-explanation"></p>
+    <p class="d3g-note">这里对每条线段计算到圆障碍中心的最小距离，再比较 0.35 + 0.20 + 0.05 = 0.60 m，并非只抽查几个采样点。只比较两条已给定的路径，没有自动搜索所有路线，也没有检查其他墙体、时间和机器人控制。</p>
+  </details>
+  <div class="sr-only" id="d3g-clearance-live" role="status" aria-live="polite"></div>
+</div><figcaption>圆盘、门洞与给定路径的受限二维解析检查。允许接触或余量规则在组件内明确；真实机器人形状、门扇运动和接触控制需要另外建模。</figcaption></figure>
+      <p>门宽至少为 <code>b + 2s</code>，这个中心区间才非空。它给出了当前圆盘模型的尺寸条件；如果改成能够转向的长方形机器人，允许姿态也会影响通过性，就不能把这条固定圆盘结论原样照搬。</p>
+      <h3>第二件事：手能不能到达门把？</h3>
+      <p><strong>逆运动学 IK</strong> 要解决的是：给定末端的目标位置或姿态，寻找符合要求的关节配置。Day 4 会细讲；今天先用两段手臂看懂“有目标位置”和“身体够得着”的区别。</p>
+      <div class="try-this"><span>动手看</span><p>把门把手向上移动，看看什么时候超出可达区域。再切换两种肘部姿态：同一个目标点，为什么可以对应不同关节配置？</p></div>
+      <figure class="interactive-figure"><div id="day3-reach" class="d3g-root">
+  <div class="d3g-heading"><strong>把手在那里，末端点够得到吗？</strong><span>侧视二维模型 · 两根杆长度固定为 0.55 m 和 0.45 m</span></div>
+  <div class="d3g-workbench">
+    <div class="d3g-picture"><svg class="d3g-scene d3g-reach-scene" role="img" aria-labelledby="d3g-reach-title d3g-reach-desc"><title id="d3g-reach-title">平面双连杆的末端位置可达区域</title><desc id="d3g-reach-desc">基座高零点七米。绿色环带表示忽略关节限位、碰撞和末端朝向时的点可达区域。目标在环带内时，显示解析计算的连杆姿态；目标在环带外时不绘制虚构到达姿态。</desc></svg>
+      <div class="d3g-legend"><span><i class="d3g-key-safe"></i>末端点可达环带</span><span><i class="d3g-key-body"></i>当前肘形</span><span><i class="d3g-key-target"></i>把手目标点</span></div>
+    </div>
+    <div class="d3g-proof"><ol class="d3g-truth-list" id="d3g-reach-checks" aria-label="目标距离与可达条件"></ol><div class="d3g-result" id="d3g-reach-result" aria-live="off"></div><p class="d3g-explanation" id="d3g-reach-explanation"></p><p class="d3g-note" id="d3g-reach-branches"></p></div>
+  </div>
+  <div class="d3g-controls">
+    <label class="form-label" for="d3g-reach-x">把手与基座的水平距离 x <output id="d3g-reach-x-value" aria-live="off">0.50 m</output><input class="form-range" id="d3g-reach-x" type="range" min="0" max="140" step="5" value="50"></label>
+    <label class="form-label" for="d3g-reach-height">把手高度 h <output id="d3g-reach-height-value" aria-live="off">1.10 m</output><input class="form-range" id="d3g-reach-height" type="range" min="0" max="220" step="5" value="110"></label>
+  </div>
+  <div class="viz-row" role="group" aria-label="选择把手位置"><button class="btn" type="button" data-d3g-reach="reachable">目标在环带内</button><button class="btn" type="button" data-d3g-reach="high">把手太高</button><button class="btn" type="button" data-d3g-reach="close">离基座太近</button><button class="btn" type="button" data-d3g-reach="edge">恰好完全伸直</button></div>
+  <div class="viz-row" role="group" aria-label="比较两个解析肘形"><button class="btn" type="button" data-d3g-elbow="0" aria-pressed="true">肘形 A</button><button class="btn" type="button" data-d3g-elbow="1" aria-pressed="false">肘形 B</button><span class="d3g-note">同一个目标点，可能对应不同关节姿态。</span></div>
+  <details class="d3g-details"><summary>先看懂圆环；想知道原因时再展开公式</summary><p>两根杆完全伸直，最远是 L₁ + L₂ = 1.00 m；尽量折回，最近是 |L₁ − L₂| = 0.10 m。因此目标到基座的距离 r 必须满足 <strong>0.10 ≤ r ≤ 1.00 m</strong>。把手高度先减去基座高度：r² = x² + (h − 0.70)²。</p><p>这里还能解析求出关节角：cos(q₂) = (r² − L₁² − L₂²)/(2L₁L₂)，q₂ 可取正、负两支，再由几何关系求 q₁。普通位置有两种肘形；伸直或折叠边界上，它们可能重合。Day 4 再系统学习正运动学与逆运动学，今天先理解输入目标与可达条件。</p></details>
+  <p class="d3g-note">本演示只有二维位置、理想转动关节和固定连杆长度；未检查关节限位、杆与地面/障碍物碰撞、末端朝向、抓握把手、开门力矩或完整运动路径。环带内只说明此模型的末端点存在位置解；环带外的解析排除也只适用于这些假设。</p>
+  <div class="sr-only" id="d3g-reach-live" role="status" aria-live="polite"></div>
+</div><figcaption>平面两转动关节、固定基座、无关节限位的解析示意，只检查末端点位置。它没有验证末端朝向、连杆碰撞、握住门把后的开门运动或真实执行。</figcaption></figure>
+      <details><summary>愿意多走一步，再看这个环带的公式</summary><p>两杆长度为 L₁、L₂，目标到基座的距离为 r。完全伸直时最远到 L₁+L₂；允许自由折叠时，最近到 |L₁−L₂|。所以末端点的可达条件是 <code>|L₁−L₂| ≤ r ≤ L₁+L₂</code>。本图只在这个理想模型里用解析公式求肘上／肘下配置。</p><p>可达区域的中心是手臂基座，不是地面原点。基座有高度时，要先用“门把高度减基座高度”计算竖直距离。这和 Day 1 统一坐标系的要求相连。</p></details>
+      <h3>第三件事：起点和终点都合法，中间能连起来吗？</h3>
+      <p>手在起点不碰墙、在终点也不碰墙，直线过去时仍可能穿墙。<strong>运动规划</strong>需要找到符合所建模约束的整条路径或轨迹。若还关心速度、加速度与动力学，也要将相应条件纳入；一条画在图上的线没有自动提供这些保证。</p>
+      <p>再把 Day 1 的机械臂构型 q 想起来：路径可以看作一串连续变化的 q；给路径配上时间，就能描述何时处在什么配置。这里先理解“全程要检查”，不要求今天推导轨迹优化。</p>
+      <details class="self-check"><summary>先自己说：IK 求解器一次没有找到解，能断言门把绝对够不到吗？</summary><p>不能一概而论。当前解析两杆模型可以按距离边界证明点不可达；一般数值 IK 或运动规划可能因初值、局部极小、采样或时间预算没有找到解。需要区分几何证明、候选被拒绝和搜索尚未找到结果，并报告实际证据。</p></details>
+      <p class="source-note">IK、轨迹与求解失败的边界见 <a href="#source-motion">MIT · Motion Planning</a>。圆盘净宽、两杆环带与线段碰撞演示为本教程的解析实例。</p>
+    </section>
+
+    <section id="tamp" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>08</span> Task and Motion Planning · 任务与运动规划</div>
+      <h2>高层说“开门”，<br class="desktop-break">低层需要带回具体证据。</h2>
+      <p><strong>TAMP</strong> 把任务层的动作选择，与运动层的连续可行性结合起来。运动失败会影响高层选择；高层改变动作、对象或顺序，又会产生新的运动问题。两部分需要交换信息。</p>
+      <p>例如一个抓取姿态能拿起杯子，却让杯子无法穿过狭窄区域，后续搬运动作就反过来约束前面的抓取选择。为每一步分别随便找一个姿态，还不一定能拼成同一条完整计划。</p>
+      <div class="try-this"><span>动手看</span><p>先看标准世界；再选缺钥匙、窄门或把手过高，逐步推进检查。留意反馈指出的动作、对象和具体条件。若修改门宽或把手高度，再比较世界版本与重新检查结果。</p></div>
+      <figure class="interactive-figure"><div id="day3-feedback" class="d3g-root">
+  <div class="d3g-heading"><strong>一次拒绝，要连同条件一起送回去</strong><span>固定四动作教学流程 · 可以逐步查看 · 没有真实机器人执行</span></div>
+  <div class="viz-row" role="group" aria-label="选择反馈场景"><button class="btn" type="button" data-d3g-feedback="standard" aria-pressed="true">条件齐全</button><button class="btn" type="button" data-d3g-feedback="missing_key" aria-pressed="false">钥匙缺失</button><button class="btn" type="button" data-d3g-feedback="narrow" aria-pressed="false">门太窄</button><button class="btn" type="button" data-d3g-feedback="high" aria-pressed="false">把手太高</button></div>
+  <div class="d3g-world-heading"><strong id="d3g-feedback-version">输入世界 v1</strong><span>机器人在 A；杯子在 B；门初始锁住且未打开</span></div>
+  <dl class="d3g-input-facts" id="d3g-feedback-inputs" aria-label="当前世界的输入"></dl>
+  <ol class="d3g-feedback-stages" id="d3g-feedback-stages" aria-label="计划、检查和反馈的六个阶段"></ol>
+  <div class="d3g-focus-panel"><span class="d3g-step-label" id="d3g-feedback-step-label"></span><h3 id="d3g-feedback-step-title"></h3><p id="d3g-feedback-step-explanation"></p><div id="d3g-feedback-evidence" class="d3g-evidence"></div></div>
+  <div class="viz-row" role="group" aria-label="控制反馈推演步骤"><button class="btn" id="d3g-feedback-previous" type="button" disabled>上一步</button><button class="btn btn-primary" id="d3g-feedback-next" type="button">下一步</button><button class="btn" id="d3g-feedback-all" type="button">查看到最后</button><button class="btn" id="d3g-feedback-reset" type="button">重新查看原输入</button></div>
+  <div class="d3g-revision"><strong>如果决定修改输入，保留原来的失败</strong><p id="d3g-feedback-revision-explanation" class="d3g-explanation"></p><button class="btn" id="d3g-feedback-revise" type="button" disabled>此例无几何修订项</button><p id="d3g-feedback-history" class="d3g-note" hidden></p></div>
+  <details class="d3g-details"><summary>为什么这里没有“一键重规划就成功”？</summary><p>当前符号域只有 unlock、open、move、pickup，没有获取钥匙、调用人类或其他通道的动作。钥匙缺失时，不能在计划中凭空多出一把钥匙；单纯再次搜索同一个域和初态，也不会创造新动作。</p><p>如果真实场景已有另一条可用路线，可以保持要求不变，寻找不同的动作序列和运动候选。若要扩大门洞或降低把手，则更改了几何输入，应记为新世界版本并重新验证；不能把新版本通过说成原版本已经通过。</p><p>本组件按固定教学规则和前两个演示的解析条件推演，不是通用 PDDL/TAMP 求解器。一次采样失败、IK 数值算法失败或规划超时通常也不足以证明所有连续方案均不存在；这里门宽与环带之外的拒绝有明确的几何条件与适用范围。</p></details>
+  <div class="sr-only" id="d3g-feedback-live" role="status" aria-live="polite"></div>
+</div><figcaption>本图示范任务与运动检查之间的信息往返。它只实现明确列出的符号及解析条件，帮助读懂接口；完整 TAMP 算法还涉及连续参数搜索、动作耦合和执行监测。</figcaption></figure>
+      <h3>一个有用的失败反馈，至少说清五件事</h3>
+      <div class="d3-feedback-example"><dl><div><dt>在哪个世界</dt><dd>world-v1，门 D 的净宽为 0.50 m</dd></div><div><dt>哪个动作／对象</dt><dd>move(r,a,b,d)，通过门 D</dd></div><div><dt>哪条条件</dt><dd>圆盘机器人直径 0.60 m；此例余量为 0</dd></div><div><dt>什么证据</dt><dd>0.50 &lt; 0.60，因此这个固定圆盘无法通过该净宽</dd></div><div><dt>结论范围</dt><dd>阻止通过这扇门；不自动否定其他门、其他机器人或改变后的环境</dd></div></dl></div>
+      <p>同样叫“失败”，可能是很不同的证据。要给上层的是可解释的条件、上下文与范围，不能把一次数值求解失败扩大成“这个对象永远不能用”。</p>
+      <div class="table-wrap"><table><caption>遇到问题后，下一步应该改什么？</caption><thead><tr><th>情况</th><th>可讨论的下一步</th><th>需要保留的区别</th></tr></thead><tbody><tr><td>当前状态没有钥匙</td><td>若已有合法取钥匙动作，就把它纳入计划</td><td>缺少该动作时，当前模型不会自动发明它</td></tr><tr><td>机器人没有开锁技能</td><td>重新定义任务／能力配置，或选择已具备的替代动作</td><td>不能把“没有钥匙”和“不会开锁”混成一个条件</td></tr><tr><td>当前通道不适合该身体尺寸</td><td>若存在其他路线，可重新选择；否则讨论环境或任务修订</td><td>扩大门洞改变了世界输入，原世界并未因此被证明可行</td></tr><tr><td>某个运动候选失败</td><td>换站位、抓取或轨迹，按失败证据重新检查</td><td>未找到解与证明无解，需要不同表述</td></tr><tr><td>执行结果与预测不同</td><td>观测新状态、定位原因、重规划或停止</td><td>不能继续沿用已经过时的状态</td></tr></tbody></table></div>
+      <h3>和昨天的 Z3，应该怎样连接？</h3>
+      <p>在这个学习流程中，Z3 可以帮助检查或求解明确编码的几何与逻辑要求；PDDL 描述状态和动作，规划器搜索序列；运动模块处理姿态、碰撞与路径。它们交换结构化输入与结果。</p>
+      <p>这个分工是我们的系统设计选择，不是说“Z3 天生只能处理几何”或“PDDL 一个布尔量就能替代全部碰撞计算”。规划也可以编码成 SAT／SMT；几何检查也可以把带上下文的结果交回任务层。关键是接口中的每个字段究竟承诺了什么。</p>
+      <details class="self-check"><summary>先自己说：为什么“重新规划”与“把门加宽”不能写成同一类修复？</summary><p>重新规划通常是在既定世界、能力和目标下重新选择动作及其参数；把门加宽直接改变环境几何。若允许环境编辑，它也可以被明确定义为一个带成本、约束和验证的动作，但不能在原模型没有该动作时偷偷修改输入并声称原任务已解决。</p></details>
+      <p class="source-note">TAMP 的离散与连续耦合依据 <a href="#source-tamp">Garrett 等人的 TAMP 综述</a>与 <a href="#source-mit">MIT 课程</a>。反馈字段与门杯修订流程为本教程的具体化示例。</p>
+    </section>
+
+    <section id="experiments" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>09</span> 看真实输入、真实输出，以及它检查了什么</div>
+      <h2>把同一个小世界，<br class="desktop-break">交给真实程序跑一遍。</h2>
+      <p>这里提供两组不同用途的真实记录。第一组由 <strong>Pyperplan 读取 PDDL 并执行 BFS</strong>，展示动作序列及每一步状态。第二组运行学习仓库原来的 <strong>MiniLab 受限检查器</strong>，展示锁、钥匙、能力与几何规则的判定。</p>
+      <p>两者做的事情不同：前者实际搜索了计划；原 MiniLab 主要检查声明的条件和图上的可达性，没有生成 unlock/open/move/pickup 动作轨迹。看到相同的“可行”字样，需要继续问它验证到了哪一层。</p>
+      <div class="try-this"><span>动手看</span><p>先读输入变化，写下预测，再展开记录。重点比较“缺钥匙”“钥匙和能力齐全”“门变窄”：哪些会影响符号计划，哪些需要后面的几何检查？</p></div>
+      <figure class="interactive-figure"><div id="day3-records" class="d3p-root">
+  <div class="d3p-record-error" role="alert" hidden></div>
+  <div class="d3p-record-content">
+    <div class="d3p-heading"><strong>先读输入，再核对本次实际输出</strong><span>真实 PDDL 搜索与原 MiniLab 规则记录，各自显示检查范围</span></div>
+    <div class="d3p-tabs" role="group" aria-label="选择实验类别"><button class="btn" type="button" data-d3p-record-kind="planning" aria-pressed="true">PDDL · 搜索动作序列</button><button class="btn" type="button" data-d3p-record-kind="minilab" aria-pressed="false">MiniLab · 检查受限规则</button></div>
+    <label class="form-label" for="d3p-record-case">选择一个实际运行案例<select class="form-select" id="d3p-record-case"></select></label>
+    <h3 id="d3p-record-title"></h3><ul id="d3p-record-changes" class="d3p-changes"></ul>
+    <p class="d3p-small" id="d3p-record-input-scope"></p>
+    <details class="d3p-details"><summary>先查看完整输入与目标</summary><pre class="d3-code"><code id="d3p-record-input"></code></pre></details>
+    <label class="form-label" for="d3p-record-prediction">我的预测与理由<textarea class="form-control" id="d3p-record-prediction" rows="2" placeholder="关键条件是什么？哪一个模块会发现它？"></textarea></label>
+    <p class="d3p-small">此处预测只在当前页面暂存；需要保留时可复制到页末笔记。</p>
+    <button class="btn btn-primary" id="d3p-record-reveal" type="button" aria-expanded="false" aria-controls="d3p-record-output">展开这次真实记录</button>
+    <div id="d3p-record-output" class="d3p-record-output" hidden>
+      <div class="d3p-result-line"><strong id="d3p-record-status"></strong><span id="d3p-record-time"></span></div>
+      <p id="d3p-record-interpretation"></p>
+      <p class="d3p-small" id="d3p-record-reason" hidden></p>
+      <div id="d3p-record-planning">
+        <div id="d3p-record-plan" class="d3p-plan-ribbon" aria-label="本次返回的动作序列"></div>
+        <div id="d3p-record-trace-controls" class="d3p-tabs"><button class="btn" id="d3p-record-prev" type="button">上一步状态</button><span id="d3p-record-step" class="d3p-small"></span><button class="btn" id="d3p-record-next" type="button">下一步状态</button></div>
+        <svg id="d3p-record-world" class="d3p-world" role="img" aria-labelledby="d3p-record-world-title d3p-record-world-desc"><title id="d3p-record-world-title">真实计划的符号状态示意</title><desc id="d3p-record-world-desc">画面根据本次记录的事实集合更新，不是机器人物理轨迹。</desc></svg>
+        <p id="d3p-record-world-note" class="d3p-small"></p>
+        <div class="d3p-effect-grid"><div><h4>本步新增</h4><div id="d3p-record-added"></div></div><div><h4>本步删除</h4><div id="d3p-record-removed"></div></div></div>
+        <details class="d3p-details"><summary>此刻的完整事实</summary><div id="d3p-record-facts" class="d3p-facts"></div></details>
+      </div>
+      <div class="d3p-focus"><strong>后续检查与执行</strong><p id="d3p-record-geometry"></p><p class="d3p-small" id="d3p-record-execution"></p></div>
+      <details class="d3p-details"><summary>这一例的完整原始 JSON</summary><pre class="d3-code"><code id="d3p-record-json"></code></pre></details>
+    </div>
+    <p class="d3p-small" id="d3p-record-environment"></p>
+  </div>
+  <div id="d3p-record-live" class="sr-only" role="status" aria-live="polite"></div>
+</div><figcaption>固定的制作环境运行记录，保留程序、版本、输入、计划或原因和耗时。交互查看记录不会重新启动 Python。</figcaption></figure>
+      <h3>为什么原 MiniLab 会把“有钥匙 + 会解锁”的锁门当作可用？</h3>
+      <p>这是它的简化规则：若钥匙匹配且声明具备 unlock 能力，就把这条门连接加入可用边。它没有真的调用开锁动作，也没有把输入的 locked 改成 false，更没有检查手臂是否能到达门把。</p>
+      <p>因此，<code>rule_feasible</code> 应读作“这些受限规则通过”。<code>blocked_state</code>、<code>blocked_action</code>、<code>blocked_geometry</code> 是这个检查器的分类，并非所有机器人系统共同规定的状态码。多个问题同时存在时，程序的检查顺序还会影响首先返回哪种原因。</p>
+      <h3>在自己环境中运行</h3>
+      <p>在下载后的仓库根目录执行以下命令。网页阅读与交互不需要安装这些依赖；这里仅供你亲手复现实验。</p>
+      <pre class="d3-code"><code>python -m pip install -r examples/day-03/requirements.txt
+python examples/day-03/run_examples.py --output day-03-my-results.json</code></pre>
+      <p>先复现，再修改一项输入。保存修改前后条件和你的首次预测，不覆盖教程制作时的记录。完整文件、各个 problem 的含义以及单独运行方法见实验说明。</p>
+      <div class="d3-downloads"><a class="btn" href="examples/day-03/README.md">实验说明</a><a class="btn" href="examples/day-03/pddl/domain.pddl">完整动作域</a><a class="btn" href="examples/day-03/run_examples.py">运行脚本</a><a class="btn" href="data/day-03-results.json">实际输出 JSON</a></div>
+      <details class="self-check"><summary>先自己说：窄门问题在 PDDL 中仍找到计划，是程序算错了吗？</summary><p>先看输入公式是否包含净宽条件。本例 PDDL 只编码所列符号关系，门变窄没有改变这些事实，因此仍可能得到同一条符号序列。后验净宽检查拒绝，说明需要补充跨层条件或修改候选，不是可以直接说规划器把已编码公式算错了。</p></details>
+      <p class="source-note">源程序、固定修订与本次环境见 <a href="examples/day-03/README.md">实验来源说明</a>。这些是教程制作环境的运行，不代表你已在自己的机器上完成操作。</p>
+    </section>
+
+    <section id="practice" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>10</span> 让每个符号都能翻译回自己的话</div>
+      <h2>最后，自己把这个机器人讲明白。</h2>
+      <p>先关掉答案，用自己的话完成下面三件小事。说不出来时，回到对应演示改一个参数，再试一次。</p>
+      <ol class="practice-list"><li><h3>一分钟定义</h3><p>不用念缩写，解释状态、目标、前置条件、效果、任务规划和运动规划。每个概念都拿门杯场景举一个例子。</p></li><li><h3>三分钟案例</h3><p>从初态开始，画出四个动作前后的事实变化；再选一个失败例，说明哪一层发现了什么证据，以及接下来允许改什么。</p></li><li><h3>两轮为什么</h3><p>第一轮解释“为什么图连通仍不够”；第二轮继续问“如果符号计划和部分几何检查都通过，为什么还需要执行监测”。保留你真正卡住的那一句。</p></li></ol>
+      <h3>Checkpoint A · 保留完整的 35 分钟</h3>
+      <p>原计划的题目是：<strong>场景图 A–D–B 连通，但门锁着，机械臂够不着把手，如何处理？</strong>下面按 8+8+8+8+3 分钟安排；先保存自己的回答，再写修订。计时只供你掌握节奏，可以暂停，不会自动判定掌握程度。</p>
+      <div id="day3-checkpoint" class="d3p-root d3p-checkpoint">
+  <div class="d3p-checkpoint-top"><div><span class="eyebrow">Checkpoint A · 开放练习</span><strong>自己推理，保留第一版回答。</strong></div><output id="d3p-clock" class="d3p-clock" aria-label="剩余练习时间">35:00</output></div>
+  <div class="d3p-tabs"><button class="btn" id="d3p-clock-toggle" type="button">开始计时</button><button class="btn" id="d3p-clock-reset" type="button">重置计时</button><span id="d3p-clock-stage" class="d3p-small">准备好再开始；重置计时不会清空答案。</span></div>
+  <div id="d3p-checkpoint-questions" class="d3p-checkpoint-questions">
+    <details open><summary>01 · 分层表示 · 8 分钟</summary><p>画出 A–D–B，分别标出拓扑、门宽／把手高度、门状态和机器人能力。说明每一层已知什么，仍不知道什么。</p><label class="form-label" for="d3p-q1-first">我的首次回答<textarea class="form-control" id="d3p-q1-first" data-d3p-answer="q1-first" rows="3"></textarea></label><label class="form-label" for="d3p-q1-revised">后来修订与原因<textarea class="form-control" id="d3p-q1-revised" data-d3p-answer="q1-revised" rows="2"></textarea></label></details>
+    <details><summary>02 · 谓词与动作 · 8 分钟</summary><p>写至少 4 个谓词和两种动作的前置／效果。用具体状态演示一次成功迁移，并说明哪些事实保持不变。</p><label class="form-label" for="d3p-q2-first">我的首次回答<textarea class="form-control" id="d3p-q2-first" data-d3p-answer="q2-first" rows="3"></textarea></label><label class="form-label" for="d3p-q2-revised">后来修订与原因<textarea class="form-control" id="d3p-q2-revised" data-d3p-answer="q2-revised" rows="2"></textarea></label></details>
+    <details><summary>03 · 失败归因 · 8 分钟</summary><p>比较“门净宽不足”和“机器人没有开锁能力”。分别说出谁发现、依据是什么、结论限于什么条件；再解释门把手过高的问题。</p><label class="form-label" for="d3p-q3-first">我的首次回答<textarea class="form-control" id="d3p-q3-first" data-d3p-answer="q3-first" rows="3"></textarea></label><label class="form-label" for="d3p-q3-revised">后来修订与原因<textarea class="form-control" id="d3p-q3-revised" data-d3p-answer="q3-revised" rows="2"></textarea></label></details>
+    <details><summary>04 · 反馈与重新求解 · 8 分钟</summary><p>画出任务层与运动检查的反馈箭头。区分“在原世界重选动作”和“修改门宽后重新求解”，说明为什么不能凭一个失败就删除整类动作。</p><label class="form-label" for="d3p-q4-first">我的首次回答<textarea class="form-control" id="d3p-q4-first" data-d3p-answer="q4-first" rows="3"></textarea></label><label class="form-label" for="d3p-q4-revised">后来修订与原因<textarea class="form-control" id="d3p-q4-revised" data-d3p-answer="q4-revised" rows="2"></textarea></label></details>
+    <details><summary>05 · 自评与待补问题 · 3 分钟</summary><p>各项 0–4 分，由你自己评估。0 表示还无法解释，2 表示能解释但遗漏条件，4 表示能结合反例和证据清楚说明。未评分就保留未评分。</p><div id="d3p-score-fields" class="d3p-score-fields"></div><p id="d3p-score-summary" class="d3p-small">尚未完成自评。</p><label class="form-label" for="d3p-q5-review">下一次最先补哪一个问题？<textarea class="form-control" id="d3p-q5-review" data-d3p-answer="q5-review" rows="2"></textarea></label></details>
+  </div>
+  <div class="d3p-tabs"><button class="btn" id="d3p-export-checkpoint" type="button">导出首答、修订与自评 .md</button><span id="d3p-checkpoint-save" class="d3p-small" role="status">答案仅保存在当前浏览器。</span></div>
+  <div id="d3p-clock-live" class="sr-only" role="status" aria-live="polite"></div>
+</div>
+      <details><summary>把这一篇放回原来的七段、10 小时安排</summary><div class="table-wrap"><table><caption>累计有效学习时间，不含休息；0:00 不是固定钟点</caption><thead><tr><th>阶段</th><th>对应学习操作</th></tr></thead><tbody><tr><td>00:00–00:45</td><td>闭卷复习 Day 2；用第 01–02 节区分几何、状态与能力</td></tr><tr><td>00:45–02:00</td><td>结合第 04、08 节阅读 R04 和 MIT TAMP 必要片段</td></tr><tr><td>02:00–04:00</td><td>手写谓词和四个动作，推导前置／效果与离散／连续边界</td></tr><tr><td>04:00–06:30</td><td>设计成功候选、缺钥匙／能力、运动几何失败三条路线</td></tr><tr><td>06:30–08:15</td><td>第 09 节：实际运行并逐项修改，保留预测和输出</td></tr><tr><td>08:15–09:00</td><td>闭卷解释任务规划与运动规划，画失败返回箭头</td></tr><tr><td>09:00–10:00</td><td>Checkpoint A 35 分钟，余下 25 分钟复核与准备 Day 4</td></tr></tbody></table></div><p>原资料中资源学习约 105 分钟的建议，与第 2 阶段的 75 分钟不完全相同；可将其余阅读穿插在第 3 阶段的推导里，不额外叠加到 10 小时之外。完整 MIT 讲次约 85 分钟，PDDL 选读约 25–40 分钟，按理解需要分段暂停。</p></details>
+      <div class="personal-note"><div class="note-heading"><div><span class="eyebrow">我的 Day 3 记录</span><h3>把不确定的地方留下来</h3></div><span id="note-status" class="note-status" aria-live="polite">记录保存在此浏览器</span></div><label class="form-label" for="learning-note">事实与假设 → 动作规则 → 我的预测 → 实际结果／未运行 → 修订解释</label><textarea class="form-control" id="learning-note" rows="10" placeholder="我今天最初不理解的词：&#10;我画的小世界和输入：&#10;我写的初态、目标与动作：&#10;首次预测和推理：&#10;亲手修改了哪一项：&#10;实际命令、输出或未运行：&#10;后来修订的解释：&#10;还没有检查的条件："></textarea><div class="note-actions"><button class="btn" type="button" id="export-note">导出 Day 3 笔记 .md</button><span>与前两天分开保存；个人输入不会自动上传 GitHub。</span></div></div>
+      <p>进入 Day 4 前，带上这个问题：<strong>“已知门把手的位置，怎样求机械臂关节角；求得一个姿态后，怎样判断它能安全到达？”</strong>今天的可达环带，会成为明天运动学的入口。</p>
+    </section>
+
+    <section id="sources" class="lesson-section sources-section" data-nav>
+      <div class="section-kicker"><span>↗</span> 原课程与查阅方式</div>
+      <h2>用同一个问题，回到原资料。</h2>
+      <p>本篇依据指定计划、PDDL 原讲义、MIT 官方材料与实际程序运行重新组织。门杯、圆盘和两杆手臂是明确假设的教学例子。</p>
+      <div class="course-list">
+        <article class="course-item" id="source-pddl"><span class="course-part">R04</span><div><h3>PDDL：先读结构，再读动作</h3><p>依次找 domain 的 types／predicates／action，action 的 parameters／precondition／effect，以及 problem 的 objects／init／goal。原讲义重点看对象、初态、目标和正负效果；先不扩展到全部 PDDL 语法。</p><a href="https://planning.wiki/ref/pddl/domain" target="_blank" rel="noopener noreferrer">指定 Domain 阅读 ↗</a><a href="https://planning.wiki/ref/pddl/problem" target="_blank" rel="noopener noreferrer">指定 Problem 阅读 ↗</a><a href="https://www.cs.toronto.edu/~sheila/2542/w09/A1/introtopddl2.pdf" target="_blank" rel="noopener noreferrer">Helmert 原讲义 ↗</a></div><span class="reading-label">25–40m</span></article>
+        <article class="course-item" id="source-mit"><span class="course-part">R16</span><div><h3>MIT Fall 2022 · Lecture 21 TAMP</h3><p>使用 2022 合集的 P21。带着三个问题看：任务变量是什么？连续动作需要什么输入？失败信息怎样影响下一次选择？听到不懂的公式时，先用本页门杯例子解释它在检查什么。</p><a href="https://www.bilibili.com/video/BV1dB4y1R7bS/?p=21" target="_blank" rel="noopener noreferrer">B 站指定讲次 ↗</a><a href="https://manipulation.csail.mit.edu/Fall2022/schedule.html" target="_blank" rel="noopener noreferrer">2022 官方课表与原视频入口 ↗</a><a href="https://manipulation.mit.edu/clutter.html" target="_blank" rel="noopener noreferrer">官方讲义 · Programming the Task Level ↗</a></div><span class="reading-label">约 85m</span></article>
+        <article class="course-item" id="source-motion"><span class="course-part">空间</span><div><h3>MIT · Motion Planning</h3><p>只查 Inverse Kinematics 与轨迹可行性相关定义，理解关节限位、碰撞、求解失败及整条路径的条件。完整推导留到后续学习。</p><a href="https://manipulation.mit.edu/trajectories.html" target="_blank" rel="noopener noreferrer">官方章节 ↗</a></div><span class="reading-label">按需</span></article>
+        <article class="course-item" id="source-tamp"><span class="course-part">原理</span><div><h3>Integrated Task and Motion Planning</h3><p>Garrett 等人的综述用于核对离散／连续耦合与方法边界。今天先理解问题定义和为什么需要结合两层；不要求通读全部算法。</p><a href="https://arxiv.org/abs/2010.01083" target="_blank" rel="noopener noreferrer">作者论文 ↗</a></div><span class="reading-label">选读</span></article>
+        <article class="course-item" id="source-code"><span class="course-part">代码</span><div><h3>Pyperplan 与原 MiniLab</h3><p>前者解析并搜索本例 PDDL；后者只检查原计划中的受限规则。完整版本、范围和复现步骤保存在实验目录。</p><a href="https://github.com/aibasel/pyperplan" target="_blank" rel="noopener noreferrer">Pyperplan 官方仓库 ↗</a><a href="https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/minilab/validate.py" target="_blank" rel="noopener noreferrer">原 MiniLab ↗</a><a href="examples/day-03/README.md">本教程实验说明</a></div><span class="reading-label">实操</span></article>
+        <article class="course-item" id="source-plan"><span class="course-part">计划</span><div><h3>Day 3 与 Checkpoint A</h3><p>保留原七段 10 小时安排、三类路线与 35 分钟阶段练习。R20 只作为任务成功条件的补充，不增加必修任务量。</p><a href="https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/DAILY/day-03.md" target="_blank" rel="noopener noreferrer">每日计划 ↗</a><a href="https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/TASK_GUIDES/day-03.md" target="_blank" rel="noopener noreferrer">操作手册 ↗</a><a href="https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/CHECKPOINTS.md" target="_blank" rel="noopener noreferrer">阶段练习 ↗</a><a href="https://behavior.stanford.edu/" target="_blank" rel="noopener noreferrer">R20 选读入口 ↗</a></div><span class="reading-label">对照</span></article>
+      </div>
+      <div class="source-method"><h3>资料读取与模型说明</h3><p>已核对指定讲次与官方资料。B 站视频本轮读取受限，未取得整段字幕，因此本页使用官方讲义、原始规划资料和可复现实验完成解释，不编造逐秒课程定位。MIT 在线讲义持续更新，作为原理查阅材料，不当作 2022 讲座的逐字转写。</p><p>网页状态搜索、几何演示和预运行记录分别注明实现范围。符号模型成立、局部几何通过、生成轨迹、仿真执行、真实机器人成功属于不同证据；本篇没有控制真实机器人。</p><p><a href="notes/day-03-tutorial.md">完整文字版教程</a> · <a href="notes/day-03-course-map.md">Day 3 课程对应表</a> · <a href="day-02.html">回顾 Day 2</a></p></div>
+    </section>
+    <div class="next-lesson"><span class="small-label">把三天连起来</span><a href="index.html#mr-workspace">Day 01 · 身体能到哪里？ ↑</a><a href="day-02.html#solver-status">Day 02 · 求解结果能说明什么？ ↑</a></div>
+    <footer class="site-footer"><div><strong>Modern Robotics 学习手记</strong><p>每个动作有条件，每个结论有证据。</p></div><a href="#start">回到顶部 ↑</a></footer>
+  </main>
+</div>
+<script id="day3-run-data" type="application/json">{
+  "schema_version": 1,
+  "environment": {
+    "python": "3.12.14",
+    "pyperplan": "2.1",
+    "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+    "generated_at_utc": "2026-10-20T09:42:53.221127+00:00"
+  },
+  "provenance": {
+    "plan_repository": "venividici/14plan",
+    "plan_revision": "de6fd9cb352370863e94d64d775c4f5236ed38fc",
+    "upstream_validate_blob": "4cbe22b923d770147e931f610fc00e0d79df96a0",
+    "upstream_file": "minilab/validate.py",
+    "pyperplan_source": "https://github.com/aibasel/pyperplan",
+    "scope": "教程制作环境中的真实程序运行；合成输入；没有用户本机或物理机器人运行。",
+    "search": "pyperplan.search.breadth_first_search",
+    "grounding_options": {
+      "remove_statics_from_initial_state": false,
+      "remove_irrelevant_operators": false
+    },
+    "elapsed_ms_definition": "planning: BFS call only; minilab: analyze call only"
+  },
+  "planning_cases": [
+    {
+      "id": "success",
+      "title": "钥匙与四种能力齐全",
+      "changes": [
+        "标准初态：门锁着，机器人在 A，杯子在 B。"
+      ],
+      "problem_file": "pddl/problem-success.pddl",
+      "source_files": {
+        "domain_git_blob_sha": "6b2864d1a331cf68074268aa3fd9df89171a5eed",
+        "problem_git_blob_sha": "cafa3d52aa1a435aae50a7a263ccb54f9ee6456a"
+      },
+      "expected_status": "plan_found",
+      "status": "plan_found",
+      "plan_length": 4,
+      "initial_facts": [
+        "(at r a)",
+        "(can-move r)",
+        "(can-open r)",
+        "(can-pickup r)",
+        "(can-unlock r)",
+        "(connected a b d)",
+        "(connected b a d)",
+        "(door-side d a)",
+        "(door-side d b)",
+        "(fits k d)",
+        "(graspable cup)",
+        "(handempty r)",
+        "(has-key r k)",
+        "(item-at cup b)",
+        "(locked d)"
+      ],
+      "goal": [
+        "(holding r cup)"
+      ],
+      "plan": [
+        {
+          "raw": "(unlock r d k a)",
+          "name": "unlock",
+          "args": [
+            "r",
+            "d",
+            "k",
+            "a"
+          ],
+          "pre": [
+            "(at r a)",
+            "(can-unlock r)",
+            "(door-side d a)",
+            "(fits k d)",
+            "(has-key r k)",
+            "(locked d)"
+          ],
+          "add": [
+            "(unlocked d)"
+          ],
+          "del": [
+            "(locked d)"
+          ],
+          "grounded_preconditions": [
+            "(at r a)",
+            "(locked d)"
+          ]
+        },
+        {
+          "raw": "(open r d a)",
+          "name": "open",
+          "args": [
+            "r",
+            "d",
+            "a"
+          ],
+          "pre": [
+            "(at r a)",
+            "(can-open r)",
+            "(door-side d a)",
+            "(unlocked d)"
+          ],
+          "add": [
+            "(opened d)"
+          ],
+          "del": [],
+          "grounded_preconditions": [
+            "(at r a)",
+            "(unlocked d)"
+          ]
+        },
+        {
+          "raw": "(move r a b d)",
+          "name": "move",
+          "args": [
+            "r",
+            "a",
+            "b",
+            "d"
+          ],
+          "pre": [
+            "(at r a)",
+            "(can-move r)",
+            "(connected a b d)",
+            "(opened d)"
+          ],
+          "add": [
+            "(at r b)"
+          ],
+          "del": [
+            "(at r a)"
+          ],
+          "grounded_preconditions": [
+            "(at r a)",
+            "(opened d)"
+          ]
+        },
+        {
+          "raw": "(pickup r cup b)",
+          "name": "pickup",
+          "args": [
+            "r",
+            "cup",
+            "b"
+          ],
+          "pre": [
+            "(at r b)",
+            "(can-pickup r)",
+            "(graspable cup)",
+            "(handempty r)",
+            "(item-at cup b)"
+          ],
+          "add": [
+            "(holding r cup)"
+          ],
+          "del": [
+            "(handempty r)",
+            "(item-at cup b)"
+          ],
+          "grounded_preconditions": [
+            "(at r b)",
+            "(handempty r)",
+            "(item-at cup b)"
+          ]
+        }
+      ],
+      "states": [
+        [
+          "(at r a)",
+          "(can-move r)",
+          "(can-open r)",
+          "(can-pickup r)",
+          "(can-unlock r)",
+          "(connected a b d)",
+          "(connected b a d)",
+          "(door-side d a)",
+          "(door-side d b)",
+          "(fits k d)",
+          "(graspable cup)",
+          "(handempty r)",
+          "(has-key r k)",
+          "(item-at cup b)",
+          "(locked d)"
+        ],
+        [
+          "(at r a)",
+          "(can-move r)",
+          "(can-open r)",
+          "(can-pickup r)",
+          "(can-unlock r)",
+          "(connected a b d)",
+          "(connected b a d)",
+          "(door-side d a)",
+          "(door-side d b)",
+          "(fits k d)",
+          "(graspable cup)",
+          "(handempty r)",
+          "(has-key r k)",
+          "(item-at cup b)",
+          "(unlocked d)"
+        ],
+        [
+          "(at r a)",
+          "(can-move r)",
+          "(can-open r)",
+          "(can-pickup r)",
+          "(can-unlock r)",
+          "(connected a b d)",
+          "(connected b a d)",
+          "(door-side d a)",
+          "(door-side d b)",
+          "(fits k d)",
+          "(graspable cup)",
+          "(handempty r)",
+          "(has-key r k)",
+          "(item-at cup b)",
+          "(opened d)",
+          "(unlocked d)"
+        ],
+        [
+          "(at r b)",
+          "(can-move r)",
+          "(can-open r)",
+          "(can-pickup r)",
+          "(can-unlock r)",
+          "(connected a b d)",
+          "(connected b a d)",
+          "(door-side d a)",
+          "(door-side d b)",
+          "(fits k d)",
+          "(graspable cup)",
+          "(handempty r)",
+          "(has-key r k)",
+          "(item-at cup b)",
+          "(opened d)",
+          "(unlocked d)"
+        ],
+        [
+          "(at r b)",
+          "(can-move r)",
+          "(can-open r)",
+          "(can-pickup r)",
+          "(can-unlock r)",
+          "(connected a b d)",
+          "(connected b a d)",
+          "(door-side d a)",
+          "(door-side d b)",
+          "(fits k d)",
+          "(graspable cup)",
+          "(has-key r k)",
+          "(holding r cup)",
+          "(opened d)",
+          "(unlocked d)"
+        ]
+      ],
+      "trace": [
+        {
+          "step": 1,
+          "action": "(unlock r d k a)",
+          "removed": [
+            "(locked d)"
+          ],
+          "added": [
+            "(unlocked d)"
+          ]
+        },
+        {
+          "step": 2,
+          "action": "(open r d a)",
+          "removed": [],
+          "added": [
+            "(opened d)"
+          ]
+        },
+        {
+          "step": 3,
+          "action": "(move r a b d)",
+          "removed": [
+            "(at r a)"
+          ],
+          "added": [
+            "(at r b)"
+          ]
+        },
+        {
+          "step": 4,
+          "action": "(pickup r cup b)",
+          "removed": [
+            "(handempty r)",
+            "(item-at cup b)"
+          ],
+          "added": [
+            "(holding r cup)"
+          ]
+        }
+      ],
+      "plan_validated_against_source_actions": true,
+      "state_invariant_checks": [
+        {
+          "one_robot_room": true,
+          "exactly_one_lock_status": true,
+          "opened_implies_unlocked": true,
+          "cup_has_one_location_or_is_held": true,
+          "hand_matches_cup_state": true
+        },
+        {
+          "one_robot_room": true,
+          "exactly_one_lock_status": true,
+          "opened_implies_unlocked": true,
+          "cup_has_one_location_or_is_held": true,
+          "hand_matches_cup_state": true
+        },
+        {
+          "one_robot_room": true,
+          "exactly_one_lock_status": true,
+          "opened_implies_unlocked": true,
+          "cup_has_one_location_or_is_held": true,
+          "hand_matches_cup_state": true
+        },
+        {
+          "one_robot_room": true,
+          "exactly_one_lock_status": true,
+          "opened_implies_unlocked": true,
+          "cup_has_one_location_or_is_held": true,
+          "hand_matches_cup_state": true
+        },
+        {
+          "one_robot_room": true,
+          "exactly_one_lock_status": true,
+          "opened_implies_unlocked": true,
+          "cup_has_one_location_or_is_held": true,
+          "hand_matches_cup_state": true
+        }
+      ],
+      "search_exhausted": false,
+      "expanded_states": 5,
+      "grounded_operator_count": 8,
+      "elapsed_ms": 0.140601,
+      "parse_ground_ms": 2.078658,
+      "search_log": [
+        "Goal reached. Start extraction of solution.",
+        "5 Nodes expanded"
+      ],
+      "geometry_check": {
+        "checked": true,
+        "passes": true,
+        "method": "declared_door_width_only",
+        "input": {
+          "door_width_m": 0.9,
+          "robot_width_m": 0.6,
+          "extra_margin_m": 0.0
+        },
+        "reason": "本例门宽数值条件成立。",
+        "scope": "仅比较声明的净宽与身体宽度；无路径、碰撞、门扇或真实执行验证。"
+      },
+      "execution_status": "not_run",
+      "scope": "finite_fully_observed_deterministic_typed_strips_domain_only_no_continuous_motion_or_physical_execution"
+    },
+    {
+      "id": "missing_key",
+      "title": "缺少钥匙",
+      "changes": [
+        "仅删除初态中的 (has-key r k)，没有拾钥匙或替代开锁动作。"
+      ],
+      "problem_file": "pddl/problem-missing-key.pddl",
+      "source_files": {
+        "domain_git_blob_sha": "6b2864d1a331cf68074268aa3fd9df89171a5eed",
+        "problem_git_blob_sha": "8f0ad6bcf727e232aa147424e7c7297a8d024ed5"
+      },
+      "expected_status": "no_plan",
+      "status": "no_plan",
+      "plan_length": null,
+      "initial_facts": [
+        "(at r a)",
+        "(can-move r)",
+        "(can-open r)",
+        "(can-pickup r)",
+        "(can-unlock r)",
+        "(connected a b d)",
+        "(connected b a d)",
+        "(door-side d a)",
+        "(door-side d b)",
+        "(fits k d)",
+        "(graspable cup)",
+        "(handempty r)",
+        "(item-at cup b)",
+        "(locked d)"
+      ],
+      "goal": [
+        "(holding r cup)"
+      ],
+      "plan": [],
+      "states": [
+        [
+          "(at r a)",
+          "(can-move r)",
+          "(can-open r)",
+          "(can-pickup r)",
+          "(can-unlock r)",
+          "(connected a b d)",
+          "(connected b a d)",
+          "(door-side d a)",
+          "(door-side d b)",
+          "(fits k d)",
+          "(graspable cup)",
+          "(handempty r)",
+          "(item-at cup b)",
+          "(locked d)"
+        ]
+      ],
+      "trace": [],
+      "plan_validated_against_source_actions": false,
+      "state_invariant_checks": [
+        {
+          "one_robot_room": true,
+          "exactly_one_lock_status": true,
+          "opened_implies_unlocked": true,
+          "cup_has_one_location_or_is_held": true,
+          "hand_matches_cup_state": true
+        }
+      ],
+      "search_exhausted": true,
+      "expanded_states": 1,
+      "grounded_operator_count": 6,
+      "elapsed_ms": 0.062193,
+      "parse_ground_ms": 0.867735,
+      "search_log": [
+        "No operators left. Task unsolvable.",
+        "1 Nodes expanded"
+      ],
+      "geometry_check": {
+        "checked": false,
+        "passes": null,
+        "method": "declared_door_width_only",
+        "input": {
+          "door_width_m": 0.9,
+          "robot_width_m": 0.6,
+          "extra_margin_m": 0.0
+        },
+        "reason": "没有找到候选计划，未进入计划的后验门宽检查。",
+        "scope": "仅比较声明的净宽与身体宽度；无路径、碰撞、门扇或真实执行验证。"
+      },
+      "execution_status": "not_run",
+      "scope": "finite_fully_observed_deterministic_typed_strips_domain_only_no_continuous_motion_or_physical_execution"
+    },
+    {
+      "id": "missing_unlock",
+      "title": "有钥匙但缺少开锁能力",
+      "changes": [
+        "仅删除 (can-unlock r)，其余初态保持标准条件。"
+      ],
+      "problem_file": "pddl/problem-missing-unlock.pddl",
+      "source_files": {
+        "domain_git_blob_sha": "6b2864d1a331cf68074268aa3fd9df89171a5eed",
+        "problem_git_blob_sha": "d68a913c2090d28dc4cc74bacbc40ecbae40d188"
+      },
+      "expected_status": "no_plan",
+      "status": "no_plan",
+      "plan_length": null,
+      "initial_facts": [
+        "(at r a)",
+        "(can-move r)",
+        "(can-open r)",
+        "(can-pickup r)",
+        "(connected a b d)",
+        "(connected b a d)",
+        "(door-side d a)",
+        "(door-side d b)",
+        "(fits k d)",
+        "(graspable cup)",
+        "(handempty r)",
+        "(has-key r k)",
+        "(item-at cup b)",
+        "(locked d)"
+      ],
+      "goal": [
+        "(holding r cup)"
+      ],
+      "plan": [],
+      "states": [
+        [
+          "(at r a)",
+          "(can-move r)",
+          "(can-open r)",
+          "(can-pickup r)",
+          "(connected a b d)",
+          "(connected b a d)",
+          "(door-side d a)",
+          "(door-side d b)",
+          "(fits k d)",
+          "(graspable cup)",
+          "(handempty r)",
+          "(has-key r k)",
+          "(item-at cup b)",
+          "(locked d)"
+        ]
+      ],
+      "trace": [],
+      "plan_validated_against_source_actions": false,
+      "state_invariant_checks": [
+        {
+          "one_robot_room": true,
+          "exactly_one_lock_status": true,
+          "opened_implies_unlocked": true,
+          "cup_has_one_location_or_is_held": true,
+          "hand_matches_cup_state": true
+        }
+      ],
+      "search_exhausted": true,
+      "expanded_states": 1,
+      "grounded_operator_count": 6,
+      "elapsed_ms": 0.060441,
+      "parse_ground_ms": 0.846684,
+      "search_log": [
+        "No operators left. Task unsolvable.",
+        "1 Nodes expanded"
+      ],
+      "geometry_check": {
+        "checked": false,
+        "passes": null,
+        "method": "declared_door_width_only",
+        "input": {
+          "door_width_m": 0.9,
+          "robot_width_m": 0.6,
+          "extra_margin_m": 0.0
+        },
+        "reason": "没有找到候选计划，未进入计划的后验门宽检查。",
+        "scope": "仅比较声明的净宽与身体宽度；无路径、碰撞、门扇或真实执行验证。"
+      },
+      "execution_status": "not_run",
+      "scope": "finite_fully_observed_deterministic_typed_strips_domain_only_no_continuous_motion_or_physical_execution"
+    },
+    {
+      "id": "missing_open",
+      "title": "能解锁，但缺少开门能力",
+      "changes": [
+        "仅删除 (can-open r)；解锁不会自动把 opened 变真。"
+      ],
+      "problem_file": "pddl/problem-missing-open.pddl",
+      "source_files": {
+        "domain_git_blob_sha": "6b2864d1a331cf68074268aa3fd9df89171a5eed",
+        "problem_git_blob_sha": "31baf5da17a38e3ff8d2a038b8b79a725fc155f7"
+      },
+      "expected_status": "no_plan",
+      "status": "no_plan",
+      "plan_length": null,
+      "initial_facts": [
+        "(at r a)",
+        "(can-move r)",
+        "(can-pickup r)",
+        "(can-unlock r)",
+        "(connected a b d)",
+        "(connected b a d)",
+        "(door-side d a)",
+        "(door-side d b)",
+        "(fits k d)",
+        "(graspable cup)",
+        "(handempty r)",
+        "(has-key r k)",
+        "(item-at cup b)",
+        "(locked d)"
+      ],
+      "goal": [
+        "(holding r cup)"
+      ],
+      "plan": [],
+      "states": [
+        [
+          "(at r a)",
+          "(can-move r)",
+          "(can-pickup r)",
+          "(can-unlock r)",
+          "(connected a b d)",
+          "(connected b a d)",
+          "(door-side d a)",
+          "(door-side d b)",
+          "(fits k d)",
+          "(graspable cup)",
+          "(handempty r)",
+          "(has-key r k)",
+          "(item-at cup b)",
+          "(locked d)"
+        ]
+      ],
+      "trace": [],
+      "plan_validated_against_source_actions": false,
+      "state_invariant_checks": [
+        {
+          "one_robot_room": true,
+          "exactly_one_lock_status": true,
+          "opened_implies_unlocked": true,
+          "cup_has_one_location_or_is_held": true,
+          "hand_matches_cup_state": true
+        }
+      ],
+      "search_exhausted": true,
+      "expanded_states": 2,
+      "grounded_operator_count": 6,
+      "elapsed_ms": 0.057437,
+      "parse_ground_ms": 0.745081,
+      "search_log": [
+        "No operators left. Task unsolvable.",
+        "2 Nodes expanded"
+      ],
+      "geometry_check": {
+        "checked": false,
+        "passes": null,
+        "method": "declared_door_width_only",
+        "input": {
+          "door_width_m": 0.9,
+          "robot_width_m": 0.6,
+          "extra_margin_m": 0.0
+        },
+        "reason": "没有找到候选计划，未进入计划的后验门宽检查。",
+        "scope": "仅比较声明的净宽与身体宽度；无路径、碰撞、门扇或真实执行验证。"
+      },
+      "execution_status": "not_run",
+      "scope": "finite_fully_observed_deterministic_typed_strips_domain_only_no_continuous_motion_or_physical_execution"
+    },
+    {
+      "id": "no_grasp",
+      "title": "缺少抓取能力",
+      "changes": [
+        "仅删除 (can-pickup r)，物体仍声明为 graspable。"
+      ],
+      "problem_file": "pddl/problem-no-grasp.pddl",
+      "source_files": {
+        "domain_git_blob_sha": "6b2864d1a331cf68074268aa3fd9df89171a5eed",
+        "problem_git_blob_sha": "79e45bb381236a8d52dd1c2e3f2a7ffc4323d2b1"
+      },
+      "expected_status": "no_plan",
+      "status": "no_plan",
+      "plan_length": null,
+      "initial_facts": [
+        "(at r a)",
+        "(can-move r)",
+        "(can-open r)",
+        "(can-unlock r)",
+        "(connected a b d)",
+        "(connected b a d)",
+        "(door-side d a)",
+        "(door-side d b)",
+        "(fits k d)",
+        "(graspable cup)",
+        "(handempty r)",
+        "(has-key r k)",
+        "(item-at cup b)",
+        "(locked d)"
+      ],
+      "goal": [
+        "(holding r cup)"
+      ],
+      "plan": [],
+      "states": [
+        [
+          "(at r a)",
+          "(can-move r)",
+          "(can-open r)",
+          "(can-unlock r)",
+          "(connected a b d)",
+          "(connected b a d)",
+          "(door-side d a)",
+          "(door-side d b)",
+          "(fits k d)",
+          "(graspable cup)",
+          "(handempty r)",
+          "(has-key r k)",
+          "(item-at cup b)",
+          "(locked d)"
+        ]
+      ],
+      "trace": [],
+      "plan_validated_against_source_actions": false,
+      "state_invariant_checks": [
+        {
+          "one_robot_room": true,
+          "exactly_one_lock_status": true,
+          "opened_implies_unlocked": true,
+          "cup_has_one_location_or_is_held": true,
+          "hand_matches_cup_state": true
+        }
+      ],
+      "search_exhausted": true,
+      "expanded_states": 4,
+      "grounded_operator_count": 6,
+      "elapsed_ms": 0.063045,
+      "parse_ground_ms": 0.732172,
+      "search_log": [
+        "No operators left. Task unsolvable.",
+        "4 Nodes expanded"
+      ],
+      "geometry_check": {
+        "checked": false,
+        "passes": null,
+        "method": "declared_door_width_only",
+        "input": {
+          "door_width_m": 0.9,
+          "robot_width_m": 0.6,
+          "extra_margin_m": 0.0
+        },
+        "reason": "没有找到候选计划，未进入计划的后验门宽检查。",
+        "scope": "仅比较声明的净宽与身体宽度；无路径、碰撞、门扇或真实执行验证。"
+      },
+      "execution_status": "not_run",
+      "scope": "finite_fully_observed_deterministic_typed_strips_domain_only_no_continuous_motion_or_physical_execution"
+    },
+    {
+      "id": "ungraspable",
+      "title": "物体未被声明为可抓取",
+      "changes": [
+        "仅删除 (graspable cup)，机器人仍有 can-pickup。"
+      ],
+      "problem_file": "pddl/problem-ungraspable.pddl",
+      "source_files": {
+        "domain_git_blob_sha": "6b2864d1a331cf68074268aa3fd9df89171a5eed",
+        "problem_git_blob_sha": "a221630fcf17e0a4e221e1fe60a6472f27aaf981"
+      },
+      "expected_status": "no_plan",
+      "status": "no_plan",
+      "plan_length": null,
+      "initial_facts": [
+        "(at r a)",
+        "(can-move r)",
+        "(can-open r)",
+        "(can-pickup r)",
+        "(can-unlock r)",
+        "(connected a b d)",
+        "(connected b a d)",
+        "(door-side d a)",
+        "(door-side d b)",
+        "(fits k d)",
+        "(handempty r)",
+        "(has-key r k)",
+        "(item-at cup b)",
+        "(locked d)"
+      ],
+      "goal": [
+        "(holding r cup)"
+      ],
+      "plan": [],
+      "states": [
+        [
+          "(at r a)",
+          "(can-move r)",
+          "(can-open r)",
+          "(can-pickup r)",
+          "(can-unlock r)",
+          "(connected a b d)",
+          "(connected b a d)",
+          "(door-side d a)",
+          "(door-side d b)",
+          "(fits k d)",
+          "(handempty r)",
+          "(has-key r k)",
+          "(item-at cup b)",
+          "(locked d)"
+        ]
+      ],
+      "trace": [],
+      "plan_validated_against_source_actions": false,
+      "state_invariant_checks": [
+        {
+          "one_robot_room": true,
+          "exactly_one_lock_status": true,
+          "opened_implies_unlocked": true,
+          "cup_has_one_location_or_is_held": true,
+          "hand_matches_cup_state": true
+        }
+      ],
+      "search_exhausted": true,
+      "expanded_states": 4,
+      "grounded_operator_count": 6,
+      "elapsed_ms": 0.062634,
+      "parse_ground_ms": 0.707335,
+      "search_log": [
+        "No operators left. Task unsolvable.",
+        "4 Nodes expanded"
+      ],
+      "geometry_check": {
+        "checked": false,
+        "passes": null,
+        "method": "declared_door_width_only",
+        "input": {
+          "door_width_m": 0.9,
+          "robot_width_m": 0.6,
+          "extra_margin_m": 0.0
+        },
+        "reason": "没有找到候选计划，未进入计划的后验门宽检查。",
+        "scope": "仅比较声明的净宽与身体宽度；无路径、碰撞、门扇或真实执行验证。"
+      },
+      "execution_status": "not_run",
+      "scope": "finite_fully_observed_deterministic_typed_strips_domain_only_no_continuous_motion_or_physical_execution"
+    },
+    {
+      "id": "already_open",
+      "title": "初态中门已经打开",
+      "changes": [
+        "删除 locked，加入 unlocked 与 opened；无需重复解锁或开门。"
+      ],
+      "problem_file": "pddl/problem-already-open.pddl",
+      "source_files": {
+        "domain_git_blob_sha": "6b2864d1a331cf68074268aa3fd9df89171a5eed",
+        "problem_git_blob_sha": "3a3b68ef4caf8867208d8c37a763b7aa4d194e94"
+      },
+      "expected_status": "plan_found",
+      "status": "plan_found",
+      "plan_length": 2,
+      "initial_facts": [
+        "(at r a)",
+        "(can-move r)",
+        "(can-open r)",
+        "(can-pickup r)",
+        "(can-unlock r)",
+        "(connected a b d)",
+        "(connected b a d)",
+        "(door-side d a)",
+        "(door-side d b)",
+        "(fits k d)",
+        "(graspable cup)",
+        "(handempty r)",
+        "(has-key r k)",
+        "(item-at cup b)",
+        "(opened d)",
+        "(unlocked d)"
+      ],
+      "goal": [
+        "(holding r cup)"
+      ],
+      "plan": [
+        {
+          "raw": "(move r a b d)",
+          "name": "move",
+          "args": [
+            "r",
+            "a",
+            "b",
+            "d"
+          ],
+          "pre": [
+            "(at r a)",
+            "(can-move r)",
+            "(connected a b d)",
+            "(opened d)"
+          ],
+          "add": [
+            "(at r b)"
+          ],
+          "del": [
+            "(at r a)"
+          ],
+          "grounded_preconditions": [
+            "(at r a)",
+            "(opened d)"
+          ]
+        },
+        {
+          "raw": "(pickup r cup b)",
+          "name": "pickup",
+          "args": [
+            "r",
+            "cup",
+            "b"
+          ],
+          "pre": [
+            "(at r b)",
+            "(can-pickup r)",
+            "(graspable cup)",
+            "(handempty r)",
+            "(item-at cup b)"
+          ],
+          "add": [
+            "(holding r cup)"
+          ],
+          "del": [
+            "(handempty r)",
+            "(item-at cup b)"
+          ],
+          "grounded_preconditions": [
+            "(at r b)",
+            "(handempty r)",
+            "(item-at cup b)"
+          ]
+        }
+      ],
+      "states": [
+        [
+          "(at r a)",
+          "(can-move r)",
+          "(can-open r)",
+          "(can-pickup r)",
+          "(can-unlock r)",
+          "(connected a b d)",
+          "(connected b a d)",
+          "(door-side d a)",
+          "(door-side d b)",
+          "(fits k d)",
+          "(graspable cup)",
+          "(handempty r)",
+          "(has-key r k)",
+          "(item-at cup b)",
+          "(opened d)",
+          "(unlocked d)"
+        ],
+        [
+          "(at r b)",
+          "(can-move r)",
+          "(can-open r)",
+          "(can-pickup r)",
+          "(can-unlock r)",
+          "(connected a b d)",
+          "(connected b a d)",
+          "(door-side d a)",
+          "(door-side d b)",
+          "(fits k d)",
+          "(graspable cup)",
+          "(handempty r)",
+          "(has-key r k)",
+          "(item-at cup b)",
+          "(opened d)",
+          "(unlocked d)"
+        ],
+        [
+          "(at r b)",
+          "(can-move r)",
+          "(can-open r)",
+          "(can-pickup r)",
+          "(can-unlock r)",
+          "(connected a b d)",
+          "(connected b a d)",
+          "(door-side d a)",
+          "(door-side d b)",
+          "(fits k d)",
+          "(graspable cup)",
+          "(has-key r k)",
+          "(holding r cup)",
+          "(opened d)",
+          "(unlocked d)"
+        ]
+      ],
+      "trace": [
+        {
+          "step": 1,
+          "action": "(move r a b d)",
+          "removed": [
+            "(at r a)"
+          ],
+          "added": [
+            "(at r b)"
+          ]
+        },
+        {
+          "step": 2,
+          "action": "(pickup r cup b)",
+          "removed": [
+            "(handempty r)",
+            "(item-at cup b)"
+          ],
+          "added": [
+            "(holding r cup)"
+          ]
+        }
+      ],
+      "plan_validated_against_source_actions": true,
+      "state_invariant_checks": [
+        {
+          "one_robot_room": true,
+          "exactly_one_lock_status": true,
+          "opened_implies_unlocked": true,
+          "cup_has_one_location_or_is_held": true,
+          "hand_matches_cup_state": true
+        },
+        {
+          "one_robot_room": true,
+          "exactly_one_lock_status": true,
+          "opened_implies_unlocked": true,
+          "cup_has_one_location_or_is_held": true,
+          "hand_matches_cup_state": true
+        },
+        {
+          "one_robot_room": true,
+          "exactly_one_lock_status": true,
+          "opened_implies_unlocked": true,
+          "cup_has_one_location_or_is_held": true,
+          "hand_matches_cup_state": true
+        }
+      ],
+      "search_exhausted": false,
+      "expanded_states": 3,
+      "grounded_operator_count": 8,
+      "elapsed_ms": 0.070256,
+      "parse_ground_ms": 0.902378,
+      "search_log": [
+        "Goal reached. Start extraction of solution.",
+        "3 Nodes expanded"
+      ],
+      "geometry_check": {
+        "checked": true,
+        "passes": true,
+        "method": "declared_door_width_only",
+        "input": {
+          "door_width_m": 0.9,
+          "robot_width_m": 0.6,
+          "extra_margin_m": 0.0
+        },
+        "reason": "本例门宽数值条件成立。",
+        "scope": "仅比较声明的净宽与身体宽度；无路径、碰撞、门扇或真实执行验证。"
+      },
+      "execution_status": "not_run",
+      "scope": "finite_fully_observed_deterministic_typed_strips_domain_only_no_continuous_motion_or_physical_execution"
+    },
+    {
+      "id": "narrow_door",
+      "title": "符号计划存在，但门宽不足",
+      "changes": [
+        "PDDL 初态与标准例相同；独立门宽输入改为 0.50 m。"
+      ],
+      "problem_file": "pddl/problem-narrow-door.pddl",
+      "source_files": {
+        "domain_git_blob_sha": "6b2864d1a331cf68074268aa3fd9df89171a5eed",
+        "problem_git_blob_sha": "169966b953af9981bf3f68019b4eca067cf64393"
+      },
+      "expected_status": "plan_found",
+      "status": "plan_found",
+      "plan_length": 4,
+      "initial_facts": [
+        "(at r a)",
+        "(can-move r)",
+        "(can-open r)",
+        "(can-pickup r)",
+        "(can-unlock r)",
+        "(connected a b d)",
+        "(connected b a d)",
+        "(door-side d a)",
+        "(door-side d b)",
+        "(fits k d)",
+        "(graspable cup)",
+        "(handempty r)",
+        "(has-key r k)",
+        "(item-at cup b)",
+        "(locked d)"
+      ],
+      "goal": [
+        "(holding r cup)"
+      ],
+      "plan": [
+        {
+          "raw": "(unlock r d k a)",
+          "name": "unlock",
+          "args": [
+            "r",
+            "d",
+            "k",
+            "a"
+          ],
+          "pre": [
+            "(at r a)",
+            "(can-unlock r)",
+            "(door-side d a)",
+            "(fits k d)",
+            "(has-key r k)",
+            "(locked d)"
+          ],
+          "add": [
+            "(unlocked d)"
+          ],
+          "del": [
+            "(locked d)"
+          ],
+          "grounded_preconditions": [
+            "(at r a)",
+            "(locked d)"
+          ]
+        },
+        {
+          "raw": "(open r d a)",
+          "name": "open",
+          "args": [
+            "r",
+            "d",
+            "a"
+          ],
+          "pre": [
+            "(at r a)",
+            "(can-open r)",
+            "(door-side d a)",
+            "(unlocked d)"
+          ],
+          "add": [
+            "(opened d)"
+          ],
+          "del": [],
+          "grounded_preconditions": [
+            "(at r a)",
+            "(unlocked d)"
+          ]
+        },
+        {
+          "raw": "(move r a b d)",
+          "name": "move",
+          "args": [
+            "r",
+            "a",
+            "b",
+            "d"
+          ],
+          "pre": [
+            "(at r a)",
+            "(can-move r)",
+            "(connected a b d)",
+            "(opened d)"
+          ],
+          "add": [
+            "(at r b)"
+          ],
+          "del": [
+            "(at r a)"
+          ],
+          "grounded_preconditions": [
+            "(at r a)",
+            "(opened d)"
+          ]
+        },
+        {
+          "raw": "(pickup r cup b)",
+          "name": "pickup",
+          "args": [
+            "r",
+            "cup",
+            "b"
+          ],
+          "pre": [
+            "(at r b)",
+            "(can-pickup r)",
+            "(graspable cup)",
+            "(handempty r)",
+            "(item-at cup b)"
+          ],
+          "add": [
+            "(holding r cup)"
+          ],
+          "del": [
+            "(handempty r)",
+            "(item-at cup b)"
+          ],
+          "grounded_preconditions": [
+            "(at r b)",
+            "(handempty r)",
+            "(item-at cup b)"
+          ]
+        }
+      ],
+      "states": [
+        [
+          "(at r a)",
+          "(can-move r)",
+          "(can-open r)",
+          "(can-pickup r)",
+          "(can-unlock r)",
+          "(connected a b d)",
+          "(connected b a d)",
+          "(door-side d a)",
+          "(door-side d b)",
+          "(fits k d)",
+          "(graspable cup)",
+          "(handempty r)",
+          "(has-key r k)",
+          "(item-at cup b)",
+          "(locked d)"
+        ],
+        [
+          "(at r a)",
+          "(can-move r)",
+          "(can-open r)",
+          "(can-pickup r)",
+          "(can-unlock r)",
+          "(connected a b d)",
+          "(connected b a d)",
+          "(door-side d a)",
+          "(door-side d b)",
+          "(fits k d)",
+          "(graspable cup)",
+          "(handempty r)",
+          "(has-key r k)",
+          "(item-at cup b)",
+          "(unlocked d)"
+        ],
+        [
+          "(at r a)",
+          "(can-move r)",
+          "(can-open r)",
+          "(can-pickup r)",
+          "(can-unlock r)",
+          "(connected a b d)",
+          "(connected b a d)",
+          "(door-side d a)",
+          "(door-side d b)",
+          "(fits k d)",
+          "(graspable cup)",
+          "(handempty r)",
+          "(has-key r k)",
+          "(item-at cup b)",
+          "(opened d)",
+          "(unlocked d)"
+        ],
+        [
+          "(at r b)",
+          "(can-move r)",
+          "(can-open r)",
+          "(can-pickup r)",
+          "(can-unlock r)",
+          "(connected a b d)",
+          "(connected b a d)",
+          "(door-side d a)",
+          "(door-side d b)",
+          "(fits k d)",
+          "(graspable cup)",
+          "(handempty r)",
+          "(has-key r k)",
+          "(item-at cup b)",
+          "(opened d)",
+          "(unlocked d)"
+        ],
+        [
+          "(at r b)",
+          "(can-move r)",
+          "(can-open r)",
+          "(can-pickup r)",
+          "(can-unlock r)",
+          "(connected a b d)",
+          "(connected b a d)",
+          "(door-side d a)",
+          "(door-side d b)",
+          "(fits k d)",
+          "(graspable cup)",
+          "(has-key r k)",
+          "(holding r cup)",
+          "(opened d)",
+          "(unlocked d)"
+        ]
+      ],
+      "trace": [
+        {
+          "step": 1,
+          "action": "(unlock r d k a)",
+          "removed": [
+            "(locked d)"
+          ],
+          "added": [
+            "(unlocked d)"
+          ]
+        },
+        {
+          "step": 2,
+          "action": "(open r d a)",
+          "removed": [],
+          "added": [
+            "(opened d)"
+          ]
+        },
+        {
+          "step": 3,
+          "action": "(move r a b d)",
+          "removed": [
+            "(at r a)"
+          ],
+          "added": [
+            "(at r b)"
+          ]
+        },
+        {
+          "step": 4,
+          "action": "(pickup r cup b)",
+          "removed": [
+            "(handempty r)",
+            "(item-at cup b)"
+          ],
+          "added": [
+            "(holding r cup)"
+          ]
+        }
+      ],
+      "plan_validated_against_source_actions": true,
+      "state_invariant_checks": [
+        {
+          "one_robot_room": true,
+          "exactly_one_lock_status": true,
+          "opened_implies_unlocked": true,
+          "cup_has_one_location_or_is_held": true,
+          "hand_matches_cup_state": true
+        },
+        {
+          "one_robot_room": true,
+          "exactly_one_lock_status": true,
+          "opened_implies_unlocked": true,
+          "cup_has_one_location_or_is_held": true,
+          "hand_matches_cup_state": true
+        },
+        {
+          "one_robot_room": true,
+          "exactly_one_lock_status": true,
+          "opened_implies_unlocked": true,
+          "cup_has_one_location_or_is_held": true,
+          "hand_matches_cup_state": true
+        },
+        {
+          "one_robot_room": true,
+          "exactly_one_lock_status": true,
+          "opened_implies_unlocked": true,
+          "cup_has_one_location_or_is_held": true,
+          "hand_matches_cup_state": true
+        },
+        {
+          "one_robot_room": true,
+          "exactly_one_lock_status": true,
+          "opened_implies_unlocked": true,
+          "cup_has_one_location_or_is_held": true,
+          "hand_matches_cup_state": true
+        }
+      ],
+      "search_exhausted": false,
+      "expanded_states": 5,
+      "grounded_operator_count": 8,
+      "elapsed_ms": 0.068193,
+      "parse_ground_ms": 0.765061,
+      "search_log": [
+        "Goal reached. Start extraction of solution.",
+        "5 Nodes expanded"
+      ],
+      "geometry_check": {
+        "checked": true,
+        "passes": false,
+        "method": "declared_door_width_only",
+        "input": {
+          "door_width_m": 0.5,
+          "robot_width_m": 0.6,
+          "extra_margin_m": 0.0
+        },
+        "reason": "门宽 0.50 m 小于机器人宽 0.60 m；当前声明尺寸拒绝这条过门候选。",
+        "scope": "仅比较声明的净宽与身体宽度；无路径、碰撞、门扇或真实执行验证。"
+      },
+      "execution_status": "not_run",
+      "scope": "finite_fully_observed_deterministic_typed_strips_domain_only_no_continuous_motion_or_physical_execution"
+    },
+    {
+      "id": "goal_already_met",
+      "title": "初态已经拿着杯子",
+      "changes": [
+        "加入 holding；删除 item-at 与 handempty，保持物体状态一致。"
+      ],
+      "problem_file": "pddl/problem-goal-already-met.pddl",
+      "source_files": {
+        "domain_git_blob_sha": "6b2864d1a331cf68074268aa3fd9df89171a5eed",
+        "problem_git_blob_sha": "979e463bbd6aee3c8bdfc3296fa77b3e22b554a8"
+      },
+      "expected_status": "plan_found",
+      "status": "plan_found",
+      "plan_length": 0,
+      "initial_facts": [
+        "(at r a)",
+        "(can-move r)",
+        "(can-open r)",
+        "(can-pickup r)",
+        "(can-unlock r)",
+        "(connected a b d)",
+        "(connected b a d)",
+        "(door-side d a)",
+        "(door-side d b)",
+        "(fits k d)",
+        "(graspable cup)",
+        "(has-key r k)",
+        "(holding r cup)",
+        "(locked d)"
+      ],
+      "goal": [
+        "(holding r cup)"
+      ],
+      "plan": [],
+      "states": [
+        [
+          "(at r a)",
+          "(can-move r)",
+          "(can-open r)",
+          "(can-pickup r)",
+          "(can-unlock r)",
+          "(connected a b d)",
+          "(connected b a d)",
+          "(door-side d a)",
+          "(door-side d b)",
+          "(fits k d)",
+          "(graspable cup)",
+          "(has-key r k)",
+          "(holding r cup)",
+          "(locked d)"
+        ]
+      ],
+      "trace": [],
+      "plan_validated_against_source_actions": true,
+      "state_invariant_checks": [
+        {
+          "one_robot_room": true,
+          "exactly_one_lock_status": true,
+          "opened_implies_unlocked": true,
+          "cup_has_one_location_or_is_held": true,
+          "hand_matches_cup_state": true
+        }
+      ],
+      "search_exhausted": false,
+      "expanded_states": 1,
+      "grounded_operator_count": 8,
+      "elapsed_ms": 0.049414,
+      "parse_ground_ms": 0.798261,
+      "search_log": [
+        "Goal reached. Start extraction of solution.",
+        "1 Nodes expanded"
+      ],
+      "geometry_check": {
+        "checked": false,
+        "passes": null,
+        "method": "declared_door_width_only",
+        "input": {
+          "door_width_m": 0.9,
+          "robot_width_m": 0.6,
+          "extra_margin_m": 0.0
+        },
+        "reason": "本次计划不含 move，未进行过门宽度检查。",
+        "scope": "仅比较声明的净宽与身体宽度；无路径、碰撞、门扇或真实执行验证。"
+      },
+      "execution_status": "not_run",
+      "scope": "finite_fully_observed_deterministic_typed_strips_domain_only_no_continuous_motion_or_physical_execution"
+    }
+  ],
+  "minilab_cases": [
+    {
+      "id": "baseline",
+      "title": "未锁门的基线",
+      "changes": [
+        "原 checker 基线：0.90 m 门，0.60 m 机器人，move 与 grasp。"
+      ],
+      "input": {
+        "rooms": [
+          {
+            "id": "A",
+            "box": [
+              0,
+              0,
+              4,
+              4
+            ]
+          },
+          {
+            "id": "B",
+            "box": [
+              4,
+              0,
+              8,
+              4
+            ]
+          }
+        ],
+        "doors": [
+          {
+            "id": "D",
+            "between": [
+              "A",
+              "B"
+            ],
+            "width_m": 0.9,
+            "locked": false
+          }
+        ],
+        "robot": {
+          "start": "A",
+          "width_m": 0.6,
+          "capabilities": [
+            "move",
+            "grasp"
+          ],
+          "keys": []
+        },
+        "objects": [
+          {
+            "id": "cup",
+            "room": "B",
+            "graspable": true
+          }
+        ],
+        "goal": {
+          "type": "hold",
+          "object": "cup"
+        }
+      },
+      "expected_status": "rule_feasible",
+      "status": "rule_feasible",
+      "reason": "restricted graph/geometry/state rules all pass",
+      "elapsed_ms": 0.027211,
+      "raw_result": {
+        "status": "rule_feasible",
+        "reason": "restricted graph/geometry/state rules all pass",
+        "geometry_valid": true,
+        "topology_connected": true,
+        "rule_task_feasible": true,
+        "scope": "axis_aligned_2d_geometry_and_symbolic_rules_only_no_physics_or_control"
+      },
+      "input_unchanged": true,
+      "notes": [
+        "原函数只检查当前声明规则，不输出或执行 unlock/open/move/pickup 序列。",
+        "即使规则可行，输入里的 locked 字段也没有被该函数修改。"
+      ],
+      "execution_status": "not_run",
+      "scope": "axis_aligned_2d_geometry_and_symbolic_rules_only_no_physics_or_control"
+    },
+    {
+      "id": "locked_missing_key_and_skill",
+      "title": "锁门，无钥匙与开锁能力",
+      "changes": [
+        "locked=true，并声明该门使用钥匙 K。"
+      ],
+      "input": {
+        "rooms": [
+          {
+            "id": "A",
+            "box": [
+              0,
+              0,
+              4,
+              4
+            ]
+          },
+          {
+            "id": "B",
+            "box": [
+              4,
+              0,
+              8,
+              4
+            ]
+          }
+        ],
+        "doors": [
+          {
+            "id": "D",
+            "between": [
+              "A",
+              "B"
+            ],
+            "width_m": 0.9,
+            "locked": true,
+            "key": "K"
+          }
+        ],
+        "robot": {
+          "start": "A",
+          "width_m": 0.6,
+          "capabilities": [
+            "move",
+            "grasp"
+          ],
+          "keys": []
+        },
+        "objects": [
+          {
+            "id": "cup",
+            "room": "B",
+            "graspable": true
+          }
+        ],
+        "goal": {
+          "type": "hold",
+          "object": "cup"
+        }
+      },
+      "expected_status": "blocked_state",
+      "status": "blocked_state",
+      "reason": "narrow doors: locked doors: D",
+      "elapsed_ms": 0.015864,
+      "raw_result": {
+        "status": "blocked_state",
+        "reason": "narrow doors: locked doors: D",
+        "geometry_valid": true,
+        "topology_connected": true,
+        "rule_task_feasible": false,
+        "scope": "axis_aligned_2d_geometry_and_symbolic_rules_only_no_physics_or_control"
+      },
+      "input_unchanged": true,
+      "notes": [
+        "原函数只检查当前声明规则，不输出或执行 unlock/open/move/pickup 序列。",
+        "即使规则可行，输入里的 locked 字段也没有被该函数修改。",
+        "原 reason 含多余的 'narrow doors:' 前缀；本例门并不窄，保留原文而按输入及 status 解读。"
+      ],
+      "execution_status": "not_run",
+      "scope": "axis_aligned_2d_geometry_and_symbolic_rules_only_no_physics_or_control"
+    },
+    {
+      "id": "key_without_unlock_skill",
+      "title": "有钥匙，但没有开锁能力",
+      "changes": [
+        "在锁门例中，仅把 K 放入 robot.keys。"
+      ],
+      "input": {
+        "rooms": [
+          {
+            "id": "A",
+            "box": [
+              0,
+              0,
+              4,
+              4
+            ]
+          },
+          {
+            "id": "B",
+            "box": [
+              4,
+              0,
+              8,
+              4
+            ]
+          }
+        ],
+        "doors": [
+          {
+            "id": "D",
+            "between": [
+              "A",
+              "B"
+            ],
+            "width_m": 0.9,
+            "locked": true,
+            "key": "K"
+          }
+        ],
+        "robot": {
+          "start": "A",
+          "width_m": 0.6,
+          "capabilities": [
+            "move",
+            "grasp"
+          ],
+          "keys": [
+            "K"
+          ]
+        },
+        "objects": [
+          {
+            "id": "cup",
+            "room": "B",
+            "graspable": true
+          }
+        ],
+        "goal": {
+          "type": "hold",
+          "object": "cup"
+        }
+      },
+      "expected_status": "blocked_state",
+      "status": "blocked_state",
+      "reason": "narrow doors: locked doors: D",
+      "elapsed_ms": 0.010776,
+      "raw_result": {
+        "status": "blocked_state",
+        "reason": "narrow doors: locked doors: D",
+        "geometry_valid": true,
+        "topology_connected": true,
+        "rule_task_feasible": false,
+        "scope": "axis_aligned_2d_geometry_and_symbolic_rules_only_no_physics_or_control"
+      },
+      "input_unchanged": true,
+      "notes": [
+        "原函数只检查当前声明规则，不输出或执行 unlock/open/move/pickup 序列。",
+        "即使规则可行，输入里的 locked 字段也没有被该函数修改。",
+        "原 reason 含多余的 'narrow doors:' 前缀；本例门并不窄，保留原文而按输入及 status 解读。"
+      ],
+      "execution_status": "not_run",
+      "scope": "axis_aligned_2d_geometry_and_symbolic_rules_only_no_physics_or_control"
+    },
+    {
+      "id": "unlock_skill_without_key",
+      "title": "有开锁能力，但没有钥匙",
+      "changes": [
+        "在锁门例中，仅加入 unlock 能力。"
+      ],
+      "input": {
+        "rooms": [
+          {
+            "id": "A",
+            "box": [
+              0,
+              0,
+              4,
+              4
+            ]
+          },
+          {
+            "id": "B",
+            "box": [
+              4,
+              0,
+              8,
+              4
+            ]
+          }
+        ],
+        "doors": [
+          {
+            "id": "D",
+            "between": [
+              "A",
+              "B"
+            ],
+            "width_m": 0.9,
+            "locked": true,
+            "key": "K"
+          }
+        ],
+        "robot": {
+          "start": "A",
+          "width_m": 0.6,
+          "capabilities": [
+            "move",
+            "grasp",
+            "unlock"
+          ],
+          "keys": []
+        },
+        "objects": [
+          {
+            "id": "cup",
+            "room": "B",
+            "graspable": true
+          }
+        ],
+        "goal": {
+          "type": "hold",
+          "object": "cup"
+        }
+      },
+      "expected_status": "blocked_state",
+      "status": "blocked_state",
+      "reason": "narrow doors: locked doors: D",
+      "elapsed_ms": 0.008653,
+      "raw_result": {
+        "status": "blocked_state",
+        "reason": "narrow doors: locked doors: D",
+        "geometry_valid": true,
+        "topology_connected": true,
+        "rule_task_feasible": false,
+        "scope": "axis_aligned_2d_geometry_and_symbolic_rules_only_no_physics_or_control"
+      },
+      "input_unchanged": true,
+      "notes": [
+        "原函数只检查当前声明规则，不输出或执行 unlock/open/move/pickup 序列。",
+        "即使规则可行，输入里的 locked 字段也没有被该函数修改。",
+        "原 reason 含多余的 'narrow doors:' 前缀；本例门并不窄，保留原文而按输入及 status 解读。"
+      ],
+      "execution_status": "not_run",
+      "scope": "axis_aligned_2d_geometry_and_symbolic_rules_only_no_physics_or_control"
+    },
+    {
+      "id": "key_and_unlock_skill",
+      "title": "钥匙和开锁能力齐全",
+      "changes": [
+        "在仅有钥匙的例子中，再加入 unlock 能力。"
+      ],
+      "input": {
+        "rooms": [
+          {
+            "id": "A",
+            "box": [
+              0,
+              0,
+              4,
+              4
+            ]
+          },
+          {
+            "id": "B",
+            "box": [
+              4,
+              0,
+              8,
+              4
+            ]
+          }
+        ],
+        "doors": [
+          {
+            "id": "D",
+            "between": [
+              "A",
+              "B"
+            ],
+            "width_m": 0.9,
+            "locked": true,
+            "key": "K"
+          }
+        ],
+        "robot": {
+          "start": "A",
+          "width_m": 0.6,
+          "capabilities": [
+            "move",
+            "grasp",
+            "unlock"
+          ],
+          "keys": [
+            "K"
+          ]
+        },
+        "objects": [
+          {
+            "id": "cup",
+            "room": "B",
+            "graspable": true
+          }
+        ],
+        "goal": {
+          "type": "hold",
+          "object": "cup"
+        }
+      },
+      "expected_status": "rule_feasible",
+      "status": "rule_feasible",
+      "reason": "restricted graph/geometry/state rules all pass",
+      "elapsed_ms": 0.007551,
+      "raw_result": {
+        "status": "rule_feasible",
+        "reason": "restricted graph/geometry/state rules all pass",
+        "geometry_valid": true,
+        "topology_connected": true,
+        "rule_task_feasible": true,
+        "scope": "axis_aligned_2d_geometry_and_symbolic_rules_only_no_physics_or_control"
+      },
+      "input_unchanged": true,
+      "notes": [
+        "原函数只检查当前声明规则，不输出或执行 unlock/open/move/pickup 序列。",
+        "即使规则可行，输入里的 locked 字段也没有被该函数修改。"
+      ],
+      "execution_status": "not_run",
+      "scope": "axis_aligned_2d_geometry_and_symbolic_rules_only_no_physics_or_control"
+    },
+    {
+      "id": "no_grasp",
+      "title": "机器人缺少 grasp 能力",
+      "changes": [
+        "从未锁门基线中，仅移除 grasp。"
+      ],
+      "input": {
+        "rooms": [
+          {
+            "id": "A",
+            "box": [
+              0,
+              0,
+              4,
+              4
+            ]
+          },
+          {
+            "id": "B",
+            "box": [
+              4,
+              0,
+              8,
+              4
+            ]
+          }
+        ],
+        "doors": [
+          {
+            "id": "D",
+            "between": [
+              "A",
+              "B"
+            ],
+            "width_m": 0.9,
+            "locked": false
+          }
+        ],
+        "robot": {
+          "start": "A",
+          "width_m": 0.6,
+          "capabilities": [
+            "move"
+          ],
+          "keys": []
+        },
+        "objects": [
+          {
+            "id": "cup",
+            "room": "B",
+            "graspable": true
+          }
+        ],
+        "goal": {
+          "type": "hold",
+          "object": "cup"
+        }
+      },
+      "expected_status": "blocked_action",
+      "status": "blocked_action",
+      "reason": "no valid grasp under declared demo rules",
+      "elapsed_ms": 0.00707,
+      "raw_result": {
+        "status": "blocked_action",
+        "reason": "no valid grasp under declared demo rules",
+        "geometry_valid": true,
+        "topology_connected": true,
+        "rule_task_feasible": false,
+        "scope": "axis_aligned_2d_geometry_and_symbolic_rules_only_no_physics_or_control"
+      },
+      "input_unchanged": true,
+      "notes": [
+        "原函数只检查当前声明规则，不输出或执行 unlock/open/move/pickup 序列。",
+        "即使规则可行，输入里的 locked 字段也没有被该函数修改。"
+      ],
+      "execution_status": "not_run",
+      "scope": "axis_aligned_2d_geometry_and_symbolic_rules_only_no_physics_or_control"
+    },
+    {
+      "id": "ungraspable_object",
+      "title": "目标物体不可抓取",
+      "changes": [
+        "从未锁门基线中，仅把 graspable 改为 false。"
+      ],
+      "input": {
+        "rooms": [
+          {
+            "id": "A",
+            "box": [
+              0,
+              0,
+              4,
+              4
+            ]
+          },
+          {
+            "id": "B",
+            "box": [
+              4,
+              0,
+              8,
+              4
+            ]
+          }
+        ],
+        "doors": [
+          {
+            "id": "D",
+            "between": [
+              "A",
+              "B"
+            ],
+            "width_m": 0.9,
+            "locked": false
+          }
+        ],
+        "robot": {
+          "start": "A",
+          "width_m": 0.6,
+          "capabilities": [
+            "move",
+            "grasp"
+          ],
+          "keys": []
+        },
+        "objects": [
+          {
+            "id": "cup",
+            "room": "B",
+            "graspable": false
+          }
+        ],
+        "goal": {
+          "type": "hold",
+          "object": "cup"
+        }
+      },
+      "expected_status": "blocked_action",
+      "status": "blocked_action",
+      "reason": "no valid grasp under declared demo rules",
+      "elapsed_ms": 0.005979,
+      "raw_result": {
+        "status": "blocked_action",
+        "reason": "no valid grasp under declared demo rules",
+        "geometry_valid": true,
+        "topology_connected": true,
+        "rule_task_feasible": false,
+        "scope": "axis_aligned_2d_geometry_and_symbolic_rules_only_no_physics_or_control"
+      },
+      "input_unchanged": true,
+      "notes": [
+        "原函数只检查当前声明规则，不输出或执行 unlock/open/move/pickup 序列。",
+        "即使规则可行，输入里的 locked 字段也没有被该函数修改。"
+      ],
+      "execution_status": "not_run",
+      "scope": "axis_aligned_2d_geometry_and_symbolic_rules_only_no_physics_or_control"
+    },
+    {
+      "id": "narrow_door",
+      "title": "门净宽不足",
+      "changes": [
+        "从未锁门基线中，仅把门宽改为 0.50 m。"
+      ],
+      "input": {
+        "rooms": [
+          {
+            "id": "A",
+            "box": [
+              0,
+              0,
+              4,
+              4
+            ]
+          },
+          {
+            "id": "B",
+            "box": [
+              4,
+              0,
+              8,
+              4
+            ]
+          }
+        ],
+        "doors": [
+          {
+            "id": "D",
+            "between": [
+              "A",
+              "B"
+            ],
+            "width_m": 0.5,
+            "locked": false
+          }
+        ],
+        "robot": {
+          "start": "A",
+          "width_m": 0.6,
+          "capabilities": [
+            "move",
+            "grasp"
+          ],
+          "keys": []
+        },
+        "objects": [
+          {
+            "id": "cup",
+            "room": "B",
+            "graspable": true
+          }
+        ],
+        "goal": {
+          "type": "hold",
+          "object": "cup"
+        }
+      },
+      "expected_status": "blocked_geometry",
+      "status": "blocked_geometry",
+      "reason": "narrow doors: D",
+      "elapsed_ms": 0.008993,
+      "raw_result": {
+        "status": "blocked_geometry",
+        "reason": "narrow doors: D",
+        "geometry_valid": true,
+        "topology_connected": true,
+        "rule_task_feasible": false,
+        "scope": "axis_aligned_2d_geometry_and_symbolic_rules_only_no_physics_or_control"
+      },
+      "input_unchanged": true,
+      "notes": [
+        "原函数只检查当前声明规则，不输出或执行 unlock/open/move/pickup 序列。",
+        "即使规则可行，输入里的 locked 字段也没有被该函数修改。"
+      ],
+      "execution_status": "not_run",
+      "scope": "axis_aligned_2d_geometry_and_symbolic_rules_only_no_physics_or_control"
+    },
+    {
+      "id": "narrow_and_locked",
+      "title": "窄门，同时缺钥匙与开锁能力",
+      "changes": [
+        "在锁门例中，再把门宽改为 0.50 m。"
+      ],
+      "input": {
+        "rooms": [
+          {
+            "id": "A",
+            "box": [
+              0,
+              0,
+              4,
+              4
+            ]
+          },
+          {
+            "id": "B",
+            "box": [
+              4,
+              0,
+              8,
+              4
+            ]
+          }
+        ],
+        "doors": [
+          {
+            "id": "D",
+            "between": [
+              "A",
+              "B"
+            ],
+            "width_m": 0.5,
+            "locked": true,
+            "key": "K"
+          }
+        ],
+        "robot": {
+          "start": "A",
+          "width_m": 0.6,
+          "capabilities": [
+            "move",
+            "grasp"
+          ],
+          "keys": []
+        },
+        "objects": [
+          {
+            "id": "cup",
+            "room": "B",
+            "graspable": true
+          }
+        ],
+        "goal": {
+          "type": "hold",
+          "object": "cup"
+        }
+      },
+      "expected_status": "blocked_geometry",
+      "status": "blocked_geometry",
+      "reason": "narrow doors: D",
+      "elapsed_ms": 0.005338,
+      "raw_result": {
+        "status": "blocked_geometry",
+        "reason": "narrow doors: D",
+        "geometry_valid": true,
+        "topology_connected": true,
+        "rule_task_feasible": false,
+        "scope": "axis_aligned_2d_geometry_and_symbolic_rules_only_no_physics_or_control"
+      },
+      "input_unchanged": true,
+      "notes": [
+        "原函数只检查当前声明规则，不输出或执行 unlock/open/move/pickup 序列。",
+        "即使规则可行，输入里的 locked 字段也没有被该函数修改。",
+        "原程序对窄门先 continue，故此条返回没有列出锁问题；修好宽度后仍需重新检查锁条件。"
+      ],
+      "execution_status": "not_run",
+      "scope": "axis_aligned_2d_geometry_and_symbolic_rules_only_no_physics_or_control"
+    }
+  ]
+}</script>
+<noscript><div class="noscript-note">正文可以正常阅读。交互需要 JavaScript；实验记录和完整文字版可从页面链接查看。</div></noscript>
+</body>
+</html>

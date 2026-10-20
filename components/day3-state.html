@@ -1,0 +1,20 @@
+<div id="day3-state" class="d3s">
+  <div class="d3s-heading"><h3>同一个房间，五张“此刻的快照”</h3><span class="d3s-method">观察状态，不是播放机器人实测</span></div>
+  <p class="d3s-intro">先点“已解锁”，再点“门已打开”。看图中的门和右侧事实：这两张快照究竟差在哪里？</p>
+  <div class="d3s-buttons" role="group" aria-label="选择状态快照">
+    <button type="button" class="d3s-button" data-d3s-snapshot="0" aria-pressed="true">① 初态</button>
+    <button type="button" class="d3s-button" data-d3s-snapshot="1" aria-pressed="false">② 已解锁</button>
+    <button type="button" class="d3s-button" data-d3s-snapshot="2" aria-pressed="false">③ 门已打开</button>
+    <button type="button" class="d3s-button" data-d3s-snapshot="3" aria-pressed="false">④ 进入 B</button>
+    <button type="button" class="d3s-button" data-d3s-snapshot="4" aria-pressed="false">⑤ 拿到杯子</button>
+  </div>
+  <div class="d3s-world-layout">
+    <div class="d3s-scene-panel"><svg class="d3s-scene" role="img" aria-labelledby="d3s-state-scene-title d3s-state-scene-desc"><title id="d3s-state-scene-title">两房间中的状态快照</title><desc id="d3s-state-scene-desc">机器人在 A，杯子在 B，门 D 上锁，钥匙在机器人的物品栏。</desc></svg><p class="d3s-boundary">示意图不按比例；R 是机器人，C 是杯子，K 是物品栏中的钥匙。持有钥匙不占用抓杯子的手。</p></div>
+    <div><span class="d3s-small-label">这张快照里，哪些说法是真的？</span><ul class="d3s-truth-list" id="d3s-state-truth"></ul></div>
+  </div>
+  <div class="d3s-callout" id="d3s-state-explanation"></div>
+  <div class="d3s-goal"><span>今天的目标</span><code>(holding r cup)</code><strong id="d3s-state-goal"></strong></div>
+  <details class="d3s-details"><summary>展开完整事实清单：状态里还有什么？</summary><p>这里列出的事实为真。连通关系、钥匙匹配和能力也是模型的一部分，只是在这组动作中保持不变。</p><ul class="d3s-fact-chips" id="d3s-state-facts"></ul></details>
+  <p class="d3s-boundary">本例采用完全已知的闭世界状态：没有列出的事实按假处理。真实机器人“还没观察到门是否上锁”，不能因此直接认定门未上锁。</p>
+  <div class="d3s-sr" id="d3s-state-live" role="status" aria-live="polite" aria-atomic="true"></div>
+</div>

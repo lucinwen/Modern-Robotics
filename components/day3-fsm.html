@@ -1,0 +1,12 @@
+<div id="day3-fsm" class="d3p-root">
+  <div class="d3p-heading"><strong>动作请求之后，先等到反馈</strong><span>预先给定四步计划 · 由你提供教学反馈事件</span></div>
+  <div class="d3p-executor-layout">
+    <svg id="d3p-fsm-scene" class="d3p-fsm-diagram" viewBox="0 0 560 310" role="img" aria-labelledby="d3p-fsm-title d3p-fsm-desc"><title id="d3p-fsm-title">计划执行器的有限状态机</title><desc id="d3p-fsm-desc">准备时可发出动作，随后等待反馈。成功反馈推进计划；失败进入待复核状态，重新确认状态后才能继续。最后一步成功后结束。</desc></svg>
+    <div><span class="small-label">已经选定的动作序列</span><ol id="d3p-fsm-plan" class="d3p-plan-list"></ol><p id="d3p-fsm-pointer" class="d3p-small"></p></div>
+  </div>
+  <div class="d3p-tabs" role="group" aria-label="给执行器一个事件"><button class="btn btn-primary" type="button" id="d3p-fsm-send">发出当前动作请求</button><button class="btn" type="button" id="d3p-fsm-success">收到成功反馈</button><button class="btn" type="button" id="d3p-fsm-failure">收到失败反馈</button><button class="btn" type="button" id="d3p-fsm-observe">演示：重新确认上一状态</button><button class="btn" type="button" id="d3p-fsm-reset">从初态重来</button></div>
+  <div class="d3p-focus"><strong id="d3p-fsm-status"></strong><p id="d3p-fsm-explanation"></p></div>
+  <details class="d3p-details"><summary>查看事件记录</summary><ol id="d3p-fsm-log" class="d3p-event-log"></ol></details>
+  <p class="d3p-small">这里不自动“假装成功”。你点击的反馈是示例输入。失败后保留计划进度，不宣称真实世界未变化；实际系统还需要观测、校验和相应恢复策略。</p>
+  <div id="d3p-fsm-live" class="sr-only" role="status" aria-live="polite"></div>
+</div>

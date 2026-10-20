@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PAGES = {
     'index.html': 'index.template.html',
     'day-02.html': 'day-02.template.html',
+    'day-03.html': 'day-03.template.html',
 }
 
 def render(template_name='index.template.html'):
@@ -43,4 +44,4 @@ if __name__ == '__main__':
     if outdated:
         raise SystemExit(', '.join(outdated) + ' is out of date; run python3 scripts/build.py')
     if args.check:
-        print('Both compiled lessons are current.')
+        print('All compiled lessons are current.')

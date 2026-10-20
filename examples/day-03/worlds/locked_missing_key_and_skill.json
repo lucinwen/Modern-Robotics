@@ -1,0 +1,54 @@
+{
+  "rooms": [
+    {
+      "id": "A",
+      "box": [
+        0,
+        0,
+        4,
+        4
+      ]
+    },
+    {
+      "id": "B",
+      "box": [
+        4,
+        0,
+        8,
+        4
+      ]
+    }
+  ],
+  "doors": [
+    {
+      "id": "D",
+      "between": [
+        "A",
+        "B"
+      ],
+      "width_m": 0.9,
+      "locked": true,
+      "key": "K"
+    }
+  ],
+  "robot": {
+    "start": "A",
+    "width_m": 0.6,
+    "capabilities": [
+      "move",
+      "grasp"
+    ],
+    "keys": []
+  },
+  "objects": [
+    {
+      "id": "cup",
+      "room": "B",
+      "graspable": true
+    }
+  ],
+  "goal": {
+    "type": "hold",
+    "object": "cup"
+  }
+}

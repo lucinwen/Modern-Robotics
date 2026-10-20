@@ -2,15 +2,15 @@
 
 面向初学者的中文学习笔记。先通过交互观察空间变化，再解释概念、公式与适用条件。
 
-目前包含 [14plan 的 Day 1](https://github.com/venividici/14plan/blob/main/DAILY/day-01.md) 与 [Day 2](https://github.com/venividici/14plan/blob/main/DAILY/day-02.md)。Day 1 从刚体与坐标变换建立空间直觉；Day 2 把空间要求写成 Z3 / SMT 约束，解释可满足性、冲突与验证。
+目前包含 [14plan 的 Day 1](https://github.com/venividici/14plan/blob/main/DAILY/day-01.md)、[Day 2](https://github.com/venividici/14plan/blob/main/DAILY/day-02.md) 和 [Day 3](https://github.com/venividici/14plan/blob/main/DAILY/day-03.md)。Day 1 从刚体与坐标变换建立空间直觉；Day 2 把空间要求写成 Z3 / SMT 约束；Day 3 再用“开门拿杯子”理解状态、动作顺序，以及任务与运动规划怎样配合。
 
 ## 打开教程
 
-- **Day 1 网页**：[index.html](index.html) · **Day 2 网页**：[day-02.html](day-02.html)。下载并解压完整仓库后，直接用浏览器打开对应文件；网页交互无须安装依赖。
+- **Day 1 网页**：[index.html](index.html) · **Day 2 网页**：[day-02.html](day-02.html) · **Day 3 网页**：[day-03.html](day-03.html)。下载并解压完整仓库后，直接用浏览器打开对应文件；网页交互无须安装依赖。GitHub 文件页显示源码，要操作可视化请打开本地网页，或启用下述 Pages。
 - GitHub Pages 预定地址：<https://venividici.github.io/-Modern-Robotics/>。需要在仓库 **Settings → Pages** 选择 **Deploy from a branch → main → /(root)** 并保存后才会发布。
-- **完整文字版**：[Day 01 教程](notes/day-01-tutorial.md) · [Day 02 教程](notes/day-02-tutorial.md)。
-- 课程对应表：[Day 01](notes/day-01-course-map.md) · [Day 02](notes/day-02-course-map.md)。
-- 配套材料：[2.1 刚体自由度专题](notes/day-01-2-1-rigid-body-dof.md) · [Day 2 Python / Z3 实验](examples/day-02/README.md)。
+- **完整文字版**：[Day 01 教程](notes/day-01-tutorial.md) · [Day 02 教程](notes/day-02-tutorial.md) · [Day 03 教程](notes/day-03-tutorial.md)。
+- 课程对应表：[Day 01](notes/day-01-course-map.md) · [Day 02](notes/day-02-course-map.md) · [Day 03](notes/day-03-course-map.md)。
+- 配套材料：[2.1 刚体自由度专题](notes/day-01-2-1-rigid-body-dof.md) · [Day 2 Python / Z3 实验](examples/day-02/README.md) · [Day 3 PDDL / MiniLab 实验](examples/day-03/README.md)。
 
 ## Day 1 · 看懂空间与运动
 
@@ -53,6 +53,41 @@ Day 2 共 9 个可视化。数轴、房间、核心和偏好组件使用明确�
 
 这些是制作教程时的运行，个人本机复现与学习体会另行记录。复现方法见 [实验说明](examples/day-02/README.md)。
 
+## Day 3 · 让机器人一步步拿到杯子
+
+贯穿全篇的任务是：机器人在 A 房间，杯子在 B 房间，中间有一扇锁着的门。教程从中文句子开始，再引入符号、动作、真实搜索与连续空间，保留原计划的七段 10 小时安排。指定资源为 R04 PDDL 阅读与 MIT Fall 2022 Lecture 21 TAMP；R20 是选读。
+
+| 章节 | 要理解的内容 | 可视化与操作 |
+|---|---|---|
+| 01 | 拓扑、几何、当前状态、动作能力分别回答什么 | 同一场景切换四层信息、窄门与缺技能对照 |
+| 02 | 对象、类型、谓词、状态与目标 | 房间图与事实集合联动，比较解锁前后和开门前后 |
+| 03 | 前置条件、增加效果、删除效果、保持不变 | 自己按四种动作，逐条检查为什么能做或不能做 |
+| 04 | domain、problem、参数与实例化 | 中文含义对照 PDDL；换初态时定位变化的文件 |
+| 05 | 计划作为状态搜索，队列与重复状态 | 逐步执行有限 BFS，观察标准任务与缺钥匙的差别 |
+| 06 | FSM、规划器与执行反馈的分工 | 发出请求后等待反馈，成功才推进，失败先复核 |
+| 07 | 身体净宽、中心位置、全路径检查、IK | 门洞与圆盘、给定折线路径；两杆手臂和两种肘部姿态 |
+| 08 | 离散动作与连续可行性的往返 | 缺钥匙、窄门、把手过高；保留失败证据和世界版本 |
+| 09 | 搜索计划与受限规则检查的不同结论 | 9 个实际 PDDL 记录、9 个原 MiniLab 记录，可逐步看完整事实 |
+| 10 | 自己解释、首次回答与后来修订 | 35 分钟 Checkpoint A、分项自评、个人笔记与 Markdown 导出 |
+
+共 **10 个知识可视化 + 1 个阶段练习区**。每节先给操作问题，再解释符号；自测提示可以折叠，不替学习者填写答案。门已解锁与门已打开分别建模；钥匙表示物品栏持有，不占拿杯子的手。全文明确区分这些教学假设与真实动作所需的观测、运动和执行证据。
+
+### Day 3 已实际运行的教学记录
+
+制作环境为 Python 3.12.14、Pyperplan 2.1。程序实际解析 `.pddl`、实例化动作并执行 BFS，保存输入、动作、完整状态、增删效果、搜索日志和耗时。全部返回动作根据源 PDDL 的完整前置与效果复核。
+
+| 输入变化 | 符号搜索实际结果 | 这说明什么 |
+|---|---|---|
+| 标准初态 | `plan_found`，4 步 | 解锁 → 开门 → 进入 B → 拿杯 |
+| 缺钥匙、缺解锁、缺开门、缺抓取能力、杯不可抓（5 例） | 各为 `no_plan`，长度 `null` | BFS 穷尽当前有限模型；没有编码替代动作或额外来源 |
+| 门已经打开 | `plan_found`，2 步 | 从移动与抓取开始 |
+| 门宽变为 0.50 m，机器人宽 0.60 m | `plan_found`，4 步；后验净宽检查拒绝 | 所列符号条件成立仍不足以通过身体尺寸检查 |
+| 杯子一开始就在手里 | `plan_found`，0 步 | 目标已成立，空计划是成功结果 |
+
+另有 9 个原 MiniLab 检查记录，比较钥匙与解锁能力各自缺失、两者齐全、窄门、缺抓取能力和物体不可抓等输入。保留原始 `reason`、检查顺序与 `input_unchanged` 证据；规则判定不会冒充真实开锁或动作执行。[完整数据](data/day-03-results.json) 与 [复现说明](examples/day-03/README.md) 一同提交。
+
+网页中的 BFS 在本页限定模型内实时计算；门洞、给定线段碰撞和平面两杆 IK 使用标明条件的解析计算。第 09 节则读取制作时保存的实际 Python 输出，操作查看器不会重新启动 Python。完整 TAMP 求解与机器人执行不包含在这些记录中。
+
 ## 使用方式
 
 1. 按目录学习一节，先猜滑条改变后会发生什么。
@@ -62,7 +97,7 @@ Day 2 共 9 个可视化。数轴、房间、核心和偏好组件使用明确�
 
 页面末尾的个人笔记只保存在当前浏览器，支持导出 `.md`；不会自动上传 GitHub。页面本身不标记用户已掌握，也不把 AI 整理的示例当成用户完成的实验。
 
-Day 1 与 Day 2 的个人笔记使用不同存储键和导出文件名；可以通过页侧的学习日导航来回切换。
+三天的个人笔记使用不同存储键和导出文件名；可以通过页侧的学习日导航来回切换。Day 3 的阶段练习另存首答、修订和自评；计时可以暂停，重置计时保留答案。运行记录旁的预测只在当前页面会话中保留，重要推理可另写进个人笔记或导出练习。
 
 ## 来源与约定
 
@@ -71,24 +106,32 @@ Day 1 与 Day 2 的个人笔记使用不同存储键和导出文件名；可以�
 - [MIT Robotic Manipulation · Geometric Pose Estimation](https://manipulation.mit.edu/pose.html)：相机、点云、遮挡、位姿估计与配准选读。
 - [14plan Day 1 任务手册](https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/TASK_GUIDES/day-01.md) 与 [MiniLab](https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/minilab/validate.py)。
 - [Z3Py 官方入门](https://github.com/microsoft/z3guide/blob/main/website/docs-programming/02%20-%20Z3%20Python/01%20-%20Introduction.md) 与 [Programming Z3](https://z3prover.github.io/papers/programmingz3.html)：Day 2 约束、作用域、核心和优化的依据。
+- [Helmert · An Introduction to PDDL](https://www.cs.toronto.edu/~sheila/2542/w09/A1/introtopddl2.pdf)：Day 3 对象、初态、目标、前置与效果的原始讲义依据。
+- [MIT Fall 2022 官方课表](https://manipulation.csail.mit.edu/Fall2022/schedule.html)、[Programming the Task Level 所在章节](https://manipulation.mit.edu/clutter.html) 与 [Motion Planning](https://manipulation.mit.edu/trajectories.html)：FSM、任务规划、IK、轨迹和检查边界。
+- [Integrated Task and Motion Planning](https://arxiv.org/abs/2010.01083)：离散动作和连续参数耦合的作者综述。
+- [Pyperplan 官方代码](https://github.com/aibasel/pyperplan)：Day 3 的实际 PDDL 解析与搜索实现。
 
 Day 1 依据官方转写与讲义整理，使用右手系、米、列向量；`T_world_camera` 将相机坐标表达为世界坐标。Day 2 依据 Z3 官方文档与计划任务整理，分别标注整数／实数、米／厘米和各演示的模型条件。
 
+Day 3 已核对指定讲次与 MIT 2022 课表，未取得本轮 B 站整段视频或字幕，因此使用官方文字资料、原始规划讲义和实际程序完成讲解，不编造完整观看记录或逐秒视频索引。持续更新的 MIT 在线讲义用来核对原理，不当作 2022 讲座的逐字转写；详细阅读顺序见 [Day 3 课程对应表](notes/day-03-course-map.md)。
+
 ## 维护与扩展
 
-这是一个无第三方浏览器运行时依赖的静态网站。Python 构建脚本把本地组件和预运行数据嵌入两篇网页；编译后的 `index.html` 与 `day-02.html` 一同提交，因此在线与离线阅读都不需要构建。主动复现 Python / Z3 实验时，才需安装其单独依赖。
+这是一个无第三方浏览器运行时依赖的静态网站。Python 构建脚本把本地组件和预运行数据嵌入三篇网页；编译后的 `index.html`、`day-02.html` 与 `day-03.html` 一同提交，因此在线与离线阅读都不需要构建。主动复现 Python / Z3 / PDDL 实验时，才需安装各自的单独依赖。
 
 | 路径 | 用途 |
 |---|---|
-| `src/*.template.html` | 两篇教程正文与组件位置 |
-| `components/` | 18 个交互演示的标记 |
+| `src/*.template.html` | 三篇教程正文与组件位置 |
+| `components/` | 28 个知识可视化与 1 个阶段练习区的标记 |
 | `assets/` | 主题、交互、几何计算与图形样式 |
 | `notes/` | 可直接在 GitHub 阅读的中文 Markdown 笔记 |
-| `scripts/build.py` | 构建两篇网页，并安全内嵌 Day 2 运行 JSON |
+| `scripts/build.py` | 构建三篇网页，并安全内嵌 Day 2 / Day 3 运行 JSON |
 | `scripts/validate.py` | 检查构建一致性、链接、ID、依赖和语法 |
 | `tests/` | 坐标、几何、区间与逻辑边界检查 |
 | `examples/day-02/` | 可复现的真实 Z3 教学实验 |
 | `data/day-02-z3-results.json` | 制作环境的一次真实输出记录 |
+| `examples/day-03/` | PDDL 动作域、9 个问题、原 MiniLab 与可编辑世界输入 |
+| `data/day-03-results.json` | 9 个 PDDL 与 9 个原 MiniLab 的真实输出 |
 
 修改正文或组件后，在仓库根目录执行：
 
@@ -98,6 +141,8 @@ python3 scripts/validate.py
 node tests/frames-math.test.cjs
 node tests/day2-geometry.test.cjs
 node tests/day2-logic.test.cjs
+node tests/day3-symbolic.test.cjs
+node tests/day3-geometry.test.cjs
 ```
 
 修改正文后同步相应完整文字版。新增课程时保留现有笔记与锚点；每篇写明原课程、核心问题、交互模型的条件和练习，不自动填写个人完成状态或学习体会。
@@ -108,4 +153,6 @@ node tests/day2-logic.test.cjs
 
 Day 2 的几何与区间检查覆盖贴边、碰角、缝隙、门洞端点、双侧余量、完整作用域撤回、核心与有限候选边界；真实 Z3 实验则独立核对模型满足性、核心不可满足性及所列扩展示例。
 
-本次新网站尚未进行浏览器端的整页视觉与交互实测。原对话中的三个自由度演示曾单独检查过，但这不替代新页面的整体浏览器测试。
+Day 3 的 173 项符号检查包括状态不变量、失败动作不变更状态、去重与最少步数，并逐例对照全部 9 个 PDDL 实际记录的完整前置、效果和状态。93 项几何检查覆盖门宽与中心偏移、给定折线最小距离、两支 IK 正向恢复、边界和世界版本反馈。记录查看器还核对 18 条记录的 schema、零步与无计划、原始结果和错误数据拒绝。
+
+目前尚未完成三篇网页在浏览器中的整页视觉与交互实测。原对话中的三个自由度演示曾单独检查过，但这不替代新页面的整体浏览器测试。

@@ -1,0 +1,18 @@
+<div id="day3-reach" class="d3g-root">
+  <div class="d3g-heading"><strong>把手在那里，末端点够得到吗？</strong><span>侧视二维模型 · 两根杆长度固定为 0.55 m 和 0.45 m</span></div>
+  <div class="d3g-workbench">
+    <div class="d3g-picture"><svg class="d3g-scene d3g-reach-scene" role="img" aria-labelledby="d3g-reach-title d3g-reach-desc"><title id="d3g-reach-title">平面双连杆的末端位置可达区域</title><desc id="d3g-reach-desc">基座高零点七米。绿色环带表示忽略关节限位、碰撞和末端朝向时的点可达区域。目标在环带内时，显示解析计算的连杆姿态；目标在环带外时不绘制虚构到达姿态。</desc></svg>
+      <div class="d3g-legend"><span><i class="d3g-key-safe"></i>末端点可达环带</span><span><i class="d3g-key-body"></i>当前肘形</span><span><i class="d3g-key-target"></i>把手目标点</span></div>
+    </div>
+    <div class="d3g-proof"><ol class="d3g-truth-list" id="d3g-reach-checks" aria-label="目标距离与可达条件"></ol><div class="d3g-result" id="d3g-reach-result" aria-live="off"></div><p class="d3g-explanation" id="d3g-reach-explanation"></p><p class="d3g-note" id="d3g-reach-branches"></p></div>
+  </div>
+  <div class="d3g-controls">
+    <label class="form-label" for="d3g-reach-x">把手与基座的水平距离 x <output id="d3g-reach-x-value" aria-live="off">0.50 m</output><input class="form-range" id="d3g-reach-x" type="range" min="0" max="140" step="5" value="50"></label>
+    <label class="form-label" for="d3g-reach-height">把手高度 h <output id="d3g-reach-height-value" aria-live="off">1.10 m</output><input class="form-range" id="d3g-reach-height" type="range" min="0" max="220" step="5" value="110"></label>
+  </div>
+  <div class="viz-row" role="group" aria-label="选择把手位置"><button class="btn" type="button" data-d3g-reach="reachable">目标在环带内</button><button class="btn" type="button" data-d3g-reach="high">把手太高</button><button class="btn" type="button" data-d3g-reach="close">离基座太近</button><button class="btn" type="button" data-d3g-reach="edge">恰好完全伸直</button></div>
+  <div class="viz-row" role="group" aria-label="比较两个解析肘形"><button class="btn" type="button" data-d3g-elbow="0" aria-pressed="true">肘形 A</button><button class="btn" type="button" data-d3g-elbow="1" aria-pressed="false">肘形 B</button><span class="d3g-note">同一个目标点，可能对应不同关节姿态。</span></div>
+  <details class="d3g-details"><summary>先看懂圆环；想知道原因时再展开公式</summary><p>两根杆完全伸直，最远是 L₁ + L₂ = 1.00 m；尽量折回，最近是 |L₁ − L₂| = 0.10 m。因此目标到基座的距离 r 必须满足 <strong>0.10 ≤ r ≤ 1.00 m</strong>。把手高度先减去基座高度：r² = x² + (h − 0.70)²。</p><p>这里还能解析求出关节角：cos(q₂) = (r² − L₁² − L₂²)/(2L₁L₂)，q₂ 可取正、负两支，再由几何关系求 q₁。普通位置有两种肘形；伸直或折叠边界上，它们可能重合。Day 4 再系统学习正运动学与逆运动学，今天先理解输入目标与可达条件。</p></details>
+  <p class="d3g-note">本演示只有二维位置、理想转动关节和固定连杆长度；未检查关节限位、杆与地面/障碍物碰撞、末端朝向、抓握把手、开门力矩或完整运动路径。环带内只说明此模型的末端点存在位置解；环带外的解析排除也只适用于这些假设。</p>
+  <div class="sr-only" id="d3g-reach-live" role="status" aria-live="polite"></div>
+</div>

@@ -1,0 +1,14 @@
+<div id="day3-search" class="d3s">
+  <div class="d3s-heading"><h3>让程序按层寻找动作序列</h3><span class="d3s-method">本有限状态域的真实 BFS</span></div>
+  <p class="d3s-intro">每点一次，程序从等待队列取出一个状态，先检查目标，再尝试本例的动作。观察不满足前置的动作被拒绝、重复状态被跳过。</p>
+  <label class="d3s-label" for="d3s-search-preset">先预测：这个起点能到达目标吗？<select id="d3s-search-preset" class="d3s-select"><option value="success">标准初态 · 门上锁，钥匙与能力齐全</option><option value="missing_key">缺少钥匙</option><option value="no_grasp">没有拿杯能力</option><option value="already_open">门一开始就打开了</option></select></label>
+  <div class="d3s-buttons"><button type="button" class="d3s-button d3s-button-primary" id="d3s-search-step">展开下一个状态</button><button type="button" class="d3s-button" id="d3s-search-run">运行到结果</button><button type="button" class="d3s-button" id="d3s-search-reset">从初态重来</button></div>
+  <div class="d3s-search-summary"><div><span class="d3s-small-label">已发现不同状态</span><strong id="d3s-search-seen">1</strong></div><div><span class="d3s-small-label">已取出检查</span><strong id="d3s-search-expanded">0</strong></div><div><span class="d3s-small-label">现在的结论</span><strong id="d3s-search-status">尚在搜索</strong></div></div>
+  <div class="d3s-queue"><span class="d3s-small-label">等待队列 · 左侧先取出</span><div id="d3s-search-queue" class="d3s-queue-items"></div></div>
+  <div class="d3s-search-columns"><div><span class="d3s-small-label">按动作数分层的已发现状态</span><div class="d3s-levels" id="d3s-search-levels"></div></div><div><span class="d3s-small-label">本次取出的状态</span><div class="d3s-current-state" id="d3s-search-current"></div><details class="d3s-details"><summary>完整状态事实</summary><ul class="d3s-fact-chips" id="d3s-search-facts"></ul></details></div></div>
+  <details class="d3s-details" open><summary>本次各动作为什么被保留或排除？</summary><ul class="d3s-search-candidates" id="d3s-search-candidates"></ul></details>
+  <div class="d3s-callout" id="d3s-search-explanation"></div>
+  <div id="d3s-search-plan-box" hidden><h4 class="d3s-plan-heading">沿父节点回溯，得到这个候选计划</h4><ol class="d3s-plan" id="d3s-search-plan"></ol></div>
+  <p class="d3s-boundary">这段 JavaScript 对页面明确给出的两房间、一个门和四类动作进行完整前向搜索，没有读取任意 PDDL 文件。每个动作代价均为 1，因此 BFS 找到最少动作数的符号计划；这不等于时间最短或运动最省。只有队列穷尽且未发现目标，才报告这个有限模型无计划。</p>
+  <div class="d3s-sr" id="d3s-search-live" role="status" aria-live="polite" aria-atomic="true"></div>
+</div>
