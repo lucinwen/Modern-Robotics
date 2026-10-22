@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f8f7">
+  <meta name="description" content="Day 10 数字人：3DGS / FLAME / SMPL-X / Blendshape / VRM / Live2D 六种表征的分工、需求到选型的映射、3DGS 高斯投影渲染、参数化人脸与身体、音画同步时序与三种失配的归因。">
+  <title>Day 10 · 像不像 vs 能不能动：3DGS / FLAME / SMPL-X 与数字人 | Modern Robotics 学习手记</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/site.css">
+  <link rel="stylesheet" href="assets/lesson-kit.css">
+  <script src="assets/site.js" defer></script>
+  <script src="assets/lesson-kit.js" defer></script>
+  <script src="assets/day10.js" defer></script>
+</head>
+<body data-lesson-key="day-10" data-lesson-title="Day 10 · 表示、驱动、渲染、同步" data-lesson-topic="3DGS / FLAME / SMPL-X / Blendshape / VRM / Live2D 的分工、选型映射、音画同步与三种失配">
+<a class="skip-link" href="#main">跳到教程正文</a>
+<header class="site-header">
+  <a class="brand" href="#start" aria-label="Modern Robotics 学习手记首页"><span class="brand-monogram">MR<span>.</span></span><span class="brand-name">Modern Robotics<small>可视化学习手记</small></span></a>
+  <div class="header-actions"><span class="edition">DAY 10 / 数字人</span><a href="https://github.com/lucinwen/Modern-Robotics" target="_blank" rel="noopener noreferrer">GitHub 仓库 <span aria-hidden="true">↗</span></a><button class="btn theme-toggle" id="theme-toggle" type="button" aria-label="切换明暗主题">切换主题</button></div>
+</header>
+<div class="page-shell">
+  <aside class="sidebar" aria-label="学习导航">
+    {{component:course-switcher}}
+    <div class="sidebar-intro"><span class="eyebrow">学习路线</span><strong>外观不等于骨骼。</strong></div>
+    <nav class="lesson-nav" aria-label="本页目录">
+      <a href="#start" class="is-current" aria-current="location"><span>00</span> 像，不等于能动</a>
+      <a href="#reps"><span>01</span> 六种表征的职责</a>
+      <a href="#matrix"><span>02</span> 需求 → 选型</a>
+      <a href="#gs"><span>03</span> 3DGS：一堆高斯</a>
+      <a href="#params"><span>04</span> FLAME 与 SMPL-X</a>
+      <a href="#timing"><span>05</span> 音画同步时序</a>
+      <a href="#failures"><span>06</span> 三种失配归因</a>
+      <a href="#scope"><span>07</span> 真实范围四格表</a>
+      <a href="#exam"><span>08</span> 综合考题六栏答卷</a>
+      <a href="#score"><span>09</span> 五维自评</a>
+      <a href="#sources"><span>↗</span> 来源与边界</a>
+    </nav>
+    <div class="sidebar-note"><span class="small-label">这一页怎么用</span><p>每说一句“我做过数字人”，<br>都要能指到：哪一层表示、<br>哪一段驱动、哪一处同步。</p><a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-10.md" target="_blank" rel="noopener noreferrer">查看原 Day 10 任务手册 ↗</a></div>
+  </aside>
+  <main id="main">
+    <section id="start" class="hero lesson-section" data-nav>
+      <div class="eyebrow">MODERN ROBOTICS / 第十天</div>
+      <h1>“我有一个高质量 3DGS 数字人。”<br><span>——所以能做实时可触摸的情感交互吗？</span></h1>
+      <p class="hero-lead">不能。这句话中间的跳跃，跨过了<strong>四道完全不同的关卡</strong>：外观重建 → 结构（骨骼/关节）→ 驱动（表情与口型）→ 同步（音画与话轮）→ 最后才是安全（可触摸的物理交互）。<strong>每一关都要单独的证据</strong>，前一关做得再好也不能替后一关作证。</p>
+      <div class="lesson-meta"><span>2026.10.22</span><span>表征 · 驱动 · 同步 · 贡献归属</span><span>9 个交互演示</span></div>
+      <a class="start-link" href="#reps">先分清六种表征 <span aria-hidden="true">↓</span></a>
+      <div class="opening-question"><span class="small-label">贯穿今天的一个问题</span><p>为什么“视觉上极其写实”的重建，不自动等于“能动、能说话、能碰”？</p><span>因为它们是<strong>不同的数据结构</strong>。3DGS 存的是空间高斯的位置、协方差、颜色与不透明度——它没有关节，没有骨骼层级，没有“下颌张开 0.3”这个自由度。你从它身上渲染出的每一帧都很像，但你找不到一个参数可以拉动。要能动，必须<a href="#reps">换成参数化表示</a>，或者手动给它绑一套骨架——那是另一项工作。</span></div>
+      <div class="reading-guide"><h2>今天的分界线：表征 / 驱动 / 渲染 / 同步</h2><p>这四层经常被一句“我做过数字人”糊在一起。真实项目里它们由不同的模块负责，失败时也表现完全不同：<strong>表征错了 → 怎么调都不像；驱动错了 → 像但表情不对；渲染错了 → 对但画面崩；同步错了 → 全都对但时间错位</strong>。今天按这四层拆开看。</p><p>本页所有示意图都是<strong>手写的二维示意</strong>，不是真实的 3DGS 训练结果，也不是真实的 FLAME / SMPL-X 前向计算。滑条背后的公式写在每个演示的说明里——你能自己复现，才算真懂。</p><details><summary>为什么不用真模型跑一遍？</summary><p>因为这一天的目标是<strong>分清职责边界</strong>，不是复现论文指标。真实 FLAME 需要 5023 顶点的模板网格、关节回归器与 blendshape 基；真实 3DGS 需要多视角图像与几十分钟优化。这些都能跑，但跑通之后你得到的数字（PSNR、LPIPS）回答不了“它能不能被驱动”这个问题。<strong>本页选择把结构讲透，把数字留白</strong>。</p></details></div>
+      <p class="source-note">范围依据 <a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-10.md" target="_blank" rel="noopener noreferrer">Day 10 任务手册</a> 与 <a href="https://github.com/lucinwen/14plan/blob/main/DAILY/day-10.md" target="_blank" rel="noopener noreferrer">每日计划</a>；对应资源 R11（3DGS）与 R12（FLAME / SMPL-X / VRM）。</p>
+    </section>
+
+    <section id="reps" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>01</span> 对应 14plan Day 10 · 第 2 阶段</div>
+      <h2>六种表征，<br class="desktop-break">六种“不能自动保证”。</h2>
+      <p>14plan 给了一张可以直接背的表：每种技术的主要数据结构 / 输出，以及<strong>它不能自动保证什么</strong>。后者才是面试里真正区分人的部分——因为几乎所有人都知道 3DGS 能重建场景，很少有人能立刻说出它<strong>不能</strong>做什么。</p>
+      <div id="day10-reps" class="demo">
+        <div class="demo-head"><span class="demo-title">技术定位卡</span><span class="demo-tag">点名字看边界</span></div>
+        <div class="chip-list" id="d10-rep-chips">
+          <button type="button" class="chip is-on" data-rep="gs">静态 3DGS</button>
+          <button type="button" class="chip" data-rep="flame">FLAME</button>
+          <button type="button" class="chip" data-rep="smplx">SMPL-X</button>
+          <button type="button" class="chip" data-rep="blend">Blendshape</button>
+          <button type="button" class="chip" data-rep="vrm">VRM</button>
+          <button type="button" class="chip" data-rep="live2d">Live2D</button>
+        </div>
+        <div class="card-grid" id="d10-rep-detail" aria-live="polite"></div>
+        <p class="demo-note" id="d10-rep-note">这六种不是“先进程度”的排序，而是<strong>回答不同问题</strong>的工具。选错的典型症状是：拿 3DGS 做表情驱动，最后靠“每帧重新重建”硬凑。</p>
+      </div>
+      <h3>三种最容易混的对比</h3>
+      <div class="table-scroll"><table class="audit"><thead><tr><th>对比</th><th>区别在哪</th><th>一句话记法</th></tr></thead><tbody>
+        <tr><td>3DGS vs NeRF</td><td>3DGS 用显式高斯基元，可光栅化；NeRF 用隐式场 + 体渲染采样。前者渲染快、易编辑，后者更紧凑但慢</td><td>一个是“一堆可见的小团”，一个是“一个查询函数”</td></tr>
+        <tr><td>FLAME vs SMPL-X</td><td>FLAME 只做人脸（形状/表情/姿态）；SMPL-X 做全身，含身体、手、脸</td><td>FLAME 是脸的参数模型，SMPL-X 是全身的参数模型</td></tr>
+        <tr><td>VRM vs SMPL-X</td><td>VRM 是<strong>角色资产标准</strong>（骨架命名、表情约定、可移植格式）；SMPL-X 是<strong>统计人体模型</strong>（参数化体型）</td><td>VRM 是“集装箱规范”，SMPL-X 是“人体坐标系”</td></tr>
+      </tbody></table></div>
+      <div class="key-idea"><strong>一条硬边界：</strong>静态重建<strong>没有</strong>骨骼、碰撞体、唇形与情绪语义。这四样必须额外获得：绑骨、加碰撞体、做 viseme 映射、接情绪指令。<strong>它们不会因为重建质量高而自动出现。</strong></div>
+    </section>
+
+    <section id="matrix" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>02</span> 对应 14plan Day 10 · 第 3 阶段</div>
+      <h2>先问要什么，<br class="desktop-break">再问用什么。</h2>
+      <p>14plan 要求列出三种不同需求各自该选什么表示：<strong>写实展示</strong>、<strong>语音表情驱动</strong>、<strong>动作同步</strong>。点一个需求，看推荐的组合、代价，以及最常见的误解。</p>
+      <div id="day10-matrix" class="demo">
+        <div class="demo-head"><span class="demo-title">需求 → 选型</span><span class="demo-tag">三种需求</span></div>
+        <div class="tabs" id="d10-m-tabs">
+          <button type="button" data-need="0" aria-pressed="true">① 写实展示</button>
+          <button type="button" data-need="1" aria-pressed="false">② 语音 + 表情驱动</button>
+          <button type="button" data-need="2" aria-pressed="false">③ 动作同步</button>
+        </div>
+        <div class="card-grid" id="d10-m-detail"></div>
+        <div class="table-scroll"><table class="audit"><thead><tr><th>层</th><th>它负责回答的问题</th><th>换成别的会怎样</th></tr></thead><tbody>
+          <tr><td>表示</td><td>这个形象以什么数据存在？几何是显式还是参数化？</td><td>用不可驱动的表示做动画，只能逐帧重建或手工绑骨</td></tr>
+          <tr><td>驱动</td><td>什么信号改变它的姿态/表情？参数怎么从语音或动作来？</td><td>表示再好，没有驱动信号就只剩一尊雕像</td></tr>
+          <tr><td>渲染</td><td>这些数据怎么变成画面？走光栅化、体渲染还是高斯投影？</td><td>渲染错了，表示和驱动都对，画面也会崩</td></tr>
+          <tr><td>同步</td><td>音频、表情、动作、画面在时间上怎么对齐？</td><td>全都对但错位，用户依然觉得“假”</td></tr>
+        </tbody></table></div>
+        <p class="demo-note" id="d10-m-note">选型的第一原则是<strong>从驱动信号倒推表示</strong>，不是从“哪个技术新”倒推。要口型，就必须有 viseme 级可控的参数；要全身动作，就必须有骨架；这两条要求会直接排除掉一部分表示。</p>
+      </div>
+      <div class="key-idea"><strong>一个实用的判断顺序：</strong>① 我需要哪些自由度（口型？眼神？手指？行走？）→ ② 哪个表示能提供这些自由度 → ③ 这个表示能不能实时渲染 → ④ 驱动信号从哪来。<strong>倒着做（先选技术再想用途）是这类项目返工的第一原因。</strong></div>
+    </section>
+
+    <section id="gs" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>03</span> 对应 14plan Day 10 · 第 2 阶段</div>
+      <h2>3DGS 到底是什么：<br class="desktop-break">一堆可以投影的小团。</h2>
+      <p>3DGS 的核心只有三步：<strong>用一组三维高斯基元表示场景 → 把它们投影到屏幕 → 按深度排序后做 alpha 混合</strong>。没有神经网络，没有逐像素采样。下面这个演示把这些高斯画出来——加数量、改尺度，看“像不像”怎么变。</p>
+      <div id="day10-gs" class="demo">
+        <div class="demo-head"><span class="demo-title">高斯投影示意</span><span class="demo-tag">二维降维演示</span></div>
+        <div class="control-grid">
+          <label class="control"><span>高斯数量</span><input id="d10-gs-count" type="range" min="20" max="1400" step="20" value="320" aria-label="高斯数量"><output id="d10-gs-count-out">320</output></label>
+          <label class="control"><span>单个高斯尺度</span><input id="d10-gs-scale" type="range" min="40" max="200" step="5" value="100" aria-label="高斯尺度百分比"><output id="d10-gs-scale-out">100%</output></label>
+        </div>
+        <div class="canvas-box"><canvas id="d10-gs-canvas" aria-label="高斯投影渲染示意：目标形状与重建结果并排"></canvas></div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>覆盖率（重建 ∩ 目标 / 并集）</span><strong id="d10-gs-iou">—</strong></div>
+          <div class="kpi-block"><span>典型毛病</span><strong id="d10-gs-flaw">—</strong></div>
+        </div>
+        <p class="demo-note" id="d10-gs-note">左边是“目标”（多视角观测想还原的东西），右边是用 N 个高斯近似的结果。真实 3DGS 的高斯参数是<strong>通过可微光栅化 + 梯度下降反推出来的</strong>，这里为了看清结构，用的是固定采样——所以这个数字只说明“覆盖关系”，不是 PSNR。</p>
+      </div>
+      <h3>为什么它能实时，而 NeRF 不能</h3>
+      <div class="table-scroll"><table class="audit"><thead><tr><th>环节</th><th>3DGS</th><th>NeRF</th></tr></thead><tbody>
+        <tr><td>表示</td><td>显式：每个高斯有位置、协方差、颜色、不透明度</td><td>隐式：MLP 查询 (x, y, z, 方向) → 密度与颜色</td></tr>
+        <tr><td>渲染</td><td>投影 + 排序 + alpha 混合（一次光栅化）</td><td>沿光线采样上百个点，每点查一次网络</td></tr>
+        <tr><td>成本随什么增长</td><td>高斯数量（可裁剪、可 LOD）</td><td>采样数 × 网络前向次数</td></tr>
+        <tr><td>可编辑性</td><td>可以直接删/移动/复制高斯（“编辑”很自然）</td><td>要改内容通常得重新训练</td></tr>
+        <tr><td>它不解决的问题</td><td colspan="2">两者都只给<strong>外观</strong>：没有关节、没有碰撞体、没有语义。</td></tr>
+      </tbody></table></div>
+      <div class="key-idea"><strong>面试里加分的一句：</strong>“3DGS 的可编辑性是它相对 NeRF 的真正优势——但‘可编辑外观’仍然不是‘可驱动结构’。要让数字人说话，我需要的是一组能由语音信号推动的表情参数，这在 FLAME 一类的参数模型里才有。”</div>
+    </section>
+
+    <section id="params" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>04</span> 对应 14plan Day 10 · 第 2 阶段</div>
+      <h2>参数化：<br class="desktop-break">把“像”变成一组可以拧的旋钮。</h2>
+      <p>FLAME 的思想很朴素：人脸不是一张固定的网格，而是<strong>模板网格 + 一组基 + 系数</strong>。形状（脸型）一组系数、表情一组系数、姿态（下颌/眼球/颈部）一组系数。改系数就得到一张新脸——这才是“可驱动”的前提。</p>
+      <div class="callout"><strong>先说明：</strong>下面这张脸是<strong>手画的二维示意</strong>，四个滑条对应 FLAME 的四类参数语义（shape / expression / pose），但<strong>不是</strong> FLAME 的前向计算。真实 FLAME 是 5023 顶点的模板网格 + 关节回归 + blendshape 基，参数维度也远不止四个。<strong>看的是“参数如何影响形状”这个关系，不是像素。</strong></div>
+      <div id="day10-params" class="demo">
+        <div class="demo-head"><span class="demo-title">参数化示意（脸）</span><span class="demo-tag">四个旋钮</span></div>
+        <div class="control-grid">
+          <label class="control"><span>shape · 脸型宽窄</span><input id="d10-p-shape" type="range" min="-100" max="100" step="5" value="0" aria-label="脸型参数"><output id="d10-p-shape-out">0</output></label>
+          <label class="control"><span>expression · 笑容</span><input id="d10-p-smile" type="range" min="0" max="100" step="5" value="20" aria-label="笑容参数"><output id="d10-p-smile-out">20</output></label>
+          <label class="control"><span>expression · 张嘴（jaw）</span><input id="d10-p-jaw" type="range" min="0" max="100" step="5" value="10" aria-label="张嘴参数"><output id="d10-p-jaw-out">10</output></label>
+          <label class="control"><span>pose · 头部偏转</span><input id="d10-p-yaw" type="range" min="-40" max="40" step="2" value="0" aria-label="头部偏转角度"><output id="d10-p-yaw-out">0°</output></label>
+        </div>
+        <div class="canvas-box"><canvas id="d10-face-canvas" aria-label="参数化人脸示意：随滑条变化"></canvas></div>
+        <p class="demo-note" id="d10-p-note">注意“笑容”和“张嘴”是两个<strong>互相独立</strong>的维度——这正是参数化模型的价值：你可以只改一个，而不是重新生成整张脸。真实系统里，这两个量通常由语音/情绪模块分别给出。</p>
+      </div>
+      <h3>FLAME、SMPL-X、Blendshape、VRM 各管哪一段</h3>
+      <div class="table-scroll"><table class="audit"><thead><tr><th>技术</th><th>参数/结构</th><th>它给了你什么</th><th>它不给你什么</th></tr></thead><tbody>
+        <tr><td>FLAME</td><td>形状系数 + 表情系数 + 姿态（颈/颌/眼）</td><td>一个可调的脸，含表情语义方向</td><td>情绪识别、语音到表情的映射</td></tr>
+        <tr><td>SMPL-X</td><td>体型 + 姿态 + 手部 + 面部系数</td><td>全身（含手、脸）的统一参数化</td><td>传感器与动作已同步的保证</td></tr>
+        <tr><td>Blendshape</td><td>一组网格形变目标 + 权重</td><td>把“表情”变成可混合的权重向量（如 ARKit 的 52 个）</td><td>自动理解用户意图</td></tr>
+        <tr><td>VRM</td><td>人形骨架命名 + 表情约定 + 可移植文件</td><td>跨软件可用的角色资产</td><td>LLM 实时性与情绪正确性</td></tr>
+        <tr><td>Live2D</td><td>二维图层 + 变形参数</td><td>成本低、二次元风格强、可控性好</td><td>三维全空间几何（转身就露）</td></tr>
+      </tbody></table></div>
+      <div class="key-idea"><strong>一个常被搞混的层级：</strong>Blendshape 是<strong>驱动接口</strong>，VRM 是<strong>资产标准</strong>，FLAME / SMPL-X 是<strong>参数化模型</strong>。它们可以叠加使用：SMPL-X 提供身体 → 绑定到 VRM 骨架 → 用 Blendshape 权重驱动表情。问“你用哪个”时，要先反问“你问的是哪一层”。</div>
+    </section>
+
+    <section id="timing" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>05</span> 对应 14plan Day 10 · 第 4 阶段</div>
+      <h2>音画同步：<br class="desktop-break">两条独立的时间线，必须对准。</h2>
+      <p>14plan 要求画出 <code>mic → VAD/ASR → 对话状态/LLM → 流式 TTS</code>，并分叉出 <code>facial/emotion directives</code>，再汇聚到 <code>viseme/blendshape → 渲染器</code>。关键在<strong>两条线的时间基准不同</strong>：音频按播放时钟走，动画按渲染帧走。</p>
+      <div class="callout"><strong>至少要标 6 个时间戳 / 版本标记：</strong>① TTS 文本块生成时刻 ② 音频块到达播放器时刻 ③ 音频真正出声时刻（含设备缓冲）④ viseme 序列计算完成时刻 ⑤ 该帧动画渲染提交时刻 ⑥ 该帧显示时刻。少标任何一个，你都无法定位偏了多少、偏在哪一段。</div>
+      <div id="day10-timing" class="demo">
+        <div class="demo-head"><span class="demo-title">音画偏移计算器</span><span class="demo-tag">四个延迟</span></div>
+        <div class="control-grid">
+          <label class="control"><span>TTS 首块到达</span><input id="d10-t-tts" type="range" min="40" max="600" step="10" value="180" aria-label="TTS 首块到达毫秒"><output id="d10-t-tts-out">180 ms</output></label>
+          <label class="control"><span>viseme 计算</span><input id="d10-t-vis" type="range" min="0" max="300" step="5" value="40" aria-label="viseme 计算毫秒"><output id="d10-t-vis-out">40 ms</output></label>
+          <label class="control"><span>渲染一帧</span><input id="d10-t-render" type="range" min="4" max="120" step="2" value="16" aria-label="渲染一帧毫秒"><output id="d10-t-render-out">16 ms</output></label>
+          <label class="control"><span>音频设备缓冲</span><input id="d10-t-buf" type="range" min="5" max="300" step="5" value="60" aria-label="音频缓冲毫秒"><output id="d10-t-buf-out">60 ms</output></label>
+        </div>
+        <div class="canvas-box"><canvas id="d10-t-canvas" aria-label="音频与动画两条时间线"></canvas></div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>音画偏移（正 = 嘴慢）</span><strong id="d10-t-offset">—</strong></div>
+          <div class="kpi-block"><span>判定</span><strong id="d10-t-verdict">—</strong></div>
+        </div>
+        <p class="demo-note" id="d10-t-note">偏移 = (viseme 计算 + 渲染一帧) − 音频缓冲。这个公式说明一件事：<strong>音频缓冲越大，嘴反而越“早”</strong>——因为画面先出来了，声音还在缓冲里排队。</p>
+      </div>
+      <h3>三条修复路线，代价不同</h3>
+      <div class="table-scroll"><table class="audit"><thead><tr><th>做法</th><th>怎么修</th><th>代价 / 副作用</th></tr></thead><tbody>
+        <tr><td>给动画加延迟</td><td>把 viseme 序列整体后移 offset 毫秒</td><td>简单可靠；但会增加“反应迟钝”感，且 offset 变了要重算</td></tr>
+        <tr><td>给音频减缓冲</td><td>降低设备缓冲（如果驱动允许）</td><td>缓冲变小 → 卡顿与爆音风险上升</td></tr>
+        <tr><td>按音频时钟驱动动画</td><td>用已播放的音频样本位置反查当前应显示哪个 viseme</td><td>最稳、能自适应；但需要拿到播放位置（不是所有平台都给你）</td></tr>
+      </tbody></table></div>
+      <div class="key-idea"><strong>优先级：</strong>第三种最好。前两种是<strong>静态补偿</strong>，一旦设备或负载变化就再次失配；第三种是<strong>闭环</strong>——它问的是“现在真正播到哪一个音素了”，而不是“我猜应该播到哪”。</div>
+    </section>
+
+    <section id="failures" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>06</span> 对应 14plan Day 10 · 第 5 阶段</div>
+      <h2>三种失配，<br class="desktop-break">三种完全不同的病因。</h2>
+      <p>14plan 点名了三种：<strong>TTS 先到嘴不动</strong>、<strong>口型早于声音</strong>、<strong>旧情绪状态污染新话轮</strong>。它们看起来都是“不同步”，但病灶分别在三个不同的模块。逐条看定位方法。</p>
+      <div id="day10-failures" class="demo">
+        <div class="demo-head"><span class="demo-title">失配归因表</span><span class="demo-tag">三个案例</span></div>
+        <div class="tabs" id="d10-f-tabs">
+          <button type="button" data-fail="0" aria-pressed="true">① 声音到了嘴不动</button>
+          <button type="button" data-fail="1" aria-pressed="false">② 嘴先动，声音后到</button>
+          <button type="button" data-fail="2" aria-pressed="false">③ 旧情绪污染新话轮</button>
+        </div>
+        <div class="card-grid" id="d10-f-detail"></div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>当前案例</span><strong id="d10-f-name">① 声音到了嘴不动</strong></div>
+          <div class="kpi-block"><span>病灶所在的层</span><strong id="d10-f-layer">驱动</strong></div>
+        </div>
+        <p class="demo-note" id="d10-f-note">三条里只有 ③ 是“状态”问题，前两条都是“时序”问题。把 ③ 当成时序去调延迟，永远调不好——因为它的错误不在时间上，在版本上。</p>
+      </div>
+      <h3>第四个坑：重建很真，但眨眼和眼神很僵</h3>
+      <p>这不是分辨率问题。3DGS 或高精度扫描给你的是<strong>外观</strong>；眨眼频率、注视目标、微表情这些属于<strong>行为层</strong>，需要单独驱动与评测。<strong>把分辨率翻倍不会让眼神变活</strong>——这是“外观 ≠ 行为”最典型的例子。</p>
+      <div class="table-scroll"><table class="audit"><thead><tr><th>看到的现象</th><th>容易误判成</th><th>实际该查什么</th></tr></thead><tbody>
+        <tr><td>眨眼僵硬、眼神发直</td><td>“模型精度不够”</td><td>有没有眼动/眨眼驱动层？注视点怎么给？</td></tr>
+        <tr><td>表情像面具</td><td>“blendshape 太少”</td><td>表情强度是否被压平？有没有做时间平滑与过渡？</td></tr>
+        <tr><td>说话时头完全不动</td><td>“动作库缺失”</td><td>头部微动（nod/sway）是否有独立通道，是否被语音驱动</td></tr>
+        <tr><td>一转身就崩</td><td>“渲染 bug”</td><td>如果是 Live2D 或单视角重建，侧后视角本来就没有数据</td></tr>
+      </tbody></table></div>
+      <div class="key-idea"><strong>验证纪律：</strong>上面所有修复方案，本页都只写成<strong>测试方案</strong>，没有运行。<strong>未运行就不能填“改善了多少毫秒”或“准确率提升 X%”</strong>——只能写“设计上应该改善，待测”。</div>
+    </section>
+
+    <section id="scope" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>07</span> 对应 14plan Day 10 · 第 4 / 7 阶段</div>
+      <h2>真实范围：<br class="desktop-break">开源底座、二次开发、未来设想。</h2>
+      <p>14plan 要求对 AI Partner 单独列清三件事，并给出四格贡献表。这不是形式主义——<strong>“基于开源二次开发”和“从零实现”在面试里是两个完全不同的分量</strong>，把作者模块全归自己，被追问一层就会塌。</p>
+      <div id="day10-scope" class="demo">
+        <div class="demo-head"><span class="demo-title">贡献四格表</span><span class="demo-tag">逐行标注</span></div>
+        <div class="table-scroll"><table class="audit"><thead><tr><th>条目（示意）</th><th>类别</th></tr></thead><tbody id="d10-s-rows"></tbody></table></div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>已标注</span><strong id="d10-s-count">0 / 6</strong></div>
+          <div class="kpi-block"><span>风险提示</span><strong id="d10-s-verdict">尚未标注</strong></div>
+        </div>
+        <p class="demo-note" id="d10-s-note">四类里最容易出事的是“开源现有功能”被写成“我实现了”。判断标准很简单：<strong>如果上游仓库明天删掉，我的系统还能不能跑？</strong>不能，就得标成依赖开源。</p>
+      </div>
+      <h3>三层拆解：说清哪一层是你的</h3>
+      <div class="table-scroll"><table class="audit"><thead><tr><th>层</th><th>这一层要写什么</th><th>写错的典型说法</th></tr></thead><tbody>
+        <tr><td>已采用的开源底座</td><td>项目名、许可证、用到它的哪个模块（渲染器 / 参数模型 / 驱动框架）</td><td>“我做了数字人渲染管线”（其实用的是别人的渲染器）</td></tr>
+        <tr><td>个人二次开发</td><td>改了什么、为什么改、改之前的表现是什么</td><td>“我优化了性能”（说不出优化前后的数字）</td></tr>
+        <tr><td>未来设想</td><td>问题定义、拟采用的方法、拟验证的指标</td><td>“已经实现了实时情感交互”（其实只有设计稿）</td></tr>
+      </tbody></table></div>
+      <div class="key-idea"><strong>一条安全底线：</strong>公开仓库里不写真实手机号、合同、企业内部实现、报名回执、真实健康数据。<strong>也不上传任何公司的内部架构图</strong>——包括“看起来无害”的那种。这条在 Day 8 已经出现过一次，因为它是整份材料里唯一“一次失误就不可挽回”的地方。</div>
+    </section>
+
+    <section id="exam" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>08</span> 今日综合考题</div>
+      <h2>“如果你有高质量 3DGS 数字人，<br class="desktop-break">能否说已完成可实时驱动、可触摸的人形机器人情感交互？”</h2>
+      <p>先自己写完六栏。这道题的陷阱是：<strong>它把四个成就打包成一句问话</strong>，而正确答法是把包拆开，逐项说“这个有证据 / 这个没有”。</p>
+      <div id="day10-exam" class="demo">
+        <div class="demo-head"><span class="demo-title">六栏答卷</span><span class="demo-tag">勾选表示你已写下</span></div>
+        <div class="table-scroll"><table class="audit"><thead><tr><th>六栏</th><th>这一题该写什么</th><th>已写</th></tr></thead><tbody>
+          <tr><td>① 输入 / 先决条件</td><td>多视角图像或视频、相机标定、可用算力、目标平台（实时渲染的帧预算）</td><td><input type="checkbox" id="d10-ex-1" aria-label="已完成输入与先决条件"></td></tr>
+          <tr><td>② 相关算法 / 接口</td><td>3DGS 优化与光栅化、FLAME/SMPL-X 参数化、viseme/blendshape 映射、渲染管线、触觉与安全层</td><td><input type="checkbox" id="d10-ex-2" aria-label="已完成算法与接口"></td></tr>
+          <tr><td>③ 预计输出</td><td>可实时渲染的形象 + 可由语音驱动的表情 + 音画同步误差在阈值内；<strong>“可触摸”需要另加物理与安全层</strong></td><td><input type="checkbox" id="d10-ex-3" aria-label="已完成预计输出"></td></tr>
+          <tr><td>④ 失败原因</td><td>静态重建无骨骼；无表情驱动层；音画两条时钟不同步；触摸涉及力控与安全，与渲染无关</td><td><input type="checkbox" id="d10-ex-4" aria-label="已完成失败原因"></td></tr>
+          <tr><td>⑤ 可验证证据</td><td>渲染帧率、音画偏移毫秒、viseme 对齐误差；<strong>未实测就写“未运行”</strong></td><td><input type="checkbox" id="d10-ex-5" aria-label="已完成可验证证据"></td></tr>
+          <tr><td>⑥ 无法保证的部分</td><td>不能保证“情感正确”、不能保证触摸安全、不能保证跨设备同步一致</td><td><input type="checkbox" id="d10-ex-6" aria-label="已完成无法保证的部分"></td></tr>
+        </tbody></table></div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>六栏完成度</span><strong id="d10-ex-count">0 / 6</strong></div>
+          <div class="kpi-block"><span>证据等级</span><strong id="d10-ex-level">未开始</strong></div>
+        </div>
+        <details class="self-check"><summary>展开标准答法骨架（先自己写完再看）</summary>
+          <p><strong>不能这么说。</strong>这句话把四件事合在了一起，需要逐项拆开：</p>
+          <p><strong>① 外观重建</strong>——3DGS 能做，我可以说“我重建了一个高质量的可渲染形象”，这是外观层的成果。<strong>② 可驱动</strong>——静态 3DGS 没有关节和表情参数，要驱动它必须额外绑骨或改换成 FLAME/SMPL-X 一类的参数化表示。这一层我目前只有方案，没有端到端结果。<strong>③ 实时同步</strong>——需要音频时钟与渲染时钟对齐，误差要能测量（毫秒级）。这一层我还没有实测数据。<strong>④ 可触摸</strong>——这是完全不同的领域：力控、碰撞、安全限位，跟“像不像”没有关系。渲染得再真，也不带来任何触觉能力。</p>
+          <p>所以准确的表述是：“<strong>我完成了外观层的高质量重建；驱动层和同步层有设计但未验证；触摸与安全层不在我的工作范围内。</strong>”这句话比“我做了可实时驱动的数字人”弱，但它经得起四层追问——而后者经不起第一层。</p>
+        </details>
+      </div>
+      <h3>Checkpoint C：三个模块的深问</h3>
+      <ol class="prompt-list">
+        <li><strong>语音打断</strong><span>旧回答在新回答后到达时，你怎么保证它不再被播出？（答不出就回 Day 9 的四道闸门）</span></li>
+        <li><strong>表情驱动</strong><span>从一段语音到一个 blendshape 权重，中间经过哪些步骤？每一步的误差怎么量？</span></li>
+        <li><strong>真实个人贡献</strong><span>这个系统里哪些模块是你写的、哪些是开源底座、哪些只是设想？给出一句能顶住两层追问的回答。</span></li>
+      </ol>
+      <div class="personal-note"><div class="note-heading"><div><span class="eyebrow">我的理解</span><h3>写给要拿这段去面试的自己</h3></div><span id="note-status" class="note-status" aria-live="polite">记录保存在此浏览器</span></div><label class="form-label" for="learning-note">如果面试官问“你的数字人是怎么被驱动的”，你能一路指到具体参数和具体代码吗？哪一段是空白？</label><textarea class="form-control" id="learning-note" rows="7" placeholder="例如：我能指到 TTS 输出的音频块和 viseme 映射表，但“情绪标签 → 表情参数”这一段我只有设想，没有实现。真实范围是：渲染器用开源，驱动层是我改的……"></textarea><div class="note-actions"><button type="button" class="btn" id="export-note">导出我的笔记 .md</button><span>浏览器自动保存；导出后可自行放入仓库，不会自动上传。</span></div></div>
+    </section>
+
+    <section id="score" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>09</span> 首次自评</div>
+      <h2>先记第一次的分数。</h2>
+      <div id="day10-score" class="demo">
+        <div class="demo-head"><span class="demo-title">五维自评（0–4 分）</span><span class="demo-tag">首次 / 修订分开记</span></div>
+        <div class="score-grid">
+          <div class="score-row"><strong>概念</strong><input id="d10-sc-1" type="range" min="0" max="4" step="1" value="2" aria-label="概念得分"><output id="d10-sc-1-out">2</output></div>
+          <div class="score-row"><strong>原理</strong><input id="d10-sc-2" type="range" min="0" max="4" step="1" value="2" aria-label="原理得分"><output id="d10-sc-2-out">2</output></div>
+          <div class="score-row"><strong>接口</strong><input id="d10-sc-3" type="range" min="0" max="4" step="1" value="2" aria-label="接口得分"><output id="d10-sc-3-out">2</output></div>
+          <div class="score-row"><strong>验证</strong><input id="d10-sc-4" type="range" min="0" max="4" step="1" value="0" aria-label="验证得分"><output id="d10-sc-4-out">0</output></div>
+          <div class="score-row"><strong>真实性</strong><input id="d10-sc-5" type="range" min="0" max="4" step="1" value="1" aria-label="真实性得分"><output id="d10-sc-5-out">1</output></div>
+        </div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>总分</span><strong id="d10-sc-total">7 / 20</strong></div>
+          <div class="kpi-block"><span>建议</span><strong id="d10-sc-tip">先分清四层</strong></div>
+        </div>
+        <p class="demo-note" id="d10-sc-note">“验证”给 0 分、“真实性”只给 1 分，都是诚实的：外观之外的三层没有实测，而贡献边界还没逐条标清。这两项是这一天最该补的。</p>
+      </div>
+    </section>
+
+    <section id="sources" class="lesson-section sources-section" data-nav>
+      <div class="section-kicker"><span>↗</span> 来源与边界</div>
+      <h2>这一页对应哪些原始材料</h2>
+      <p>范围来自 <a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-10.md" target="_blank" rel="noopener noreferrer">Day 10 任务手册</a>：R11（3DGS 系列视频第 1、2 集；第 4 集为选修）、R12（FLAME / SMPL-X / VRM 官方文档概览），以及任务手册「实际任务补强」四节（能力定位表、可打断角色交互数据流、三种时序失败、面试自问）。</p>
+      <div class="source-method"><h3>本页做了什么、没做什么</h3><p>本页提供<strong>结构化的分工表</strong>：六种表征的“不能自动保证什么”、需求到选型的映射、3DGS 的三步流程、FLAME 的参数语义、音画偏移的计算式、三种失配的归因路径、贡献四格表。</p><p><strong>本页没有训练任何 3DGS 模型，没有加载 FLAME / SMPL-X 权重，没有驱动任何真实数字人</strong>，也没有 INZ Lab 或 AI Partner 的实机运行数据。所有画面都是手写的二维示意；所有毫秒数与阈值都是<strong>用于理解量级的示意值</strong>，不是实测值。</p><p>关于 INZ Lab 与 AI Partner：本页只使用可披露的高层描述（研究方向、开源底座类型、已知缺口），<strong>不包含任何企业内部实现、未公开数据或内部文档</strong>。任何“我做过什么”的表述，必须按四格表（本人做过 / 团队成果 / 开源现有功能 / 拟研究）逐条标注后才能写进材料——这是整份教程反复出现的那条纪律，因为它是唯一不能靠努力弥补的地方。</p></div>
+    </section>
+    <div class="next-lesson"><span class="small-label">继续：换一种传感器看世界</span><a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-11.md" target="_blank" rel="noopener noreferrer">Day 11 · FMCW 毫米波与微动感知 ↗</a></div>
+    <footer class="site-footer"><div><strong>Modern Robotics 学习手记</strong><p>先看见变化，再说清原因。</p></div><a href="#start">回到顶部 ↑</a></footer>
+  </main>
+</div>
+<noscript><div class="noscript-note">文字教程可以正常阅读。交互演示需要在浏览器中启用 JavaScript。</div></noscript>
+</body>
+</html>

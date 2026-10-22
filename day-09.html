@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f8f7">
+  <meta name="description" content="Day 9 可打断的语音会话：Mic→VAD→ASR→LLM→TTS→Speaker 六节点链、六种会话状态机、t0–t4 打断时序、三条竞态、turn_id 与 generation_epoch 过期过滤、陪伴机器人报警分级与可验证证据。">
+  <title>Day 09 · 打断之后：语音会话的状态一致性 | Modern Robotics 学习手记</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/site.css">
+  <link rel="stylesheet" href="assets/lesson-kit.css">
+  <script src="assets/site.js" defer></script>
+  <script src="assets/lesson-kit.js" defer></script>
+  <script src="assets/day9.js" defer></script>
+</head>
+<body data-lesson-key="day-09" data-lesson-title="Day 09 · 可打断的语音会话" data-lesson-topic="六节点语音链、六状态机、打断时序、三条竞态、过期结果过滤、报警分级与可验证证据">
+<a class="skip-link" href="#main">跳到教程正文</a>
+<header class="site-header">
+  <a class="brand" href="#start" aria-label="Modern Robotics 学习手记首页"><span class="brand-monogram">MR<span>.</span></span><span class="brand-name">Modern Robotics<small>可视化学习手记</small></span></a>
+  <div class="header-actions"><span class="edition">DAY 09 / 语音会话</span><a href="https://github.com/lucinwen/Modern-Robotics" target="_blank" rel="noopener noreferrer">GitHub 仓库 <span aria-hidden="true">↗</span></a><button class="btn theme-toggle" id="theme-toggle" type="button" aria-label="切换明暗主题">切换主题</button></div>
+</header>
+<div class="page-shell">
+  <aside class="sidebar" aria-label="学习导航">
+    <details class="day-switcher">
+  <summary><span class="eyebrow">学习日导航 · 14 天路线</span><strong id="day-switcher-current">选择学习日</strong><span class="day-switcher__hint">展开全部 14 天 ▾</span></summary>
+  <nav class="course-switcher" aria-label="选择学习日">
+    <a href="index.html" data-day="01"><strong>DAY 01</strong><span>空间与运动</span></a>
+    <a href="day-02.html" data-day="02"><strong>DAY 02</strong><span>约束与求解</span></a>
+    <a href="day-03.html" data-day="03"><strong>DAY 03</strong><span>状态与计划</span></a>
+    <a href="day-04.html" data-day="04"><strong>DAY 04</strong><span>运动学 FK/IK</span></a>
+    <a href="day-05.html" data-day="05"><strong>DAY 05</strong><span>ROS2 与导航</span></a>
+    <a href="day-06.html" data-day="06"><strong>DAY 06</strong><span>训练环境</span></a>
+    <a href="day-07.html" data-day="07"><strong>DAY 07</strong><span>策略与数据</span></a>
+    <a href="day-08.html" data-day="08"><strong>DAY 08</strong><span>场景基线</span></a>
+    <a href="day-09.html" data-day="09"><strong>DAY 09</strong><span>语音会话</span></a>
+    <a href="day-10.html" data-day="10"><strong>DAY 10</strong><span>数字人</span></a>
+    <a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-11.md" data-day="11" target="_blank" rel="noopener noreferrer"><strong>DAY 11</strong><span>毫米波感知 ↗</span></a>
+    <a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-12.md" data-day="12" target="_blank" rel="noopener noreferrer"><strong>DAY 12</strong><span>多源融合 ↗</span></a>
+    <a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-13.md" data-day="13" target="_blank" rel="noopener noreferrer"><strong>DAY 13</strong><span>XR 与传输 ↗</span></a>
+    <a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-14.md" data-day="14" target="_blank" rel="noopener noreferrer"><strong>DAY 14</strong><span>模拟面试 ↗</span></a>
+  </nav>
+</details>
+    <div class="sidebar-intro"><span class="eyebrow">学习路线</span><strong>取消的是版本，不是声音。</strong></div>
+    <nav class="lesson-nav" aria-label="本页目录">
+      <a href="#start" class="is-current" aria-current="location"><span>00</span> 只关扬声器够吗</a>
+      <a href="#chain"><span>01</span> 六节点语音链</a>
+      <a href="#states"><span>02</span> 六状态与合法迁移</a>
+      <a href="#timeline"><span>03</span> t0–t4 打断时序</a>
+      <a href="#races"><span>04</span> 三条竞态</a>
+      <a href="#epoch"><span>05</span> 过期结果过滤</a>
+      <a href="#companion"><span>06</span> 报警分级与三条路径</a>
+      <a href="#verify"><span>07</span> 怎么证明没双播</a>
+      <a href="#exam"><span>08</span> 综合考题六栏答卷</a>
+      <a href="#score"><span>09</span> 五维自评</a>
+      <a href="#sources"><span>↗</span> 来源与边界</a>
+    </nav>
+    <div class="sidebar-note"><span class="small-label">这一页怎么用</span><p>任何一处「已经处理了打断」，<br>都要能指到具体哪一行代码拦住它。<br>指不到，就是还没处理。</p><a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-09.md" target="_blank" rel="noopener noreferrer">查看原 Day 9 任务手册 ↗</a></div>
+  </aside>
+  <main id="main">
+    <section id="start" class="hero lesson-section" data-nav>
+      <div class="eyebrow">MODERN ROBOTICS / 第九天</div>
+      <h1>用户说“先停一下”，<br><span>旧回答 400 ms 后才回来。</span></h1>
+      <p class="hero-lead">数字人当场安静了，用户很满意。半秒后，一个不是这一轮的声音又响起来——<strong>因为“让扬声器停下来”和“让这次回答作废”是两件完全不同的事</strong>。今天只解决这一件事：把“取消”从声学层抬到状态层。</p>
+      <div class="lesson-meta"><span>2026.10.22</span><span>异步状态 · 时序 · 可验证证据</span><span>9 个交互演示</span></div>
+      <a class="start-link" href="#chain">先画出六节点链 <span aria-hidden="true">↓</span></a>
+      <div class="opening-question"><span class="small-label">贯穿今天的一个问题</span><p>用户打断正在说话的数字人，旧 LLM 回答在新回答之后才返回。只暂停扬声器，足够吗？</p><span>不够。暂停扬声器只是把<strong>已经到达音频设备的样本</strong>停掉。它拦不住三样东西：LLM 流里还没吐完的 token、TTS 已经合成好但不一定已经送进设备的音频块、以及这些产物在下一个话轮里被重新送进播放队列。真正的答案是一个版本条件：<strong>旧版本产生的任何结果，一律丢弃</strong>。</span></div>
+      <div class="reading-guide"><h2>今天要分清的四件事</h2><p>14plan 反复要求把材料分成四类，这一页每一块都按这个纪律标：<strong>概念解释</strong>（原理说得通）、<strong>纸面设计</strong>（我设计了但没实现）、<strong>实际运行</strong>（我跑过并有日志）、<strong>历史成果</strong>（过去项目里真实发生过的）。</p><p>本页所有内容属于<strong>概念解释 + 纸面设计</strong>。我没有运行任何 ASR / TTS / LLM 推理服务，也没有任何陪伴机器人的实机部署记录。这句话不是免责声明，是这一页的可信度来源——把边界说死，剩下的部分才站得住。</p><details><summary>为什么“打断”比“不打断”难这么多？</summary><p>不打断的系统是单向流水线：说完 → 识别 → 生成 → 播放，每一步只依赖上一步，天然串行。一旦允许打断，整条链变成<strong>并发的、可撤销的</strong>：用户的新输入要和正在生成的旧回答竞争，而旧回答的每一段产物可能在任何时刻、在任意一层（token 流、TTS 合成队列、音频设备缓冲）里冒出来。并发 + 撤销 = 需要版本号。这是本页唯一的核心结论。</p></details></div>
+      <p class="source-note">范围依据 <a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-09.md" target="_blank" rel="noopener noreferrer">Day 9 任务手册</a> 与 <a href="https://github.com/lucinwen/14plan/blob/main/DAILY/day-09.md" target="_blank" rel="noopener noreferrer">每日计划</a>；对应资源 R09（aha-voice 语音流水线）与 R10。</p>
+    </section>
+
+    <section id="chain" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>01</span> 对应 14plan Day 9 · 第 2 阶段</div>
+      <h2>先把最小链路画出来，<br class="desktop-break">再谈延迟和打断。</h2>
+      <p>14plan 要求写下语音系统的最小链路：<strong>Mic → VAD → ASR → LLM → TTS → Speaker</strong>。六个节点、五条边。每一条边都是一次可能的“消息还在路上”，也就是打断时必须处理的位置。</p>
+      <div id="day9-chain" class="demo">
+        <div class="demo-head"><span class="demo-title">六节点语音链</span><span class="demo-tag">点节点看合同</span></div>
+        <div class="step-chain" id="d9-chain-nodes">
+          <button type="button" class="node" data-node="mic">Mic</button><span class="arrow">→</span>
+          <button type="button" class="node" data-node="vad">VAD</button><span class="arrow">→</span>
+          <button type="button" class="node" data-node="asr">ASR</button><span class="arrow">→</span>
+          <button type="button" class="node" data-node="llm">LLM</button><span class="arrow">→</span>
+          <button type="button" class="node" data-node="tts">TTS</button><span class="arrow">→</span>
+          <button type="button" class="node" data-node="spk">Speaker</button>
+        </div>
+        <div class="card-grid" id="d9-chain-detail" aria-live="polite"></div>
+        <p class="demo-note">这六个节点里，<strong>只有 Speaker 是“可被物理停止”的</strong>。前面五个都只能“被逻辑作废”——这就是为什么取消必须带版本号。</p>
+      </div>
+      <h3>延迟预算：用户等到第几毫秒开始不耐烦</h3>
+      <p>首响延迟（用户说完到听见第一个音节）由四段累加。调一调，看总时长和“用户耐心线”的关系——超过 1.5 s，人会怀疑设备没听到，开始重复或者放弃。</p>
+      <div id="day9-latency" class="demo">
+        <div class="demo-head"><span class="demo-title">首响延迟预算</span><span class="demo-tag">四段累加</span></div>
+        <div class="control-grid">
+          <label class="control"><span>VAD 端点判定</span><input id="d9-l-vad" type="range" min="80" max="800" step="20" value="300" aria-label="VAD 端点判定毫秒"><output id="d9-l-vad-out">300 ms</output></label>
+          <label class="control"><span>ASR 识别</span><input id="d9-l-asr" type="range" min="100" max="1200" step="20" value="350" aria-label="ASR 识别毫秒"><output id="d9-l-asr-out">350 ms</output></label>
+          <label class="control"><span>LLM 首 token</span><input id="d9-l-llm" type="range" min="100" max="2500" step="50" value="600" aria-label="LLM 首 token 毫秒"><output id="d9-l-llm-out">600 ms</output></label>
+          <label class="control"><span>TTS 首块</span><input id="d9-l-tts" type="range" min="80" max="1200" step="20" value="250" aria-label="TTS 首块毫秒"><output id="d9-l-tts-out">250 ms</output></label>
+        </div>
+        <div class="canvas-box"><canvas id="d9-latency-canvas" aria-label="首响延迟预算条形图"></canvas></div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>首响延迟</span><strong id="d9-l-total">1500 ms</strong></div>
+          <div class="kpi-block"><span>相对耐心线（1500 ms）</span><strong id="d9-l-verdict">刚好卡线</strong></div>
+        </div>
+        <p class="demo-note" id="d9-l-note">四段里最值钱的是 VAD：把端点判定从 300 ms 降到 150 ms，用户感知到的“反应快”提升，比把 LLM 换快一倍更明显——因为那是每句话都要付的固定成本。</p>
+      </div>
+      <div class="key-idea"><strong>一个反直觉的点：</strong>缩短首响延迟和“可打断”是<strong>两件不同的事</strong>。延迟再低，旧回答也会在新回答之后到达——因为你不能假设网络的返回顺序等于你的发起顺序。</div>
+    </section>
+
+    <section id="states" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>02</span> 对应 14plan Day 9 · 第 3 阶段</div>
+      <h2>六个状态，<br class="desktop-break">和一张只允许一部分格子的迁移矩阵。</h2>
+      <p>14plan 给了六个状态：<code>LISTENING</code>、<code>RECOGNIZING</code>、<code>THINKING</code>、<code>SPEAKING</code>、<code>CANCELING</code>、<code>CONFIRMING</code>。每轮消息带 <code>session_id</code>、<code>turn_id</code>、<code>generation_epoch</code> 和时间戳。</p>
+      <div class="callout"><strong>必须写在页面上的一句话：</strong>这是<strong>学习用的状态机草案</strong>，不是 INZ Lab 的内部实现，也不代表任何产品的真实架构。把它当成“如果我来设计，最小需要哪些状态”。</div>
+      <div id="day9-states" class="demo">
+        <div class="demo-head"><span class="demo-title">迁移矩阵</span><span class="demo-tag">点两格试一次迁移</span></div>
+        <div class="control-grid">
+          <label class="control"><span>从</span><select id="d9-s-from" aria-label="迁移起点状态">
+            <option value="LISTENING">LISTENING</option>
+            <option value="RECOGNIZING">RECOGNIZING</option>
+            <option value="THINKING">THINKING</option>
+            <option value="SPEAKING">SPEAKING</option>
+            <option value="CANCELING">CANCELING</option>
+            <option value="CONFIRMING">CONFIRMING</option>
+          </select></label>
+          <label class="control"><span>到</span><select id="d9-s-to" aria-label="迁移终点状态">
+            <option value="LISTENING">LISTENING</option>
+            <option value="RECOGNIZING">RECOGNIZING</option>
+            <option value="THINKING">THINKING</option>
+            <option value="SPEAKING">SPEAKING</option>
+            <option value="CANCELING">CANCELING</option>
+            <option value="CONFIRMING">CONFIRMING</option>
+          </select></label>
+        </div>
+        <div class="table-scroll"><table class="audit"><thead><tr><th>迁移</th><th>判定</th><th>条件 / 为什么</th></tr></thead><tbody id="d9-s-rows"></tbody></table></div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>当前尝试</span><strong id="d9-s-pair">LISTENING → LISTENING</strong></div>
+          <div class="kpi-block"><span>结论</span><strong id="d9-s-verdict">—</strong></div>
+        </div>
+        <p class="demo-note" id="d9-s-note">最常见的错误是把 <code>CANCELING</code> 当成一个“消息”而不是一个“状态”。它必须<strong>持续到旧版本的所有产物都被确认丢弃</strong>才结束；提前结束就会漏掉迟到的 chunk。</p>
+      </div>
+      <h3>为什么需要 CANCELING 这个独立状态</h3>
+      <div class="table-scroll"><table class="audit"><thead><tr><th>状态</th><th>它在等什么</th><th>谁能把它推出去</th><th>漏掉它的后果</th></tr></thead><tbody>
+        <tr><td>LISTENING</td><td>用户开口</td><td>VAD 触发</td><td>听不见，用户重复</td></tr>
+        <tr><td>RECOGNIZING</td><td>ASR 给出最终文本</td><td>ASR 完成 / 超时</td><td>卡在“听见了但不懂”</td></tr>
+        <tr><td>THINKING</td><td>LLM 首个可播块</td><td>LLM 流 / 超时 / 用户插话</td><td>沉默，用户以为死机</td></tr>
+        <tr><td>SPEAKING</td><td>播放队列清空</td><td>播放完成 / 用户插话</td><td>被抢话但还在自说自话</td></tr>
+        <tr><td>CANCELING</td><td><strong>旧 epoch 的产物全部确认丢弃</strong></td><td>丢弃确认（不是“发出取消”）</td><td>迟到的 TTS 块重新出声</td></tr>
+        <tr><td>CONFIRMING</td><td>用户对高风险动作的明确答复</td><td>是 / 否 / 超时</td><td>该问的没问，直接执行</td></tr>
+      </tbody></table></div>
+      <div class="key-idea"><strong>纪律：</strong><code>CANCELING</code> 的退出条件是“确认已丢弃”，不是“已经发出取消”。这两者之间隔着一次网络往返和若干个还在排队的缓冲块——<strong>所有竞态都住在这条缝里</strong>。</div>
+    </section>
+
+    <section id="timeline" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>03</span> 对应 14plan Day 9 · 第 3 阶段</div>
+      <h2>把打断摊开成 t0–t4，<br class="desktop-break">看每一步谁该负责。</h2>
+      <p>14plan 给了一张可以直接照着写的时序表。逐步点，右侧会显示这一刻<strong>谁发布事件、谁持有可取消句柄、谁拒绝过期结果、屏幕上实际在说什么</strong>——这四个问题答不上来，说明设计还没落地。</p>
+      <div id="day9-timeline" class="demo">
+        <div class="demo-head"><span class="demo-title">打断时序 t0–t4</span><span class="demo-tag">逐步推进</span></div>
+        <div class="canvas-box"><canvas id="d9-tl-canvas" aria-label="T1 与 T2 两条话轮的时间轴"></canvas></div>
+        <div class="step-chain" id="d9-tl-steps">
+          <button type="button" class="node" data-step="0">t0</button><span class="arrow">→</span>
+          <button type="button" class="node" data-step="1">t1</button><span class="arrow">→</span>
+          <button type="button" class="node" data-step="2">t2</button><span class="arrow">→</span>
+          <button type="button" class="node" data-step="3">t3</button><span class="arrow">→</span>
+          <button type="button" class="node" data-step="4">t4</button>
+        </div>
+        <div class="table-scroll"><table class="audit"><thead><tr><th>这一刻</th><th>发生了什么 / 谁负责</th></tr></thead><tbody id="d9-tl-rows"></tbody></table></div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>当前时刻</span><strong id="d9-tl-now">t0</strong></div>
+          <div class="kpi-block"><span>状态</span><strong id="d9-tl-state">LISTENING / T1</strong></div>
+          <div class="kpi-block"><span>屏幕在说什么</span><strong id="d9-tl-say">（还没开口）</strong></div>
+        </div>
+        <p class="demo-note" id="d9-tl-note">关键在 t3：那个迟到的文本片段<strong>必须因为 epoch 变旧而被丢弃</strong>，而不是“因为当前正在播 T2 所以先缓存起来”。缓存 = 迟早会播出来。</p>
+      </div>
+      <h3>t3 的三种错误写法，和它们各自的症状</h3>
+      <div class="table-scroll"><table class="audit"><thead><tr><th>写法</th><th>看起来像什么</th><th>症状</th></tr></thead><tbody>
+        <tr><td>丢弃“当前没有正在播的东西”到达的块</td><td>很自然：没人播就不播</td><td>T2 说完、队列空了，迟到的 T1 块到达 → 被当成新内容播出</td></tr>
+        <tr><td>把迟到块放进缓存队列等空闲</td><td>很像“礼貌排队”</td><td>说完 T2 之后突然冒出一句 T1 的残句，用户以为系统精神错乱</td></tr>
+        <tr><td>只比较 turn_id，不比较 epoch</td><td>看着已经够了</td><td>同一 turn 内二次打断（用户连说两次“停”）无法区分先后</td></tr>
+      </tbody></table></div>
+      <div class="key-idea"><strong>正确的判据只有一条：</strong>每一块音频/文本都携带它出生时的 <code>generation_epoch</code>；<strong>到达时与当前 epoch 不等，就丢弃，不入队、不缓存、不重播</strong>。这不是“优先级”，是“身份”。</div>
+    </section>
+
+    <section id="races" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>04</span> 对应 14plan Day 9 · 第 3 阶段</div>
+      <h2>三条竞态，<br class="desktop-break">每条都要能说出“测什么”。</h2>
+      <p>14plan 点名了三种竞态：旧 LLM 回答晚到、用户第二次插话、TTS 队列仍在播放。逐条看它们的触发条件、正确处置，以及<strong>能被别人复现的测试预期</strong>。</p>
+      <div id="day9-races" class="demo">
+        <div class="demo-head"><span class="demo-title">竞态处置表</span><span class="demo-tag">三个案例</span></div>
+        <div class="tabs" id="d9-r-tabs">
+          <button type="button" data-race="0" aria-pressed="true">① 旧回答晚到</button>
+          <button type="button" data-race="1" aria-pressed="false">② 用户二次插话</button>
+          <button type="button" data-race="2" aria-pressed="false">③ TTS 队列仍播放</button>
+        </div>
+        <div class="card-grid" id="d9-r-detail"></div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>当前案例</span><strong id="d9-r-name">① 旧回答晚到</strong></div>
+          <div class="kpi-block"><span>最容易被忽略的一处</span><strong id="d9-r-trap">丢弃位置</strong></div>
+        </div>
+        <p class="demo-note" id="d9-r-note">三条竞态里最阴的是第 ③ 条：它不产生任何报错，只是让用户听见一句不该出现的话。没有断言就永远发现不了。</p>
+      </div>
+      <h3>为什么“第二次插话”比第一次更难</h3>
+      <p>第一次打断时，<code>epoch</code> 从 1 变 2，T1 的产物全部失效，判据干净。第二次打断发生在 <code>CANCELING</code> 还没结束时——此时 T2 自己也已经产生了半句内容，用户又把它打断了。<strong>如果你用“当前 turn_id”判断，T2 和 T3 的产物会混在一起</strong>；只有单调递增的 <code>generation_epoch</code> 才能区分“T2 被打断前”和“T3 开始后”。</p>
+      <div class="table-scroll"><table class="audit"><thead><tr><th>事件</th><th>epoch</th><th>当前 turn</th><th>到达的块属于</th><th>判定</th></tr></thead><tbody>
+        <tr><td>用户问天气</td><td>1</td><td>T1</td><td>—</td><td>正常生成</td></tr>
+        <tr><td>用户说“先停一下”</td><td>2</td><td>T2</td><td>—</td><td>T1 全部失效</td></tr>
+        <tr><td>T1 的残块到达</td><td>1（旧）</td><td>T2</td><td>T1</td><td><strong>丢弃</strong></td></tr>
+        <tr><td>用户又说“算了别问了”</td><td>3</td><td>T3</td><td>—</td><td>T2 全部失效</td></tr>
+        <tr><td>T2 的残块到达</td><td>2（旧）</td><td>T3</td><td>T2</td><td><strong>丢弃</strong></td></tr>
+      </tbody></table></div>
+    </section>
+
+    <section id="epoch" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>05</span> 对应 14plan Day 9 · 第 6 阶段</div>
+      <h2>过期结果过滤：<br class="desktop-break">四个闸门，全过才播。</h2>
+      <p>这是本页最该背下来的一段。一个到达的音频块要被播出去，必须同时通过四道判断；任何一道不过，直接丢弃。<strong>把四个条件随便关掉一个，看会发生什么。</strong></p>
+      <div id="day9-epoch" class="demo">
+        <div class="demo-head"><span class="demo-title">过期过滤判定器</span><span class="demo-tag">关掉一个闸门看后果</span></div>
+        <div class="gate" id="d9-gates">
+          <label><input type="checkbox" id="d9-g-session" checked aria-label="闸门一：session 相同"> ① <code>chunk.session_id == 当前 session</code>（跨会话隔离）</label>
+          <label><input type="checkbox" id="d9-g-turn" checked aria-label="闸门二：turn 相同"> ② <code>chunk.turn_id == 当前 turn</code>（同一轮内）</label>
+          <label><input type="checkbox" id="d9-g-epoch" checked aria-label="闸门三：epoch 相同"> ③ <code>chunk.generation_epoch == 当前 epoch</code>（版本最新）</label>
+          <label><input type="checkbox" id="d9-g-queue" checked aria-label="闸门四：队列版本一致"> ④ <code>chunk.queue_version == 音频队列版本</code>（没被 flush 过）</label>
+        </div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>判定</span><strong id="d9-g-verdict">接受并播放</strong></div>
+          <div class="kpi-block"><span>失效的闸门</span><strong id="d9-g-which">无</strong></div>
+        </div>
+        <p class="demo-note" id="d9-g-note">四个闸门对应四个不同的失效原因：① 串会话、② 串话轮、③ 版本过期、④ 队列已清空但块还在飞。<strong>任何单独一个都拦不住全部四种</strong>——这就是为什么“只暂停扬声器”必然漏。</p>
+      </div>
+      <h3>“只暂停扬声器”到底拦住了什么</h3>
+      <div class="table-scroll"><table class="audit"><thead><tr><th>层</th><th>暂停扬声器能拦住吗</th><th>为什么</th></tr></thead><tbody>
+        <tr><td>音频设备缓冲区里已写入的样本</td><td>能（部分）</td><td>这是唯一“物理可停”的一层</td></tr>
+        <tr><td>TTS 已合成、还在播放队列里排队的块</td><td>不一定</td><td>取决于播放器是否支持 flush；有的实现只是停止出流，队列还在</td></tr>
+        <tr><td>TTS 合成器正在生成、尚未交付的块</td><td>不能</td><td>合成任务已经发出，取消需要单独的信令</td></tr>
+        <tr><td>LLM 流里还没吐完的 token</td><td>不能</td><td>它根本不知道扬声器停了，会继续生成到结束</td></tr>
+        <tr><td>下一轮到达的“旧版本”产物</td><td>不能</td><td>没有任何状态记住“这一轮已经作废”</td></tr>
+      </tbody></table></div>
+      <div class="key-idea"><strong>一句话版本：</strong>暂停扬声器是<strong>让声音停下来</strong>；丢弃旧 epoch 是<strong>让这次回答作废</strong>。前者是声学动作，后者是状态动作。用户要的是后者，而大多数人只做了前者。</div>
+    </section>
+
+    <section id="companion" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>06</span> 对应 14plan Day 9 · 第 4 阶段</div>
+      <h2>陪伴机器人：<br class="desktop-break">“聊天”和“异常确认”是两条业务流。</h2>
+      <p>它们共用同一个麦克风和同一个扬声器，但<strong>风险等级、失败代价、退出条件完全不同</strong>。把它们做成一条流程，是这类系统最常见的架构错误。</p>
+      <div class="table-scroll"><table class="audit"><thead><tr><th>维度</th><th>聊天流</th><th>异常确认流</th></tr></thead><tbody>
+        <tr><td>目标</td><td>让对话自然、可打断、有来有回</td><td>确认是否存在需要人介入的情况</td></tr>
+        <tr><td>答错的代价</td><td>用户重复一遍 / 觉得笨</td><td>漏报风险，或误报造成恐慌与打扰</td></tr>
+        <tr><td>允许 LLM 自由发挥吗</td><td>可以</td><td><strong>不可以</strong>：LLM 不做独立医疗诊断</td></tr>
+        <tr><td>打断语义</td><td>立即停止，丢弃旧版本</td><td>可以停止说话，但<strong>不能停止流程</strong>（确认状态必须保留）</td></tr>
+        <tr><td>退出条件</td><td>用户不说话了就结束</td><td>必须有明确结论：已确认安全 / 已转人工 / 用户明确拒绝 / 超时升级</td></tr>
+      </tbody></table></div>
+      <h3>一次异常值的处理链</h3>
+      <p>14plan 给的顺序是：<strong>检查信号质量 → 连续性 / 置信度 → 询问是否需要帮助 → 在用户授权规则内转人工 / 家属</strong>。注意第二步在第三步前面：<strong>先判断这个值可不可信，再决定要不要打扰用户</strong>。顺序反了，就会因为一次传感器抖动半夜给家属打电话。</p>
+      <div id="day9-companion" class="demo">
+        <div class="demo-head"><span class="demo-title">报警分级与三条退出路径</span><span class="demo-tag">点分级看处置</span></div>
+        <div class="tabs" id="d9-alarm-tabs">
+          <button type="button" data-alarm="0" aria-pressed="true">L0 记录</button>
+          <button type="button" data-alarm="1" aria-pressed="false">L1 询问</button>
+          <button type="button" data-alarm="2" aria-pressed="false">L2 通知家属</button>
+          <button type="button" data-alarm="3" aria-pressed="false">L3 转人工</button>
+        </div>
+        <div class="card-grid" id="d9-alarm-detail"></div>
+        <div class="table-scroll"><table class="audit"><thead><tr><th>路径</th><th>正确处置</th><th>禁止动作</th></tr></thead><tbody>
+          <tr><td>误报（信号质量差 / 单次异常值）</td><td>记录 + 降级 + 提高后续判定阈值 + 不打扰用户</td><td>直接按最高级报警；向用户宣称“检测到异常”</td></tr>
+          <tr><td>用户明确拒绝帮助</td><td>记录拒绝事实与时间，<strong>尊重决定</strong>，告知可随时改变，只在授权规则内保留后续升级权</td><td>反复劝说、绕过用户直接通知家属</td></tr>
+          <tr><td>网络断连</td><td>本地兜底：给出“我暂时联系不上，请按预设方式联系 X”，并记录断连时长</td><td>假装已经通知成功；静默失败</td></tr>
+        </tbody></table></div>
+        <p class="demo-note" id="d9-alarm-note">分级的意义不是“严重程度排序”，而是<strong>决定谁被打扰</strong>：L0 不打扰任何人，L1 只打扰用户，L2 打扰家属，L3 打扰专业人员。每一级都必须是用户事先同意的。</p>
+      </div>
+      <div class="key-idea"><strong>一条不能含糊的边界：</strong>“情感交互”里的<strong>表达</strong>（语气、表情、共情措辞）可以由 LLM 生成；<strong>判断</strong>（是否存在危险、是否需要升级）不能由 LLM 独立下结论，只能由规则 + 传感器置信度 + 人工授权共同决定。</div>
+    </section>
+
+    <section id="verify" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>07</span> 对应 14plan Day 9 · 第 6 阶段</div>
+      <h2>怎么证明“没有双重播放”。</h2>
+      <p>“听起来没问题”不是证据。可验证的做法是<strong>在事件日志上写断言</strong>——不需要人耳，跑一遍就能判定。下面五条是一组最小的断言集合，勾选你确实写下了的。</p>
+      <div id="day9-verify" class="demo">
+        <div class="demo-head"><span class="demo-title">无双重播放断言</span><span class="demo-tag">五条，人工核对</span></div>
+        <table class="audit"><thead><tr><th>#</th><th>断言</th><th>写下了</th></tr></thead><tbody>
+          <tr><td>1</td><td>同一 <code>turn_id</code> 的同一个 <code>chunk_index</code>，在 <code>play</code> 事件里最多出现一次</td><td><input type="checkbox" id="d9-v-1" aria-label="断言一已写下"></td></tr>
+          <tr><td>2</td><td>所有 <code>play(turn=T1)</code> 的时间戳都早于 <code>cancel(T1)</code> 的时间戳</td><td><input type="checkbox" id="d9-v-2" aria-label="断言二已写下"></td></tr>
+          <tr><td>3</td><td>不存在 <code>epoch &lt; current_epoch</code> 的音频块进入音频设备（日志里无对应 <code>sink_write</code>）</td><td><input type="checkbox" id="d9-v-3" aria-label="断言三已写下"></td></tr>
+          <tr><td>4</td><td><code>cancel</code> 之后 300 ms 内，扬声器输出能量低于静音阈值</td><td><input type="checkbox" id="d9-v-4" aria-label="断言四已写下"></td></tr>
+          <tr><td>5</td><td>T2 的首个 <code>play</code> 时间戳晚于 T1 的 <code>cancel</code> 时间戳</td><td><input type="checkbox" id="d9-v-5" aria-label="断言五已写下"></td></tr>
+        </tbody></table>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>已写下</span><strong id="d9-v-count">0 / 5</strong></div>
+          <div class="kpi-block"><span>可作为证据</span><strong id="d9-v-verdict">还不行</strong></div>
+        </div>
+        <p class="demo-note" id="d9-v-note">断言 4 是唯一涉及物理量的，也最容易被跳过——但它恰好覆盖了“取消信令发出但设备缓冲还在出声”这一段，而这一段正是用户能听见的部分。</p>
+      </div>
+      <h3>用 Python 模拟事件序列就够了</h3>
+      <p>14plan 明确写了：<strong>不需要训练 ASR / TTS 模型</strong>。你只需要一个事件循环 + 一个带版本号的队列，按 t0–t4 注入事件，然后对日志跑上面五条断言。这是“纸面设计”升级为“实际运行”最省力的路径——一台笔记本、几十行代码。</p>
+      <div class="table-scroll"><table class="audit"><thead><tr><th>你实际做的</th><th>属于哪一类</th><th>能在面试里说什么</th></tr></thead><tbody>
+        <tr><td>画了时序图，推演了 t0–t4</td><td>概念解释</td><td>“我能讲清打断时旧版本怎么失效”</td></tr>
+        <tr><td>写了一个模拟事件序列的脚本，跑了断言</td><td>实际运行</td><td>“我写了个最小事件模拟器，五条断言全过，日志在这里”</td></tr>
+        <tr><td>只有状态机草案，没写代码</td><td>纸面设计</td><td>“我设计了状态机，还没实现”——不许说成“做过”</td></tr>
+      </tbody></table></div>
+    </section>
+
+    <section id="exam" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>08</span> 今日综合考题</div>
+      <h2>“用户打断正在说话的数字人，<br class="desktop-break">旧回答在新回答之后返回。只暂停扬声器足够吗？”</h2>
+      <p>先自己写完六栏，再展开标准骨架。这道题的评分点不在“知道要加版本号”，而在<strong>能不能说清四个闸门各拦什么、以及你拿什么证明它真的拦住了</strong>。</p>
+      <div id="day9-exam" class="demo">
+        <div class="demo-head"><span class="demo-title">六栏答卷</span><span class="demo-tag">勾选表示你已写下</span></div>
+        <div class="table-scroll"><table class="audit"><thead><tr><th>六栏</th><th>这一题该写什么</th><th>已写</th></tr></thead><tbody>
+          <tr><td>① 输入 / 先决条件</td><td>麦克风流、每轮携带 session_id / turn_id / generation_epoch、音频设备支持 flush</td><td><input type="checkbox" id="d9-ex-1" aria-label="已完成输入与先决条件"></td></tr>
+          <tr><td>② 相关算法 / 接口</td><td>VAD 端点判定、流式 ASR、流式 LLM token、流式 TTS chunk、播放队列 flush 接口</td><td><input type="checkbox" id="d9-ex-2" aria-label="已完成算法与接口"></td></tr>
+          <tr><td>③ 预计输出</td><td>打断后 300 ms 内静音；旧 epoch 的块零次进入设备；新话轮正常开始</td><td><input type="checkbox" id="d9-ex-3" aria-label="已完成预计输出"></td></tr>
+          <tr><td>④ 失败原因</td><td>只停扬声器：LLM 继续生成、TTS 队列未 flush、迟到块无身份被判为“新内容”</td><td><input type="checkbox" id="d9-ex-4" aria-label="已完成失败原因"></td></tr>
+          <tr><td>⑤ 可验证证据</td><td>事件日志五条断言 + 能量曲线；<strong>未实际运行就写“未运行”</strong></td><td><input type="checkbox" id="d9-ex-5" aria-label="已完成可验证证据"></td></tr>
+          <tr><td>⑥ 无法保证的部分</td><td>无法保证不同设备缓冲深度下都能 300 ms 静音；无法保证网络抖动时新话轮不被延迟</td><td><input type="checkbox" id="d9-ex-6" aria-label="已完成无法保证的部分"></td></tr>
+        </tbody></table></div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>六栏完成度</span><strong id="d9-ex-count">0 / 6</strong></div>
+          <div class="kpi-block"><span>证据等级</span><strong id="d9-ex-level">未开始</strong></div>
+        </div>
+        <details class="self-check"><summary>展开标准答法骨架（先自己写完再看）</summary>
+          <p><strong>不够。</strong>暂停扬声器只停止已经写入音频设备的样本，它不改变系统的状态。旧 LLM 流仍然会继续产出 token，TTS 合成任务仍然会继续交付音频块，而这些块到达播放器时，播放器没有任何依据判断它们属于“已经作废的那一轮”。</p>
+          <p>最小实现是给每一轮分配单调递增的 <code>generation_epoch</code>，并让所有下游产物携带它出生时的 epoch。播放前过四个闸门：session 相同、turn 相同、epoch 等于当前、队列版本未被 flush。任一不过就丢弃——<strong>不入队、不缓存</strong>。打断时 <code>CANCELING</code> 状态要持续到“旧 epoch 产物全部确认丢弃”才退出，而不是在发出取消信令时退出。</p>
+          <p>证据方面：我用事件日志跑了五条断言（同 chunk 不重复 play、T1 的 play 全早于 cancel、无旧 epoch 进入设备、cancel 后 300 ms 静音、T2 首播晚于 T1 取消）。<strong>这套断言我目前只在纸面上设计，还没有实际运行</strong>——所以我现在能说的是“设计成立”，不能说“实测通过”。</p>
+        </details>
+      </div>
+      <h3>90 秒语音与交互技术说明（口述骨架）</h3>
+      <div class="prompt-list">
+        <li><strong>0–25 s · 问题</strong><span>可打断的语音系统里，取消必须是状态层的动作，不是声学层的动作。</span></li>
+        <li><strong>25–60 s · 机制</strong><span>六节点链、六状态、四闸门；epoch 是身份不是优先级。</span></li>
+        <li><strong>60–90 s · 边界</strong><span>我只做到了设计层面，断言还没跑；没有实机部署，也没有延迟实测数据。</span></li>
+      </div>
+    </section>
+
+    <section id="score" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>09</span> 首次自评</div>
+      <h2>先记第一次的分数。</h2>
+      <div id="day9-score" class="demo">
+        <div class="demo-head"><span class="demo-title">五维自评（0–4 分）</span><span class="demo-tag">首次 / 修订分开记</span></div>
+        <div class="score-grid">
+          <div class="score-row"><strong>概念</strong><input id="d9-sc-1" type="range" min="0" max="4" step="1" value="2" aria-label="概念得分"><output id="d9-sc-1-out">2</output></div>
+          <div class="score-row"><strong>原理</strong><input id="d9-sc-2" type="range" min="0" max="4" step="1" value="2" aria-label="原理得分"><output id="d9-sc-2-out">2</output></div>
+          <div class="score-row"><strong>接口</strong><input id="d9-sc-3" type="range" min="0" max="4" step="1" value="2" aria-label="接口得分"><output id="d9-sc-3-out">2</output></div>
+          <div class="score-row"><strong>验证</strong><input id="d9-sc-4" type="range" min="0" max="4" step="1" value="0" aria-label="验证得分"><output id="d9-sc-4-out">0</output></div>
+          <div class="score-row"><strong>真实性</strong><input id="d9-sc-5" type="range" min="0" max="4" step="1" value="2" aria-label="真实性得分"><output id="d9-sc-5-out">2</output></div>
+        </div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>总分</span><strong id="d9-sc-total">8 / 20</strong></div>
+          <div class="kpi-block"><span>建议</span><strong id="d9-sc-tip">先补验证</strong></div>
+        </div>
+        <p class="demo-note" id="d9-sc-note">“验证”给 0 分是诚实的：没有事件日志、没有能量曲线、没有实测延迟。补它的成本很低——一个几十行的事件模拟器就够，这是性价比最高的一次升级。</p>
+      </div>
+      <div class="personal-note"><div class="note-heading"><div><span class="eyebrow">我的理解</span><h3>写给要拿这段去面试的自己</h3></div><span id="note-status" class="note-status" aria-live="polite">记录保存在此浏览器</span></div><label class="form-label" for="learning-note">如果面试官追问“你怎么知道旧回答不会再响一次”，你现在的答案是什么？缺哪一条证据？</label><textarea class="form-control" id="learning-note" rows="7" placeholder="例如：我能说出四个闸门，但拿不出日志。缺的是把 t0–t4 写成事件序列跑一遍，输出 T1 的 play 时间戳全早于 cancel。这个周末用 Python 补上……"></textarea><div class="note-actions"><button type="button" class="btn" id="export-note">导出我的笔记 .md</button><span>浏览器自动保存；导出后可自行放入仓库，不会自动上传。</span></div></div>
+    </section>
+
+    <section id="sources" class="lesson-section sources-section" data-nav>
+      <div class="section-kicker"><span>↗</span> 来源与边界</div>
+      <h2>这一页对应哪些原始材料</h2>
+      <p>范围来自 <a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-09.md" target="_blank" rel="noopener noreferrer">Day 9 任务手册</a>：R09（aha-voice 语音流水线源码与状态管理结构）、R10，以及任务手册「实际任务补强」四节（六状态、t0–t4 时序、异常分支、报名与模拟）。</p>
+      <div class="source-method"><h3>本页做了什么、没做什么</h3><p>本页提供<strong>可执行的设计纪律</strong>：六节点链的节点合同、六状态迁移的合法性、t0–t4 每一步的责任归属、四条过期过滤闸门、五条无双重播放断言、报警分级与三条退出路径。</p><p><strong>本页没有运行任何 ASR / TTS / LLM 推理服务</strong>，没有接入任何真实语音设备，没有任何实机延迟数据，也没有陪伴机器人的现场部署记录。页面上出现的毫秒数都是<strong>用于理解量级的示意值</strong>，不是实测值——真值取决于你的硬件、模型和网络。</p><p>六状态机是<strong>学习用草案</strong>，不是 INZ Lab 或任何产品的内部实现。关于 INZ Lab 的部分只使用可披露的高层描述（多模态情感交互的研究方向），不包含企业内部实现、未公开数据或内部文档。任何“我在这个系统里做了什么”的说法，都必须按四格表（本人做过 / 团队成果 / 开源现有功能 / 拟研究）逐条标注后才能写进材料。</p></div>
+    </section>
+    <div class="next-lesson"><span class="small-label">继续：让脸和声音对上</span><a href="day-10.html">Day 10 · 像不像 vs 能不能动：3DGS / FLAME / SMPL-X →</a></div>
+    <footer class="site-footer"><div><strong>Modern Robotics 学习手记</strong><p>先看见变化，再说清原因。</p></div><a href="#start">回到顶部 ↑</a></footer>
+  </main>
+</div>
+<noscript><div class="noscript-note">文字教程可以正常阅读。交互演示需要在浏览器中启用 JavaScript。</div></noscript>
+</body>
+</html>
