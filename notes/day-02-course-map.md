@@ -1,6 +1,6 @@
 # Day 02 · 课程地图：把空间要求变成可检查的约束
 
-计划学习日：2026-10-21；教程准备日：2026-10-20。本文对应 [14plan Day 02](https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/DAILY/day-02.md)、[逐任务操作手册](https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/TASK_GUIDES/day-02.md) 和 [R03 资源子教程](https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/STUDY_GUIDES/R03.md)。
+计划学习日：2026-10-21；教程准备日：2026-10-20。本文对应 [14plan Day 02](https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/DAILY/day-02.md)、[逐任务操作手册](https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/TASK_GUIDES/day-02.md) 和 [R03 资源子教程](https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/STUDY_GUIDES/R03.md)。
 
 [打开 Day 2 可视化教程](../day-02.html) · [真实 Z3 教学实验与运行方法](../examples/day-02/README.md) · [返回 Day 1](../index.html)
 

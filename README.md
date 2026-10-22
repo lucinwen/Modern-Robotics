@@ -7,7 +7,7 @@
 ## 打开教程
 
 - **Day 1 网页**：[index.html](index.html) · **Day 2 网页**：[day-02.html](day-02.html) · **Day 3 网页**：[day-03.html](day-03.html) · **Day 6 网页**：[day-06.html](day-06.html)。下载并解压完整仓库后，直接用浏览器打开对应文件；网页交互无须安装依赖。GitHub 文件页显示源码，要操作可视化请打开本地网页，或启用下述 Pages。
-- **在线地址（GitHub Pages，已发布）**：<https://venividici.github.io/Modern-Robotics/>。推送到 `main` 后会自动重新发布，不需要再改设置。
+- **在线地址（GitHub Pages，已发布）**：<https://lucinwen.github.io/Modern-Robotics/>。推送到 `main` 后会自动重新发布，不需要再改设置。
 - 本地预览（推荐，交互最稳）：在仓库根目录执行 `python -m http.server 8000`，浏览器打开 <http://localhost:8000>。
 - **完整文字版**：[Day 01 教程](notes/day-01-tutorial.md) · [Day 02 教程](notes/day-02-tutorial.md) · [Day 03 教程](notes/day-03-tutorial.md) · [Day 06 教程](notes/day-06-tutorial.md)。
 - 课程对应表：[Day 01](notes/day-01-course-map.md) · [Day 02](notes/day-02-course-map.md) · [Day 03](notes/day-03-course-map.md)。
@@ -105,7 +105,7 @@ Day 2 共 9 个可视化。数轴、房间、核心和偏好组件使用明确�
 - [Modern Robotics 官方视频转写](https://modernrobotics.northwestern.edu/nu-gm-book-resource/)：Day 1 的 P4 / P9 / P10 / P11 / P12 / P16，合计 22 分 35 秒。
 - [Modern Robotics 原书](https://hades.mech.northwestern.edu/images/2/25/MR-v2.pdf)：§2.1、§2.5 与第 3 章相关内容。
 - [MIT Robotic Manipulation · Geometric Pose Estimation](https://manipulation.mit.edu/pose.html)：相机、点云、遮挡、位姿估计与配准选读。
-- [14plan Day 1 任务手册](https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/TASK_GUIDES/day-01.md) 与 [MiniLab](https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/minilab/validate.py)。
+- [14plan Day 1 任务手册](https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/TASK_GUIDES/day-01.md) 与 [MiniLab](https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/minilab/validate.py)。
 - [Z3Py 官方入门](https://github.com/microsoft/z3guide/blob/main/website/docs-programming/02%20-%20Z3%20Python/01%20-%20Introduction.md) 与 [Programming Z3](https://z3prover.github.io/papers/programmingz3.html)：Day 2 约束、作用域、核心和优化的依据。
 - [Helmert · An Introduction to PDDL](https://www.cs.toronto.edu/~sheila/2542/w09/A1/introtopddl2.pdf)：Day 3 对象、初态、目标、前置与效果的原始讲义依据。
 - [MIT Fall 2022 官方课表](https://manipulation.csail.mit.edu/Fall2022/schedule.html)、[Programming the Task Level 所在章节](https://manipulation.mit.edu/clutter.html) 与 [Motion Planning](https://manipulation.mit.edu/trajectories.html)：FSM、任务规划、IK、轨迹和检查边界。

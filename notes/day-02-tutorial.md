@@ -42,7 +42,7 @@ Day 2 的指定资源是 **Z3 官方文档**。按 [R03 阅读范围](../day-02.
 
 第 09–10 节：自己改一项并解释。
 
-范围依据 [R03 子教程](https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/STUDY_GUIDES/R03.md)与 [Day 2 任务手册](https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/TASK_GUIDES/day-02.md)。制作日期为 2026-10-20，计划日不代表已经完成个人学习。
+范围依据 [R03 子教程](https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/STUDY_GUIDES/R03.md)与 [Day 2 任务手册](https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/TASK_GUIDES/day-02.md)。制作日期为 2026-10-20，计划日不代表已经完成个人学习。
 
 ## 01 · 先留出未知的位置，再告诉程序哪些值可以用。
 
@@ -641,7 +641,7 @@ R03 的约 105 分钟是官方材料的定向学习量，穿插在这些阶段�
 
 </details>
 
-回到 [原任务手册](https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/TASK_GUIDES/day-02.md)核对七段产物。明天要用到的状态可以先写成 `door_locked`、`robot_has_key` 两个布尔谓词，继续区分“世界是什么状态”与“允许做什么动作”。
+回到 [原任务手册](https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/TASK_GUIDES/day-02.md)核对七段产物。明天要用到的状态可以先写成 `door_locked`、`robot_has_key` 两个布尔谓词，继续区分“世界是什么状态”与“允许做什么动作”。
 
 ## 原文与课程地图 · 看懂一个例子，再读对应原文。
 
@@ -667,13 +667,13 @@ Getting Started、Boolean Logic、Solvers、Arithmetic。重点读 Solver、chec
 
 六例断言集、两个 2×2 房间、门接面、分级退让和真实记录要求。
 
-[每日计划 ↗](https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/DAILY/day-02.md) · [逐阶段手册 ↗](https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/TASK_GUIDES/day-02.md) · [R03 子教程 ↗](https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/STUDY_GUIDES/R03.md)
+[每日计划 ↗](https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/DAILY/day-02.md) · [逐阶段手册 ↗](https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/TASK_GUIDES/day-02.md) · [R03 子教程 ↗](https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/STUDY_GUIDES/R03.md)
 
 ### 代码 · 原 MiniLab 与本教程实验（实操）
 
 原版整数坐标打包，与新增真实 Z3 示例分别标注来源。可查看代码和完整原始输出。
 
-[原 MiniLab ↗](https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/minilab/z3_demo.py) · [本教程实验说明](../examples/day-02/README.md) · [本次运行 JSON](../data/day-02-z3-results.json)
+[原 MiniLab ↗](https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/minilab/z3_demo.py) · [本教程实验说明](../examples/day-02/README.md) · [本次运行 JSON](../data/day-02-z3-results.json)
 
 ### 模型与记录的边界
 

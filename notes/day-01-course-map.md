@@ -1,6 +1,6 @@
 # Day 01 · 课程地图：从空间直觉走到坐标计算
 
-学习日期：2026-10-20。本文对应 [14plan 的 Day 01](https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/DAILY/day-01.md) 与 [R01 精确分 P 清单](https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/STUDY_GUIDES/R01.md)。这是一份辅助理解的教程地图，不代表已经完成个人学习或实测。
+学习日期：2026-10-20。本文对应 [14plan 的 Day 01](https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/DAILY/day-01.md) 与 [R01 精确分 P 清单](https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/STUDY_GUIDES/R01.md)。这是一份辅助理解的教程地图，不代表已经完成个人学习或实测。
 
 本教程以官方视频文字转写和官方在线讲义为依据，重新组织解释并制作交互示意；不声称已经完整播放、观看或逐帧解析 B 站原片。原视频保留为回看入口。不同年份的 MIT 视频目录不可互换。
 
@@ -23,7 +23,7 @@
 
 ## 2. MIT 部分是定向阅读
 
-按 [R16 子教程](https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/STUDY_GUIDES/R16.md)，Day 01 优先阅读 [MIT 官方第 4 章 Geometric Pose Estimation](https://manipulation.mit.edu/pose.html) 的以下内容，约 30–40 分钟：
+按 [R16 子教程](https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/STUDY_GUIDES/R16.md)，Day 01 优先阅读 [MIT 官方第 4 章 Geometric Pose Estimation](https://manipulation.mit.edu/pose.html) 的以下内容，约 30–40 分钟：
 
 1. **Cameras and depth sensors / Simulating an RGB-D camera**：相机给出了什么测量？颜色图像、深度图和三维点各自是什么？
 2. **Sensor noise and depth dropouts / Occlusions and partial views**：看不到的部分为什么不能当作不存在？
@@ -52,7 +52,7 @@
 | 任务空间与工作空间 | 任务目标在三维里，为什么机械臂仍可能够不到？ | 目标在工作空间外；或位置能到，但要求的朝向不能同时满足。 |
 | 空间图、AABB 和接面证据 | 房间在图上连接，为什么机器人仍可能过不了门？ | 分别改变门宽、锁状态和房间位置，定位失败所属的层。 |
 
-最后一行来自 [Day 01 任务操作手册](https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/TASK_GUIDES/day-01.md)，属于该学习计划的综合练习；不能把它说成上述六段 Modern Robotics 视频全部讲过的内容。
+最后一行来自 [Day 01 任务操作手册](https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/TASK_GUIDES/day-01.md)，属于该学习计划的综合练习；不能把它说成上述六段 Modern Robotics 视频全部讲过的内容。
 
 ## 5. 先观察，再自己复述
 

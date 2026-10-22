@@ -720,7 +720,7 @@ Garrett 等人的综述用于核对离散／连续耦合与方法边界。今天
 
 [Pyperplan 官方仓库 ↗](https://github.com/aibasel/pyperplan)
 
-[原 MiniLab ↗](https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/minilab/validate.py)
+[原 MiniLab ↗](https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/minilab/validate.py)
 
 [本教程实验说明](../examples/day-03/README.md)
 
@@ -732,11 +732,11 @@ Garrett 等人的综述用于核对离散／连续耦合与方法边界。今天
 
 保留原七段 10 小时安排、三类路线与 35 分钟阶段练习。R20 只作为任务成功条件的补充，不增加必修任务量。
 
-[每日计划 ↗](https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/DAILY/day-03.md)
+[每日计划 ↗](https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/DAILY/day-03.md)
 
-[操作手册 ↗](https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/TASK_GUIDES/day-03.md)
+[操作手册 ↗](https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/TASK_GUIDES/day-03.md)
 
-[阶段练习 ↗](https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/CHECKPOINTS.md)
+[阶段练习 ↗](https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/CHECKPOINTS.md)
 
 [R20 选读入口 ↗](https://behavior.stanford.edu/)
 

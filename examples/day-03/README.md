@@ -37,8 +37,8 @@ python3 examples/day-03/run_examples.py --only-minilab --output my-day-03-minila
 
 本教程 PDDL 域和场景是教学新建文件。原 checker 的来源固定为：
 
-- 仓库版本：[`venividici/14plan@de6fd9cb352370863e94d64d775c4f5236ed38fc`](https://github.com/venividici/14plan/tree/de6fd9cb352370863e94d64d775c4f5236ed38fc)。
-- 源文件：[`minilab/validate.py`](https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/minilab/validate.py)。
+- 仓库版本：[`venividici/14plan@de6fd9cb352370863e94d64d775c4f5236ed38fc`](https://github.com/lucinwen/14plan/tree/de6fd9cb352370863e94d64d775c4f5236ed38fc)。
+- 源文件：[`minilab/validate.py`](https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/minilab/validate.py)。
 - 源 Git blob SHA：`4cbe22b923d770147e931f610fc00e0d79df96a0`，文件 8266 字节。
 
 运行脚本先核对原 checker 的 Git blob 哈希。若要研究如何修改 checker，请复制成自己的文件并明确记录变更；当前对照脚本会拒绝把改过的文件标为原始 checker。

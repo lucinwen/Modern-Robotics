@@ -302,7 +302,7 @@ def upstream_runs(path):
                      "elapsed_ms_including_process_startup": round(elapsed, 6)})
     return {"status": "executed", "source_blob_sha": blob_sha,
             "source_revision": PLAN_REVISION,
-            "source_url": f"https://github.com/venividici/14plan/blob/{PLAN_REVISION}/minilab/z3_demo.py",
+            "source_url": f"https://github.com/lucinwen/14plan/blob/{PLAN_REVISION}/minilab/z3_demo.py",
             "runs": runs}
 
 

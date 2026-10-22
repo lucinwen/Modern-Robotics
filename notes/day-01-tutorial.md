@@ -35,7 +35,7 @@
 
 </details>
 
-课程范围依据 [Day 1 计划](https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/DAILY/day-01.md)。教程依据指定短片的官方转写与 MIT 在线讲义整理；来源与原视频入口见页末。
+课程范围依据 [Day 1 计划](https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/DAILY/day-01.md)。教程依据指定短片的官方转写与 MIT 在线讲义整理；来源与原视频入口见页末。
 
 ## 01 · 自由度：描述一种摆法，最少要几个独立的数？
 
@@ -338,7 +338,7 @@ R_{z}(90°) =
 
 </details>
 
-来源：[P16 官方转写](../index.html#source-p16)；数值练习参照 [R01 学习任务](https://github.com/venividici/14plan/blob/main/STUDY_GUIDES/R01.md)。
+来源：[P16 官方转写](../index.html#source-p16)；数值练习参照 [R01 学习任务](https://github.com/lucinwen/14plan/blob/main/STUDY_GUIDES/R01.md)。
 
 ## 06 · 相机看到的点，怎样放进同一个世界？
 
@@ -437,7 +437,7 @@ R_{z}(90°) =
 
 </details>
 
-来源：[Day 1 任务手册](https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/TASK_GUIDES/day-01.md) 与 [MiniLab 实际规则](https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/minilab/validate.py)。这一节是计划中的应用补充，不属于 Modern Robotics 六个短片的逐字内容。
+来源：[Day 1 任务手册](https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/TASK_GUIDES/day-01.md) 与 [MiniLab 实际规则](https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/minilab/validate.py)。这一节是计划中的应用补充，不属于 Modern Robotics 六个短片的逐字内容。
 
 ## 08 · 先留下一次预测，再动手验证
 
@@ -470,7 +470,7 @@ R_{z}(90°) =
 
     [返回房间演示 ↑](../index.html#room-validation)
 
-原计划的 MiniLab 实验、首次答案和真实运行记录，仍在 [Day 1 操作手册](https://github.com/venividici/14plan/blob/main/TASK_GUIDES/day-01.md) 中继续。网页演示用于帮助理解，不能代替你的亲自运行记录。
+原计划的 MiniLab 实验、首次答案和真实运行记录，仍在 [Day 1 操作手册](https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-01.md) 中继续。网页演示用于帮助理解，不能代替你的亲自运行记录。
 
 ## 原课程与阅读范围
 
@@ -524,7 +524,7 @@ R 与 t、4 × 4 矩阵、逆变换和变换链。
 
 ### 这份教程怎样整理
 
-课程清单来自 [R01](https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/STUDY_GUIDES/R01.md)、[R16](https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/STUDY_GUIDES/R16.md) 和 Day 1 手册；讲解依据西北大学课程官方转写、原书与 MIT 在线讲义编写。这里不声称完整播放过 B 站各视频，也不编造逐秒定位。
+课程清单来自 [R01](https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/STUDY_GUIDES/R01.md)、[R16](https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/STUDY_GUIDES/R16.md) 和 Day 1 手册；讲解依据西北大学课程官方转写、原书与 MIT 在线讲义编写。这里不声称完整播放过 B 站各视频，也不编造逐秒定位。
 
 交互演示为配套教学实现，数值按所注明的简化模型计算。图中合成示例、浏览器练习与你自己的掌握情况、设备实测分别记录。
 

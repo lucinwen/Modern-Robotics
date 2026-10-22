@@ -52,7 +52,7 @@ S1–U2 使用整数位置、米、轴对齐、不旋转、允许接边的模型
 
 - 原计划版本：`de6fd9cb352370863e94d64d775c4f5236ed38fc`
 - 原文件 blob：`2cb1e01141b6d983c2e6e55b28d407c363604e83`
-- [原文件](https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/minilab/z3_demo.py)
+- [原文件](https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/minilab/z3_demo.py)
 
 若本地已有这个版本的 14plan，可选执行：
 
@@ -76,4 +76,4 @@ python examples/day-02/run_examples.py --output my-day-02-results.json --upstrea
 
 - [Z3Py Introduction](https://github.com/microsoft/z3guide/blob/main/website/docs-programming/02%20-%20Z3%20Python/01%20-%20Introduction.md)：Solvers、Boolean Logic、Arithmetic。
 - [Programming Z3](https://z3prover.github.io/papers/programmingz3.html)：§4.1–§4.5 与 §8。
-- [R03](https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/STUDY_GUIDES/R03.md) 与 [Day 02 任务手册](https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/TASK_GUIDES/day-02.md)。
+- [R03](https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/STUDY_GUIDES/R03.md) 与 [Day 02 任务手册](https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/TASK_GUIDES/day-02.md)。

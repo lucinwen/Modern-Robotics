@@ -26,7 +26,7 @@
 <a class="skip-link" href="#main">跳到教程正文</a>
 <header class="site-header">
   <a class="brand" href="#start" aria-label="Modern Robotics 学习手记首页"><span class="brand-monogram">MR<span>.</span></span><span class="brand-name">Modern Robotics<small>可视化学习手记</small></span></a>
-  <div class="header-actions"><span class="edition">DAY 01 / 空间基础</span><a href="https://github.com/venividici/Modern-Robotics" target="_blank" rel="noopener noreferrer">GitHub 仓库 <span aria-hidden="true">↗</span></a><button class="btn theme-toggle" id="theme-toggle" type="button" aria-label="切换明暗主题">切换主题</button></div>
+  <div class="header-actions"><span class="edition">DAY 01 / 空间基础</span><a href="https://github.com/lucinwen/Modern-Robotics" target="_blank" rel="noopener noreferrer">GitHub 仓库 <span aria-hidden="true">↗</span></a><button class="btn theme-toggle" id="theme-toggle" type="button" aria-label="切换明暗主题">切换主题</button></div>
 </header>
 <div class="page-shell">
   <aside class="sidebar" aria-label="学习导航">
@@ -44,7 +44,7 @@
       <a href="#practice"><span>08</span> 亲手解释与记录</a>
       <a href="#sources"><span>↗</span> 对应课程与来源</a>
     </nav>
-    <div class="sidebar-note"><span class="small-label">这一页怎么用</span><p>每次学一小节。<br>先观察，改一个参数，<br>再用自己的话解释。</p><a href="https://github.com/venividici/14plan/blob/main/DAILY/day-01.md" target="_blank" rel="noopener noreferrer">查看原 Day 1 计划 ↗</a></div>
+    <div class="sidebar-note"><span class="small-label">这一页怎么用</span><p>每次学一小节。<br>先观察，改一个参数，<br>再用自己的话解释。</p><a href="https://github.com/lucinwen/14plan/blob/main/DAILY/day-01.md" target="_blank" rel="noopener noreferrer">查看原 Day 1 计划 ↗</a></div>
   </aside>
   <main id="main">
     <section id="start" class="hero lesson-section" data-nav>
@@ -55,7 +55,7 @@
       <a class="start-link" href="#rigid-body">从第一幅图开始 <span aria-hidden="true">↓</span></a>
       <div class="opening-question"><span class="small-label">贯穿今天的一个问题</span><p>“机器人，去隔壁房间拿一个杯子。”</p><span>杯子在哪里？坐标相对谁？手够得到吗？门能过去吗？看见了就能抓住吗？</span></div>
       <div class="reading-guide"><h2>不需要先学完线性代数</h2><p>遇到一个新词，先看它在图里对应什么。看到公式时，先问它的<strong>输入是什么、输出是什么、坐标相对谁</strong>。一节中只改一个滑条，猜一猜结果再拖动。</p><p>本教程统一采用<strong>米、右手坐标系、列向量</strong>。像 <code>(1, 2, 0)</code> 这样的三个数，按顺序表示 x、y、z；纸面上横着写只是为了方便阅读。</p><details><summary>“点、向量、矩阵”还陌生？先看这 3 句话</summary><ul><li><strong>点的位置</strong>：从选定原点出发，沿三根轴分别走多远。</li><li><strong>向量</strong>：带方向和长度的箭头，例如“向右移动 1 米”；坐标表通常也写成一列数。</li><li><strong>矩阵</strong>：按行列排列的数字表。本页里的旋转矩阵，记录三根新坐标轴分别指向哪里。它怎样作用于一个点，会在第 3 节拆开。</li></ul></details></div>
-      <p class="source-note">课程范围依据 <a href="https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/DAILY/day-01.md" target="_blank" rel="noopener noreferrer">Day 1 计划</a>。教程依据指定短片的官方转写与 MIT 在线讲义整理；来源与原视频入口见页末。</p>
+      <p class="source-note">课程范围依据 <a href="https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/DAILY/day-01.md" target="_blank" rel="noopener noreferrer">Day 1 计划</a>。教程依据指定短片的官方转写与 MIT 在线讲义整理；来源与原视频入口见页末。</p>
     </section>
 
     <section id="rigid-body" class="lesson-section" data-nav>
@@ -144,7 +144,7 @@
       <p>作用于列向量时，最右边先算。中间的 <code>base</code> 接上了，最后得到 world 与 camera 的关系。<strong>矩阵通常不能调换相乘顺序。</strong>你可以将这套关系理解为不同设备之间共用空间参照的基础：各自原点不同，就先明确每段变换。</p>
       <details><summary>逆变换为什么不能只把 t 加一个负号？</summary><p>要先撤销平移，再撤销旋转，所以逆变换的旋转是 <code>Rᵀ</code>，逆变换矩阵里的平移是 <code>−Rᵀt</code>。直接把 t 改成 −t，只有在某些特殊情况下才碰巧正确。</p><p>相对位姿描述、坐标转换和主动移动都可以用 T，但三者的解释仍要像上一节那样分开。给题目写清下标比死记一个矩阵更可靠。</p></details>
       <details class="self-check"><summary>停一下，自己解释：T_world_camera 和 T_camera_world 能直接互换吗？</summary><p>不能。它们互为逆矩阵，输入与输出参考系相反。先写清要把哪个坐标系中的点变到哪个坐标系，再选矩阵。</p></details>
-      <p class="source-note">来源：<a href="#source-p16">P16 官方转写</a>；数值练习参照 <a href="https://github.com/venividici/14plan/blob/main/STUDY_GUIDES/R01.md" target="_blank" rel="noopener noreferrer">R01 学习任务</a>。</p>
+      <p class="source-note">来源：<a href="#source-p16">P16 官方转写</a>；数值练习参照 <a href="https://github.com/lucinwen/14plan/blob/main/STUDY_GUIDES/R01.md" target="_blank" rel="noopener noreferrer">R01 学习任务</a>。</p>
     </section>
 
     <section id="perception" class="lesson-section" data-nav>
@@ -178,7 +178,7 @@
       <h3>这里说的“世界模型”，先理解到哪一步？</h3>
       <p>房间、门、杯子、机器人、几何尺寸和状态，构成了一份<strong>结构化的世界表示</strong>。它可以由人工建立，也可以由感知更新。学习型动态世界模型还涉及根据状态和动作预测后续变化；仅仅建了一张空间图，并没有完成这种动态预测模型的训练。</p>
       <details class="self-check"><summary>停一下，自己解释：房间相邻、图上连通、门能通过，分别需要什么证据？</summary><p>几何相邻要检查边界位置；图连通看节点与边；门通行还要检查实际开口、机器人尺寸与余量、门状态及相关动作能力。完整任务成功还需要运动与执行验证。</p></details>
-      <p class="source-note">来源：<a href="https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/TASK_GUIDES/day-01.md" target="_blank" rel="noopener noreferrer">Day 1 任务手册</a> 与 <a href="https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/minilab/validate.py" target="_blank" rel="noopener noreferrer">MiniLab 实际规则</a>。这一节是计划中的应用补充，不属于 Modern Robotics 六个短片的逐字内容。</p>
+      <p class="source-note">来源：<a href="https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/TASK_GUIDES/day-01.md" target="_blank" rel="noopener noreferrer">Day 1 任务手册</a> 与 <a href="https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/minilab/validate.py" target="_blank" rel="noopener noreferrer">MiniLab 实际规则</a>。这一节是计划中的应用补充，不属于 Modern Robotics 六个短片的逐字内容。</p>
     </section>
 
     <section id="practice" class="lesson-section" data-nav>
@@ -187,7 +187,7 @@
       <p>不用因为读到了页尾就把自己标成“已掌握”。先选一个最不确定的问题，写下预测，再去对应的演示里改变参数。下面的练习也可以直接在纸上做。</p>
       <ol class="practice-list"><li><h3>画两个坐标系</h3><p>在同一张图上标 world、camera 的原点和三根轴。解释 <code>T_world_camera</code> 的输入与输出。</p><a href="#transforms">返回变换演示 ↑</a></li><li><h3>自己算一次，再反算一次</h3><p>相机绕 z 转 90°，相机原点在世界 <code>(2, 1, 0)</code>，相机系点是 <code>(1, 0, 0)</code>。先写旋转后的偏移，再加平移，最后用逆变换检验。</p><details><summary>已经尝试，查看核对提示</summary><p>旋转后的偏移是 <code>(0, 1, 0)</code>，世界点是 <code>(2, 2, 0)</code>。先减 <code>(2, 1, 0)</code>，再乘逆旋转，应恢复 <code>(1, 0, 0)</code>。别只记结果，要能解释每一步相对谁。</p></details></li><li><h3>制造三个不同的失败</h3><p>保持图边、缩小门；保留图边、移开房间；保持几何、锁上门。分别写“改了什么 → 哪层失败 → 需要哪种证据”。</p><a href="#room-validation">返回房间演示 ↑</a></li></ol>
       <div class="personal-note"><div class="note-heading"><div><span class="eyebrow">我的理解</span><h3>写给下次复习的自己</h3></div><span id="note-status" class="note-status" aria-live="polite">记录保存在此浏览器</span></div><label class="form-label" for="learning-note">我原先怎么想？改了哪个参数？现在能怎样解释？还有什么没懂？</label><textarea class="form-control" id="learning-note" rows="8" placeholder="例如：我一开始把‘换坐标’理解成了物体移动。把角度改到 90° 后，我观察到……"></textarea><div class="note-actions"><button type="button" class="btn" id="export-note">导出我的笔记 .md</button><span>浏览器自动保存；导出后可自行放入仓库，不会自动上传。</span></div></div>
-      <p>原计划的 MiniLab 实验、首次答案和真实运行记录，仍在 <a href="https://github.com/venividici/14plan/blob/main/TASK_GUIDES/day-01.md" target="_blank" rel="noopener noreferrer">Day 1 操作手册</a> 中继续。网页演示用于帮助理解，不能代替你的亲自运行记录。</p>
+      <p>原计划的 MiniLab 实验、首次答案和真实运行记录，仍在 <a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-01.md" target="_blank" rel="noopener noreferrer">Day 1 操作手册</a> 中继续。网页演示用于帮助理解，不能代替你的亲自运行记录。</p>
     </section>
 
     <section id="sources" class="lesson-section sources-section" data-nav>
@@ -203,7 +203,7 @@
         <article class="course-item" id="source-p16"><span class="course-part">P16</span><div><h3>3.3.1 齐次变换矩阵</h3><p>R 与 t、4 × 4 矩阵、逆变换和变换链。</p><a href="https://www.bilibili.com/video/BV1KV411Z7sC/?p=16" target="_blank" rel="noopener noreferrer">原视频 ↗</a><a href="https://modernrobotics.northwestern.edu/nu-gm-book-resource/3-3-1-homogeneous-transformation-matrices/" target="_blank" rel="noopener noreferrer">官方转写 ↗</a></div><time>06:23</time></article>
         <article class="course-item" id="source-mit"><span class="course-part">MIT</span><div><h3>Geometric Pose Estimation · 定向选读</h3><p>相机、点云、遮挡、位姿估计与配准。2022 第 5 讲作为对应视频入口。</p><a href="https://manipulation.mit.edu/pose.html" target="_blank" rel="noopener noreferrer">官方在线讲义 ↗</a><a href="https://www.bilibili.com/video/BV1dB4y1R7bS/?p=5" target="_blank" rel="noopener noreferrer">对应长视频 ↗</a></div><span class="reading-label">选读</span></article>
       </div>
-      <div class="source-method"><h3>这份教程怎样整理</h3><p>课程清单来自 <a href="https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/STUDY_GUIDES/R01.md" target="_blank" rel="noopener noreferrer">R01</a>、<a href="https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/STUDY_GUIDES/R16.md" target="_blank" rel="noopener noreferrer">R16</a> 和 Day 1 手册；讲解依据西北大学课程官方转写、原书与 MIT 在线讲义编写。这里不声称完整播放过 B 站各视频，也不编造逐秒定位。</p><p>交互演示为配套教学实现，数值按所注明的简化模型计算。图中合成示例、浏览器练习与你自己的掌握情况、设备实测分别记录。</p><p><a href="notes/day-01-2-1-rigid-body-dof.md">2.1 完整文字笔记</a> · <a href="notes/day-01-course-map.md">Day 1 课程对应表</a> · <a href="notes/day-01-tutorial.md">本页文字版教程</a></p></div>
+      <div class="source-method"><h3>这份教程怎样整理</h3><p>课程清单来自 <a href="https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/STUDY_GUIDES/R01.md" target="_blank" rel="noopener noreferrer">R01</a>、<a href="https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/STUDY_GUIDES/R16.md" target="_blank" rel="noopener noreferrer">R16</a> 和 Day 1 手册；讲解依据西北大学课程官方转写、原书与 MIT 在线讲义编写。这里不声称完整播放过 B 站各视频，也不编造逐秒定位。</p><p>交互演示为配套教学实现，数值按所注明的简化模型计算。图中合成示例、浏览器练习与你自己的掌握情况、设备实测分别记录。</p><p><a href="notes/day-01-2-1-rigid-body-dof.md">2.1 完整文字笔记</a> · <a href="notes/day-01-course-map.md">Day 1 课程对应表</a> · <a href="notes/day-01-tutorial.md">本页文字版教程</a></p></div>
     </section>
     <div class="next-lesson"><span class="small-label">接着建立空间约束</span><a href="day-02.html">Day 02 · 从摆放规则到 Z3 求解 →</a></div>
     <footer class="site-footer"><div><strong>Modern Robotics 学习手记</strong><p>先看见变化，再说清原因。</p></div><a href="#start">回到顶部 ↑</a></footer>

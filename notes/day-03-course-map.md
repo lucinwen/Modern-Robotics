@@ -1,6 +1,6 @@
 # Day 03 · 课程地图：让机器人知道先做什么、再检查做不做得到
 
-计划学习日：2026-10-22；教程准备与来源核对日：2026-10-20。本文对应 [14plan Day 03](https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/DAILY/day-03.md)、[逐任务操作手册](https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/TASK_GUIDES/day-03.md) 及 R04、R16、R20。沿用同一计划版本，避免教程与练习条件来自不同修订。
+计划学习日：2026-10-22；教程准备与来源核对日：2026-10-20。本文对应 [14plan Day 03](https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/DAILY/day-03.md)、[逐任务操作手册](https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/TASK_GUIDES/day-03.md) 及 R04、R16、R20。沿用同一计划版本，避免教程与练习条件来自不同修订。
 
 [打开 Day 3 可视化教程](../day-03.html) · [真实程序实验与运行方法](../examples/day-03/README.md) · [回顾 Day 2](../day-02.html)
 
@@ -16,9 +16,9 @@ Day 1 练习描述空间，Day 2 练习把空间要求写成可检查的约束�
 
 | 资源 | 本日选择 | 精确入口与阅读范围 | 需要带走的认识 |
 |---|---|---|---|
-| [R04 子教程](https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/STUDY_GUIDES/R04.md) | 必修，建议 25–40 分钟 | [Planning.wiki Domain](https://planning.wiki/ref/pddl/domain) 的 `:types`、`:predicates`、`:action`；[Problem](https://planning.wiki/ref/pddl/problem) 的 `:objects`、`:init`、`:goal`。 | Domain 定义可用的描述和动作规则；Problem 提供这一次场景的对象、初态和目标。 |
-| [R16 子教程](https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/STUDY_GUIDES/R16.md) | 必修，MIT **2022 第 21 讲** | [B 站 P21 · Task-and-Motion Planning](https://www.bilibili.com/video/BV1dB4y1R7bS/?p=21)；原计划标注 1:24:53，约 85 分钟。对照 [MIT Fall 2022 课程安排](https://manipulation.csail.mit.edu/Fall2022/schedule.html) 和该页链接的 [官方视频合集](https://www.youtube.com/playlist?list=PLkx8KyIQkMfUSDs2hvTWzaq-cxGl8Ha69)。 | 找出任务变量、运动可行性检查以及失败反馈各自的输入和输出。讲次号码只适用于这里的 2022 版本。 |
-| [R20 子教程](https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/STUDY_GUIDES/R20.md) | 选读，约 40–50 分钟 | [BEHAVIOR 官方站](https://behavior.stanford.edu/) 与 [任务定义说明](https://behavior.stanford.edu/behavior_components/behavior_tasks.html)。只挑一个任务，辨认对象、初态和成功条件。 | 成功需要可检查的目标条件；画面看起来合理不足以判断任务完成。 |
+| [R04 子教程](https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/STUDY_GUIDES/R04.md) | 必修，建议 25–40 分钟 | [Planning.wiki Domain](https://planning.wiki/ref/pddl/domain) 的 `:types`、`:predicates`、`:action`；[Problem](https://planning.wiki/ref/pddl/problem) 的 `:objects`、`:init`、`:goal`。 | Domain 定义可用的描述和动作规则；Problem 提供这一次场景的对象、初态和目标。 |
+| [R16 子教程](https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/STUDY_GUIDES/R16.md) | 必修，MIT **2022 第 21 讲** | [B 站 P21 · Task-and-Motion Planning](https://www.bilibili.com/video/BV1dB4y1R7bS/?p=21)；原计划标注 1:24:53，约 85 分钟。对照 [MIT Fall 2022 课程安排](https://manipulation.csail.mit.edu/Fall2022/schedule.html) 和该页链接的 [官方视频合集](https://www.youtube.com/playlist?list=PLkx8KyIQkMfUSDs2hvTWzaq-cxGl8Ha69)。 | 找出任务变量、运动可行性检查以及失败反馈各自的输入和输出。讲次号码只适用于这里的 2022 版本。 |
+| [R20 子教程](https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/STUDY_GUIDES/R20.md) | 选读，约 40–50 分钟 | [BEHAVIOR 官方站](https://behavior.stanford.edu/) 与 [任务定义说明](https://behavior.stanford.edu/behavior_components/behavior_tasks.html)。只挑一个任务，辨认对象、初态和成功条件。 | 成功需要可检查的目标条件；画面看起来合理不足以判断任务完成。 |
 
 Planning.wiki 是原计划指定的社区参考。本教程用规划研究者 Malte Helmert 的 [《An Introduction to PDDL》](https://www.cs.toronto.edu/~sheila/2542/w09/A1/introtopddl2.pdf) 核对基本状态和动作语义；不把某个教学页面对扩展语法的限制，推广成整个 PDDL 标准的限制。今天采用 `:strips :typing`，正前置条件、增加效果和删除效果；数值、时间、量词和条件效果留作延伸。
 
@@ -40,7 +40,7 @@ Planning.wiki 是原计划指定的社区参考。本教程用规划研究者 Ma
 | 08:15–09:00 | 关闭资料解释任务规划与运动规划的区别；分析门把过高等新情况。 | 1 分钟定义、项目案例与两轮“为什么”；无法确定的地方写未知。 |
 | 09:00–10:00 | 进行 Checkpoint A，并保留首次回答与修订。 | 35 分钟检查记录、自评分与下一次复习问题。 |
 
-依据 [Checkpoint A 原始要求](https://github.com/venividici/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/CHECKPOINTS.md)，最后一段中的测验按 **8 + 8 + 8 + 8 + 3 = 35 分钟**执行：分层表示、谓词和动作、不同失败、反馈修复、评分。操作手册里“12 分钟起步内完整执行至少 35 分钟”的文字无法同时成立，所以这里以独立 Checkpoint 的明确分配为准；剩余 25 分钟用于对照和复盘。首次答案、自评分与完成时间仍由学习者填写。
+依据 [Checkpoint A 原始要求](https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/CHECKPOINTS.md)，最后一段中的测验按 **8 + 8 + 8 + 8 + 3 = 35 分钟**执行：分层表示、谓词和动作、不同失败、反馈修复、评分。操作手册里“12 分钟起步内完整执行至少 35 分钟”的文字无法同时成立，所以这里以独立 Checkpoint 的明确分配为准；剩余 25 分钟用于对照和复盘。首次答案、自评分与完成时间仍由学习者填写。
 
 ## 4. 同一个门杯例子的符号合同
 
