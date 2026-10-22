@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Day 06 · 从可渲染场景到机器人训练环境</title>
+<style>
+:root{--bg:#f7f7f5;--fg:#191919;--muted:#666;--card:#fff;--line:#deded8;--accent:#275d4b;--bad:#9b2c2c}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--fg);line-height:1.75}
+header{position:sticky;top:0;background:#fffffff0;border-bottom:1px solid var(--line);padding:14px 5vw;display:flex;justify-content:space-between;z-index:5}
+header a{color:var(--accent);text-decoration:none}main{max-width:980px;margin:auto;padding:56px 24px 100px}.hero{padding:48px 0 28px}
+.hero h1{font-size:clamp(40px,6vw,74px);line-height:1.05;margin:.2em 0}.hero p{font-size:20px;color:var(--muted);max-width:760px}
+.meta{display:flex;gap:10px;flex-wrap:wrap}.pill{border:1px solid var(--line);border-radius:999px;padding:5px 10px;font-size:12px}
+section{padding:44px 0;border-top:1px solid var(--line)}h2{font-size:34px;line-height:1.25;margin:0 0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin:16px 0}.grid,.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:12px}.controls label{font-size:13px;color:var(--muted)}input[type=range]{width:100%}
+select,button,textarea,input[type=number]{font:inherit;border:1px solid var(--line);border-radius:9px;background:#fff;padding:9px}button{cursor:pointer}
+output,strong.kpi{color:var(--accent)}.status{font-weight:700}.bad{color:var(--bad)}.bar{height:16px;background:#eee;border-radius:99px;overflow:hidden}.bar>i{display:block;height:100%;background:var(--accent)}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{border-bottom:1px solid var(--line);padding:9px;text-align:left;vertical-align:top}
+code,pre{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}pre{overflow:auto;background:#111;color:#eee;padding:16px;border-radius:12px}.note{color:var(--muted);font-size:13px}
+.diagram{min-height:190px;display:grid;place-items:center;border-radius:12px;background:linear-gradient(145deg,#f0f3f0,#fff);border:1px solid var(--line)}
+.chain{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.node{padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff}.arrow{color:var(--muted)}
+textarea{width:100%;min-height:170px}.qa{border-left:4px solid var(--accent);padding-left:14px}
+@media(max-width:720px){.grid,.two,.controls{grid-template-columns:1fr}main{padding:32px 18px 80px}.hero h1{font-size:42px}h2{font-size:28px}}
+</style>
+</head>
+<body>
+<header><b>Modern Robotics · Day 06</b><a href="index.html">← Day 1–3</a></header>
+<main>
+<section class="hero">
+<div class="meta"><span class="pill">Isaac Sim</span><span class="pill">Isaac Lab</span><span class="pill">UE → Physical AI</span><span class="pill">10h</span></div>
+<h1>场景能显示，<br>为什么还不能训练机器人？</h1>
+<p>从 UE 可编辑场景出发，逐层补齐尺度、碰撞、质量、关节、传感、动作、奖励、终止、reset 和评测证据。今天不把“导入成功”误写成“训练成功”。</p>
+</section>
+
+<section id="s1"><h2>01 · 渲染几何 ≠ 物理几何</h2>
+<p>先改尺度和碰撞开关，观察同一个漂亮 Mesh 在机器人任务中会产生完全不同的结论。</p>
+<div class="card controls">
+<label>UE 尺寸（cm）<input id="cm" type="range" min="20" max="300" value="100"><output id="cmv">100</output></label>
+<label>碰撞<input id="collision" type="checkbox" checked></label>
+</div>
+<div class="grid">
+<div class="card"><b>转换到仿真单位</b><p><strong class="kpi" id="meters">1.00 m</strong></p><div class="bar"><i id="sizebar" style="width:33%"></i></div></div>
+<div class="card"><b>机器人看到的墙</b><p id="wallstatus" class="status">可碰撞</p><p class="note">无碰撞 Mesh 可以“看起来是墙”，却让机器人直接穿过去。</p></div>
+</div></section>
+
+<section id="s2"><h2>02 · 质量、摩擦和时间步决定“推了以后怎样动”</h2>
+<div class="card controls">
+<label>推力 N<input id="force" type="range" min="0" max="80" value="20"><output id="forcev">20</output></label>
+<label>质量 kg<input id="mass" type="range" min="1" max="40" value="10"><output id="massv">10</output></label>
+<label>摩擦系数<input id="mu" type="range" min="0" max="10" value="4"><output id="muv">0.4</output></label>
+<label>控制周期 Hz<input id="hz" type="range" min="10" max="100" value="50"><output id="hzv">50</output></label>
+</div>
+<div class="card"><p>简化模型下净加速度：<strong id="acc">0</strong> m/s²；单控制周期速度变化约 <strong id="dv">0</strong> m/s。</p><p class="note">这是教学模型，不等同 PhysX 完整接触求解；重点是学会指出哪些物理参数缺失。</p></div>
+</section>
+
+<section id="s3"><h2>03 · 门有动画，不等于门有 Articulation</h2>
+<div class="two">
+<div class="diagram"><div class="chain"><span class="node">墙</span><span class="arrow">—</span><span class="node">铰链 Joint</span><span class="arrow">—</span><span class="node">门 Rigid Body</span></div></div>
+<div class="card controls">
+<label>力矩 N·m<input id="torque" type="range" min="0" max="40" value="10"><output id="torquev">10</output></label>
+<label>转动惯量 kg·m²<input id="inertia" type="range" min="1" max="30" value="8"><output id="inertiav">8</output></label>
+<label>存在物理铰链<input id="joint" type="checkbox" checked></label>
+</div></div>
+<div class="card"><p id="doorstatus" class="status"></p></div>
+</section>
+
+<section id="s4"><h2>04 · Observation 是“策略能看到什么”，不是“世界真值有什么”</h2>
+<div class="card controls">
+<label>传感噪声 σ<input id="noise" type="range" min="0" max="30" value="5"><output id="noisev">0.05</output></label>
+<label>真实距离 m<input id="trueD" type="range" min="50" max="500" value="200"><output id="trueDv">2.00</output></label>
+<label>是否偷偷给策略 door_locked 真值<input id="priv" type="checkbox"></label>
+</div>
+<div class="grid"><div class="card"><b>策略观测</b><p id="obs"></p></div><div class="card"><b>公平性检查</b><p id="privstatus" class="status"></p></div></div>
+</section>
+
+<section id="s5"><h2>05 · 传感器、物理和控制必须对齐时间</h2>
+<div class="card controls">
+<label>物理频率 Hz<input id="phz" type="range" min="60" max="480" value="120"><output id="phzv">120</output></label>
+<label>相机频率 Hz<input id="chz" type="range" min="5" max="60" value="30"><output id="chzv">30</output></label>
+<label>控制频率 Hz<input id="ctrlhz" type="range" min="10" max="100" value="50"><output id="ctrlhzv">50</output></label>
+</div>
+<div class="card"><p id="timing"></p></div>
+</section>
+
+<section id="s6"><h2>06 · Action 要写清“输出什么、单位是什么、谁执行”</h2>
+<div class="card controls">
+<label>动作模式<select id="actionMode"><option value="vel">底盘速度</option><option value="joint">关节位置</option><option value="ee">末端目标</option></select></label>
+<label>动作值<input id="actionValue" type="number" value="0.3" step="0.1"></label>
+</div>
+<div class="card"><p id="actionExplain"></p></div>
+</section>
+
+<section id="s7"><h2>07 · Reward 高，不代表任务成功</h2>
+<p>比较正常完成与“空车冲终点刷进度”的奖励。终局 success 必须单独定义。</p>
+<div class="card">
+<table><thead><tr><th>案例</th><th>进度奖励</th><th>持物奖励</th><th>总奖励</th><th>Success</th></tr></thead>
+<tbody><tr><td>真正送达杯子</td><td>8</td><td>5</td><td>13</td><td>✅</td></tr><tr><td>空车到终点</td><td>12</td><td>0</td><td>12</td><td>❌</td></tr></tbody></table>
+<p class="qa"><b>结论：</b>奖励是训练信号，success 是评测谓词；二者应相关，但不能互相替代。</p>
+</div></section>
+
+<section id="s8"><h2>08 · Reset 不是“把机器人拖回起点”</h2>
+<div class="card controls">
+<label>机器人位置已重置<input id="resetRobot" type="checkbox" checked></label>
+<label>速度已清零<input id="resetVel" type="checkbox"></label>
+<label>门角度已恢复<input id="resetDoor" type="checkbox"></label>
+<label>杯子状态已恢复<input id="resetCup" type="checkbox"></label>
+<label>随机种子已记录<input id="resetSeed" type="checkbox"></label>
+</div>
+<div class="card"><p id="resetStatus" class="status"></p></div>
+</section>
+
+<section id="s9"><h2>09 · Scene seed 和 train/test split 决定你有没有“背题”</h2>
+<div class="card controls">
+<label>训练 seed 数<input id="trainN" type="range" min="1" max="100" value="20"><output id="trainNv">20</output></label>
+<label>测试 seed 与训练重复<input id="leak" type="checkbox"></label>
+</div>
+<div class="card"><p id="leakStatus" class="status"></p></div>
+</section>
+
+<section id="s10"><h2>10 · UE → USD / Isaac Sim → Isaac Lab：20 项迁移审计</h2>
+<div class="card"><table><thead><tr><th>层</th><th>必须核对</th><th>失败后果</th></tr></thead><tbody>
+<tr><td>坐标</td><td>单位、原点、轴方向、姿态</td><td>尺度或位置错误</td></tr>
+<tr><td>几何</td><td>collision、footprint、净空</td><td>穿墙/误判可达</td></tr>
+<tr><td>物理</td><td>质量、惯量、摩擦、重力</td><td>动作响应失真</td></tr>
+<tr><td>关节</td><td>类型、轴、限位、驱动</td><td>门/机构不能交互</td></tr>
+<tr><td>传感</td><td>外参、频率、时间戳、噪声</td><td>观测错位</td></tr>
+<tr><td>动作</td><td>类型、单位、频率、控制器</td><td>策略输出无法执行</td></tr>
+<tr><td>任务</td><td>reward、success、termination</td><td>刷分或错误验收</td></tr>
+<tr><td>复现</td><td>reset、seed、版本、失败日志</td><td>实验不可比较</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="s11"><h2>11 · 一次完整 Episode 到底发生什么？</h2>
+<div class="diagram"><div class="chain"><span class="node">Reset</span><span class="arrow">→</span><span class="node">Observation</span><span class="arrow">→</span><span class="node">Policy</span><span class="arrow">→</span><span class="node">Action</span><span class="arrow">→</span><span class="node">Physics</span><span class="arrow">→</span><span class="node">Reward / Termination</span><span class="arrow">↺</span></div></div>
+<div class="card"><button id="stepBtn">推进一步</button> <button id="resetBtn">重置 episode</button>
+<p>Step: <strong id="stepNo">0</strong> · 距离: <strong id="dist">5.00</strong> m · 持杯: <strong id="holding">否</strong> · 终止: <strong id="term">否</strong></p></div>
+</section>
+
+<section id="practice"><h2>练习 · 把你的 SceneWeaver 场景写成任务合同</h2>
+<p>先自己填，再对照上面的 20 项审计。这里的答案只保存在当前浏览器。</p>
+<textarea id="notes" placeholder="scene / robot / observation / action / reward / success / termination / reset / seed / version / evidence ..."></textarea>
+<p><button id="saveNote">保存到浏览器</button> <button id="copyNote">复制 Markdown</button></p>
+<p id="noteStatus" class="note"></p><pre id="mdPreview"></pre>
+</section>
+
+<section><h2>来源与真实性边界</h2>
+<p>学习范围来自 14plan 的 Day 06、R06（Isaac Sim）和 R19（Isaac Lab）任务设计。Isaac Lab 的 manager-based RL 环境把 action、physics stepping、termination、reward、reset 和 observation 组织成明确的 step 流程；本网页用简化数学模型帮助理解这些接口。</p>
+<p class="note">本页没有运行 Isaac Sim、Isaac Lab、ROS 或实体机器人。网页交互是教学计算，不应写成实机/仿真成功证据。</p>
+</section>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+function bindRange(id,out,fn){const el=$(id),o=$(out);const u=()=>{o.textContent=fn?fn(+el.value):el.value;calc()};el.addEventListener('input',u);u()}
+function calc(){
+  const cm=+$('cm').value;
+  $('meters').textContent=(cm/100).toFixed(2)+' m';
+  $('sizebar').style.width=Math.min(100,cm/3)+'%';
+  $('wallstatus').textContent=$('collision').checked?'可碰撞：几何可用于接触检查':'仅视觉：机器人可能直接穿墙';
+  $('wallstatus').className=$('collision').checked?'status':'status bad';
+  const F=+$('force').value,m=+$('mass').value,mu=+$('mu').value/10,hz=+$('hz').value;
+  const net=Math.max(0,F-mu*m*9.81),a=net/m;
+  $('acc').textContent=a.toFixed(3);$('dv').textContent=(a/hz).toFixed(4);
+  const alpha=+$('torque').value/+$('inertia').value;
+  $('doorstatus').textContent=$('joint').checked?('物理铰链存在：角加速度约 '+alpha.toFixed(2)+' rad/s²'):'只有动画/静态网格：推门动作没有可求解的关节自由度';
+  $('doorstatus').className=$('joint').checked?'status':'status bad';
+  const td=+$('trueD').value/100,n=+$('noise').value/100;
+  $('obs').textContent='range ≈ '+td.toFixed(2)+' m，噪声尺度 σ='+n.toFixed(2)+' m';
+  $('privstatus').textContent=$('priv').checked?'不公平：策略读取了现实中未定义的特权真值':'公平性较好：策略只读取已声明的可观测量';
+  $('privstatus').className=$('priv').checked?'status bad':'status';
+  const ph=+$('phz').value,ch=+$('chz').value,ct=+$('ctrlhz').value;
+  $('timing').textContent='每个控制周期约 '+(ph/ct).toFixed(2)+' 个物理步；每帧相机之间约 '+(ph/ch).toFixed(2)+' 个物理步。频率不整除时需要明确采样/保持策略。';
+  const mode=$('actionMode').value,v=+$('actionValue').value;
+  const map={
+    vel:'策略输出 '+v+' m/s 级的底盘速度目标，由底盘控制器消费；还要有速度限幅和安全检查。',
+    joint:'策略输出 '+v+' rad 的关节位置目标，由关节控制器消费；不能把目标角当成观测角。',
+    ee:'策略输出末端目标（示例量 '+v+'），还需要 IK/控制器把任务空间目标映射到关节命令。'
+  };
+  $('actionExplain').textContent=map[mode];
+  const ok=$('resetRobot').checked&&$('resetVel').checked&&$('resetDoor').checked&&$('resetCup').checked&&$('resetSeed').checked;
+  $('resetStatus').textContent=ok?'Reset 合同完整：关键动态状态与复现信息都被恢复/记录':'Reset 不完整：下一个 episode 会继承上一个 episode 的隐藏状态';
+  $('resetStatus').className=ok?'status':'status bad';
+  $('leakStatus').textContent=$('leak').checked?'测试 seed 泄漏：高成功率可能只是记住训练场景，不是泛化':'训练/测试 seed 独立：至少避免这一类直接泄漏';
+  $('leakStatus').className=$('leak').checked?'status bad':'status';
+}
+bindRange('cm','cmv');bindRange('force','forcev');bindRange('mass','massv');bindRange('mu','muv',v=>(v/10).toFixed(1));bindRange('hz','hzv');
+bindRange('torque','torquev');bindRange('inertia','inertiav');bindRange('noise','noisev',v=>(v/100).toFixed(2));bindRange('trueD','trueDv',v=>(v/100).toFixed(2));
+bindRange('phz','phzv');bindRange('chz','chzv');bindRange('ctrlhz','ctrlhzv');bindRange('trainN','trainNv');
+['collision','joint','priv','actionMode','actionValue','resetRobot','resetVel','resetDoor','resetCup','resetSeed','leak'].forEach(id=>$(id).addEventListener('change',calc));
+let step=0,dist=5,holding=false,term=false;
+$('stepBtn').onclick=()=>{if(term)return;step++;dist=Math.max(0,dist-.55);if(step>=5)holding=true;if(dist===0&&holding)term=true;$('stepNo').textContent=step;$('dist').textContent=dist.toFixed(2);$('holding').textContent=holding?'是':'否';$('term').textContent=term?'成功':'否'};
+$('resetBtn').onclick=()=>{step=0;dist=5;holding=false;term=false;$('stepNo').textContent='0';$('dist').textContent='5.00';$('holding').textContent='否';$('term').textContent='否'};
+const note=$('notes');note.value=localStorage.getItem('mr-day6-note')||'';
+function md(){return '# Day 06 · 我的任务合同\n\n'+note.value+'\n'}
+$('saveNote').onclick=()=>{localStorage.setItem('mr-day6-note',note.value);$('noteStatus').textContent='已保存在当前浏览器。'};
+$('copyNote').onclick=async()=>{const t=md();$('mdPreview').textContent=t;try{await navigator.clipboard.writeText(t);$('noteStatus').textContent='Markdown 已复制；若浏览器禁止剪贴板，可直接复制下方文本。'}catch(e){$('noteStatus').textContent='浏览器未授权剪贴板，请直接复制下方文本。'}};
+calc();
+</script>
+</body>
+</html>
