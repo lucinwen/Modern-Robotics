@@ -2,11 +2,11 @@
 
 面向初学者的中文学习笔记。先通过交互观察空间变化，再解释概念、公式与适用条件。
 
-目前包含 **Day 1 / 2 / 3 / 6** 四篇连续教程，全部对齐 `14plan` 对应日的任务手册。Day 1–3 是空间、约束与任务规划的基础链；**Day 6 · 从可渲染场景到机器人训练环境** 聚焦 UE → Isaac Sim / Isaac Lab：三方责任分工、尺度、碰撞、质量、关节、传感、动作、奖励、终止、reset、seed、迁移审计与评测证据。
+目前包含 **Day 1–6** 六篇连续教程，全部对齐 `14plan` 对应日的任务手册。基础链为 Day 1 空间与五层合法性 → Day 2 约束与 Z3 → Day 3 任务规划与 TAMP；身体与系统链为 **Day 4 运动学（FK/IK/Jacobian）** → **Day 5 ROS2 / TF / Nav2 接口** → **Day 6 UE → Isaac Sim / Isaac Lab 训练环境**。
 
 ## 打开教程
 
-- **Day 1 网页**：[index.html](index.html) · **Day 2 网页**：[day-02.html](day-02.html) · **Day 3 网页**：[day-03.html](day-03.html) · **Day 6 网页**：[day-06.html](day-06.html)。下载并解压完整仓库后，直接用浏览器打开对应文件；网页交互无须安装依赖。GitHub 文件页显示源码，要操作可视化请打开本地网页，或启用下述 Pages。
+- **Day 1**：[index.html](index.html) · **Day 2**：[day-02.html](day-02.html) · **Day 3**：[day-03.html](day-03.html) · **Day 4**：[day-04.html](day-04.html) · **Day 5**：[day-05.html](day-05.html) · **Day 6**：[day-06.html](day-06.html)。下载并解压完整仓库后，直接用浏览器打开对应文件；网页交互无须安装依赖。GitHub 文件页显示源码，要操作可视化请打开本地网页，或启用下述 Pages。
 - **在线地址（GitHub Pages，已发布）**：<https://lucinwen.github.io/Modern-Robotics/>。推送到 `main` 后会自动重新发布，不需要再改设置。
 - 本地预览（推荐，交互最稳）：在仓库根目录执行 `python -m http.server 8000`，浏览器打开 <http://localhost:8000>。
 - **完整文字版**：[Day 01 教程](notes/day-01-tutorial.md) · [Day 02 教程](notes/day-02-tutorial.md) · [Day 03 教程](notes/day-03-tutorial.md) · [Day 06 教程](notes/day-06-tutorial.md)。
@@ -118,15 +118,15 @@ Day 3 已核对指定讲次与 MIT 2022 课表，未取得本轮 B 站整段视�
 
 ## 维护与扩展
 
-这是一个无第三方浏览器运行时依赖的静态网站。Python 构建脚本把本地组件和预运行数据嵌入四篇网页；编译后的 `index.html`、`day-02.html` 与 `day-03.html` 一同提交，因此在线与离线阅读都不需要构建。主动复现 Python / Z3 / PDDL 实验时，才需安装各自的单独依赖。
+这是一个无第三方浏览器运行时依赖的静态网站。Python 构建脚本把本地组件和预运行数据嵌入六篇网页；编译后的 `index.html`、`day-02.html` 与 `day-03.html` 一同提交，因此在线与离线阅读都不需要构建。主动复现 Python / Z3 / PDDL 实验时，才需安装各自的单独依赖。
 
 | 路径 | 用途 |
 |---|---|
-| `src/*.template.html` | 四篇教程正文与组件位置 |
+| `src/*.template.html` | 六篇教程正文与组件位置 |
 | `components/` | 知识可视化、阶段练习区与 14 天导航组件 |
 | `assets/` | 主题、交互、几何计算与图形样式 |
 | `notes/` | 可直接在 GitHub 阅读的中文 Markdown 笔记 |
-| `scripts/build.py` | 构建四篇网页，并安全内嵌 Day 2 / Day 3 运行 JSON |
+| `scripts/build.py` | 构建六篇网页，并安全内嵌 Day 2 / Day 3 运行 JSON |
 | `scripts/validate.py` | 检查构建一致性、链接、ID、依赖和语法 |
 | `tests/` | 坐标、几何、区间与逻辑边界检查 |
 | `examples/day-02/` | 可复现的真实 Z3 教学实验 |
@@ -158,6 +158,18 @@ Day 3 的 173 项符号检查包括状态不变量、失败动作不变更状态
 
 目前尚未完成三篇网页在浏览器中的整页视觉与交互实测。原对话中的三个自由度演示曾单独检查过，但这不替代新页面的整体浏览器测试。
 
+
+## Day 4 · 机械臂够得到吗：FK / IK / Jacobian
+
+平面二连杆把五个概念一次讲透：正运动学（改角度看末端）、可达环与两组逆解、关节限位（可达但不可执行）、雅可比与速度椭圆、奇异位形（|J| = 0）。数值校核覆盖 `(1,1)` 有解与 `(3,0)` 无解，并配有四条失败链（逆解无解 / 超限位 / 路径碰撞 / 控制跟不上）与责任链。
+
+- 网页：[day-04.html](day-04.html)
+
+## Day 5 · 一条“去 B 房间”的消息链：ROS2 / TF / Nav2
+
+Topic / Service / Action 的语义选择、八条箭头的消息合同（含义/方向/单位/frame/发布者）、TF 时间戳陈旧、URDF 的职权边界、costmap 膨胀与有效通道、Action 状态机与取消语义、三种故障注入、UE 场景 → 导航接口合同六项。**本页未运行 ROS 2 / Nav2，是概念合同，不是实测记录。**
+
+- 网页：[day-05.html](day-05.html)
 
 ## Day 6 · 从可渲染场景到机器人训练环境
 
