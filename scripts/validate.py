@@ -15,6 +15,7 @@ EXPECTED = {
     'index.html': ['dof-rigid-body', 'dof-three-points', 'dof-cspace-explorer', 'mr-workspace', 'mr-frames-rotation', 'mr-active-passive', 'mr-homogeneous-transform', 'day1-point-cloud', 'day1-room-validation'],
     'day-02.html': ['day2-domains', 'day2-nonoverlap', 'day2-packing', 'day2-contact', 'day2-pipeline', 'day2-incremental', 'day2-core', 'day2-preferences', 'day2-results'],
     'day-03.html': ['day3-layers', 'day3-state', 'day3-actions', 'day3-domain', 'day3-search', 'day3-fsm', 'day3-clearance', 'day3-reach', 'day3-feedback', 'day3-records', 'day3-checkpoint'],
+    'day-06.html': ['day6-roles', 'day6-geometry', 'day6-physics', 'day6-articulation', 'day6-observation', 'day6-time', 'day6-action', 'day6-reward', 'day6-reset', 'day6-seed', 'day6-audit', 'day6-counterexamples', 'day6-checker', 'day6-episode', 'day6-exam', 'day6-score'],
 }
 RECORDED_DATA = {
     'day-02.html': ('Day 2', 'data/day-02-z3-results.json'),

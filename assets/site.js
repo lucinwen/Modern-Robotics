@@ -61,7 +61,7 @@
     });
   }
   if (note && exportButton) exportButton.addEventListener('click', function () {
-    const text = '# ' + lessonTitle + '\n\n' + note.value + '\n\n---\n课程：' + lessonTopic + '\nhttps://github.com/venividici/-Modern-Robotics\n';
+    const text = '# ' + lessonTitle + '\n\n' + note.value + '\n\n---\n课程：' + lessonTopic + '\nhttps://github.com/venividici/Modern-Robotics\n';
     const blob = new Blob([text], {type: 'text/markdown;charset=utf-8'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');

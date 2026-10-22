@@ -13,22 +13,24 @@
   <link rel="stylesheet" href="assets/workspace.css">
   <link rel="stylesheet" href="assets/perception.css">
   <link rel="stylesheet" href="assets/rooms.css">
+  <link rel="stylesheet" href="assets/lesson-kit.css">
   <script src="assets/site.js" defer></script>
   <script src="assets/visualizations.js" defer></script>
   <script src="assets/frames.js" defer></script>
   <script src="assets/workspace.js" defer></script>
   <script src="assets/perception.js" defer></script>
   <script src="assets/rooms.js" defer></script>
+  <script src="assets/lesson-kit.js" defer></script>
 </head>
-<body>
+<body data-lesson-key="day-01" data-lesson-title="Day 01 · 我的空间与运动学习笔记" data-lesson-topic="刚体自由度、构型空间、坐标系与齐次变换">
 <a class="skip-link" href="#main">跳到教程正文</a>
 <header class="site-header">
   <a class="brand" href="#start" aria-label="Modern Robotics 学习手记首页"><span class="brand-monogram">MR<span>.</span></span><span class="brand-name">Modern Robotics<small>可视化学习手记</small></span></a>
-  <div class="header-actions"><span class="edition">DAY 01 / 空间基础</span><a href="https://github.com/venividici/-Modern-Robotics" target="_blank" rel="noopener noreferrer">GitHub 仓库 <span aria-hidden="true">↗</span></a><button class="btn theme-toggle" id="theme-toggle" type="button" aria-label="切换明暗主题">切换主题</button></div>
+  <div class="header-actions"><span class="edition">DAY 01 / 空间基础</span><a href="https://github.com/venividici/Modern-Robotics" target="_blank" rel="noopener noreferrer">GitHub 仓库 <span aria-hidden="true">↗</span></a><button class="btn theme-toggle" id="theme-toggle" type="button" aria-label="切换明暗主题">切换主题</button></div>
 </header>
 <div class="page-shell">
   <aside class="sidebar" aria-label="学习导航">
-    <nav class="course-switcher" aria-label="选择学习日"><a href="index.html" aria-current="page"><strong>DAY 01</strong><span>空间与运动</span></a><a href="day-02.html"><strong>DAY 02</strong><span>约束与求解</span></a><a href="day-03.html"><strong>DAY 03</strong><span>状态与计划</span></a></nav>
+    {{component:course-switcher}}
     <div class="sidebar-intro"><span class="eyebrow">学习路线</span><strong>第一天，建立空间直觉。</strong></div>
     <nav class="lesson-nav" aria-label="本页目录">
       <a href="#start" class="is-current" aria-current="location"><span>00</span> 从这里开始</a>

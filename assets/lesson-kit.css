@@ -1,0 +1,108 @@
+/* Shared building blocks for the 14-day lesson pages. Reuses site.css theme variables. */
+
+.day-switcher { margin: 0 0 26px; border: 1px solid var(--border); border-radius: 8px; background: var(--background); }
+.day-switcher > summary { list-style: none; cursor: pointer; display: grid; gap: 3px; padding: 12px 14px; }
+.day-switcher > summary::-webkit-details-marker { display: none; }
+.day-switcher > summary strong { font-size: 13px; color: var(--foreground); font-weight: 650; }
+.day-switcher__hint { font-size: 11px; color: var(--muted-foreground); }
+.day-switcher[open] > summary { border-bottom: 1px solid var(--border); }
+.day-switcher .course-switcher { margin: 12px; grid-template-columns: 1fr 1fr; }
+.day-switcher a[data-day] > span { font-size: 10px; }
+.day-switcher a[aria-current="page"] { background: var(--accent); border-color: var(--input); color: var(--accent-foreground); }
+
+.demo { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin: 22px 0; }
+.demo-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 14px; }
+.demo-title { font-size: 14px; font-weight: 650; letter-spacing: .01em; }
+.demo-tag { font-size: 11px; color: var(--muted-foreground); border: 1px solid var(--border); border-radius: 999px; padding: 2px 9px; }
+.demo-note { font-size: 12px; color: var(--muted-foreground); margin: 10px 0 0; }
+
+.control-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 20px; margin-bottom: 14px; }
+.control { display: grid; gap: 4px; font-size: 12px; color: var(--muted-foreground); }
+.control > span { display: flex; justify-content: space-between; gap: 10px; }
+.control output { color: var(--primary); font-weight: 650; font-variant-numeric: tabular-nums; }
+.control input[type="range"] { width: 100%; accent-color: var(--primary); }
+.control select, .control input[type="number"] { font: inherit; color: var(--foreground); background: var(--background); border: 1px solid var(--input); border-radius: 7px; padding: 7px 9px; }
+
+.canvas-box { position: relative; width: 100%; background: var(--muted); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.canvas-box > canvas { display: block; width: 100%; height: auto; }
+.canvas-box--tall { min-height: 260px; }
+
+.kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; margin-top: 12px; }
+.kpi-block { background: var(--muted); border-radius: 8px; padding: 10px 12px; }
+.kpi-block > span { display: block; font-size: 11px; color: var(--muted-foreground); }
+.kpi-block > strong { display: block; font-size: 17px; color: var(--primary); font-variant-numeric: tabular-nums; margin-top: 3px; }
+
+.flag { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 650; }
+.flag.ok { color: var(--viz-series-1); }
+.flag.bad { color: var(--destructive); }
+.flag.warn { color: var(--viz-series-2); }
+
+.chip-list { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+.chip { font-size: 11px; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted-foreground); background: var(--background); }
+.chip.is-on { border-color: var(--primary); color: var(--accent-foreground); background: var(--accent); }
+
+.step-chain { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 12px 0; }
+.step-chain .node { font-size: 12px; padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--background); color: var(--foreground); }
+.step-chain .node.is-active { border-color: var(--primary); background: var(--accent); color: var(--accent-foreground); font-weight: 650; }
+.step-chain .arrow { color: var(--muted-foreground); font-size: 12px; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--muted-foreground); margin-top: 10px; }
+.legend > span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
+
+.mini-matrix { border-collapse: collapse; font-family: Consolas, monospace; font-size: 13px; }
+.mini-matrix td { border: 1px solid var(--border); padding: 5px 9px; text-align: center; font-variant-numeric: tabular-nums; }
+
+.audit { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+.audit th, .audit td { border-bottom: 1px solid var(--border); padding: 7px 8px; text-align: left; vertical-align: top; }
+.audit th { color: var(--muted-foreground); font-weight: 600; font-size: 12px; }
+
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.audit--wide { min-width: 760px; }
+.audit td code, .audit th code { font-size: 12px; }
+.audit tbody tr.is-done td { color: var(--muted-foreground); }
+.audit tbody tr.is-done td:first-child { text-decoration: line-through; }
+.audit input[type="checkbox"] { width: 15px; height: 15px; accent-color: var(--primary); }
+.audit tr.is-fail td { color: var(--destructive); }
+
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-top: 14px; }
+.case-card { border: 1px solid var(--border); border-radius: 10px; padding: 14px; background: var(--background); display: grid; gap: 8px; }
+.case-card h4 { margin: 0; font-size: 13px; color: var(--primary); }
+.case-card dl { margin: 0; display: grid; gap: 6px; }
+.case-card dt { font-size: 11px; color: var(--muted-foreground); letter-spacing: .02em; }
+.case-card dd { margin: 0; font-size: 12.5px; color: var(--foreground); line-height: 1.55; }
+
+.role-lane { display: grid; gap: 10px; margin-top: 14px; }
+.role-card { border: 1px solid var(--border); border-left: 3px solid var(--border); border-radius: 8px; padding: 12px 14px; background: var(--background); }
+.role-card.is-active { border-left-color: var(--primary); background: var(--accent); }
+.role-card h4 { margin: 0 0 6px; font-size: 13px; }
+.role-card p { margin: 0; font-size: 12.5px; color: var(--muted-foreground); line-height: 1.6; }
+.role-card ul { margin: 6px 0 0; padding-left: 18px; font-size: 12.5px; color: var(--foreground); line-height: 1.65; }
+
+.score-grid { display: grid; gap: 12px; margin-top: 12px; }
+.score-row { display: grid; grid-template-columns: minmax(120px, 1fr) 2fr 54px; align-items: center; gap: 12px; font-size: 12.5px; }
+.score-row > strong { font-weight: 600; }
+.score-row output { text-align: right; color: var(--primary); font-variant-numeric: tabular-nums; font-weight: 650; }
+.score-row input[type="range"] { width: 100%; accent-color: var(--primary); }
+
+.prompt-list { display: grid; gap: 10px; margin: 12px 0; padding: 0; list-style: none; counter-reset: six; }
+.prompt-list li { counter-increment: six; position: relative; padding: 10px 12px 10px 44px; border: 1px solid var(--border); border-radius: 8px; background: var(--background); font-size: 12.5px; line-height: 1.6; }
+.prompt-list li::before { content: counter(six); position: absolute; left: 12px; top: 10px; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: var(--accent-foreground); font-size: 11px; font-weight: 700; display: grid; place-items: center; }
+.prompt-list li strong { display: block; margin-bottom: 3px; color: var(--foreground); }
+.prompt-list li span { color: var(--muted-foreground); }
+
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.tabs button { font: inherit; font-size: 12px; cursor: pointer; border: 1px solid var(--border); background: var(--background); color: var(--muted-foreground); border-radius: 999px; padding: 5px 12px; }
+.tabs button[aria-pressed="true"] { border-color: var(--primary); color: var(--accent-foreground); background: var(--accent); font-weight: 650; }
+
+.timeline-h { display: grid; grid-auto-flow: column; gap: 4px; align-items: end; margin: 12px 0; min-height: 90px; }
+.timeline-h .beat { background: var(--accent); border-radius: 4px 4px 0 0; min-height: 6px; }
+
+.gate { display: grid; gap: 8px; margin-top: 12px; }
+.gate label { display: flex; align-items: center; gap: 9px; font-size: 13px; }
+.gate input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--primary); }
+
+@media (max-width: 720px) {
+  .control-grid { grid-template-columns: 1fr; }
+  .day-switcher .course-switcher { grid-template-columns: 1fr 1fr; }
+}

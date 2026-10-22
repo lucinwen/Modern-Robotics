@@ -2,12 +2,13 @@
 
 面向初学者的中文学习笔记。先通过交互观察空间变化，再解释概念、公式与适用条件。
 
-目前包含 Day 1–3 的连续基础教程，并新增 **Day 6 · 从可渲染场景到机器人训练环境**。Day 6 聚焦 UE → Isaac Sim / Isaac Lab：尺度、碰撞、质量、关节、传感、动作、奖励、终止、reset、seed 与评测证据。
+目前包含 **Day 1 / 2 / 3 / 6** 四篇连续教程，全部对齐 `14plan` 对应日的任务手册。Day 1–3 是空间、约束与任务规划的基础链；**Day 6 · 从可渲染场景到机器人训练环境** 聚焦 UE → Isaac Sim / Isaac Lab：三方责任分工、尺度、碰撞、质量、关节、传感、动作、奖励、终止、reset、seed、迁移审计与评测证据。
 
 ## 打开教程
 
 - **Day 1 网页**：[index.html](index.html) · **Day 2 网页**：[day-02.html](day-02.html) · **Day 3 网页**：[day-03.html](day-03.html) · **Day 6 网页**：[day-06.html](day-06.html)。下载并解压完整仓库后，直接用浏览器打开对应文件；网页交互无须安装依赖。GitHub 文件页显示源码，要操作可视化请打开本地网页，或启用下述 Pages。
-- GitHub Pages 预定地址：<https://venividici.github.io/-Modern-Robotics/>。需要在仓库 **Settings → Pages** 选择 **Deploy from a branch → main → /(root)** 并保存后才会发布。
+- **在线地址（GitHub Pages，已发布）**：<https://venividici.github.io/Modern-Robotics/>。推送到 `main` 后会自动重新发布，不需要再改设置。
+- 本地预览（推荐，交互最稳）：在仓库根目录执行 `python -m http.server 8000`，浏览器打开 <http://localhost:8000>。
 - **完整文字版**：[Day 01 教程](notes/day-01-tutorial.md) · [Day 02 教程](notes/day-02-tutorial.md) · [Day 03 教程](notes/day-03-tutorial.md) · [Day 06 教程](notes/day-06-tutorial.md)。
 - 课程对应表：[Day 01](notes/day-01-course-map.md) · [Day 02](notes/day-02-course-map.md) · [Day 03](notes/day-03-course-map.md)。
 - 配套材料：[2.1 刚体自由度专题](notes/day-01-2-1-rigid-body-dof.md) · [Day 2 Python / Z3 实验](examples/day-02/README.md) · [Day 3 PDDL / MiniLab 实验](examples/day-03/README.md)。
@@ -117,15 +118,15 @@ Day 3 已核对指定讲次与 MIT 2022 课表，未取得本轮 B 站整段视�
 
 ## 维护与扩展
 
-这是一个无第三方浏览器运行时依赖的静态网站。Python 构建脚本把本地组件和预运行数据嵌入三篇网页；编译后的 `index.html`、`day-02.html` 与 `day-03.html` 一同提交，因此在线与离线阅读都不需要构建。主动复现 Python / Z3 / PDDL 实验时，才需安装各自的单独依赖。
+这是一个无第三方浏览器运行时依赖的静态网站。Python 构建脚本把本地组件和预运行数据嵌入四篇网页；编译后的 `index.html`、`day-02.html` 与 `day-03.html` 一同提交，因此在线与离线阅读都不需要构建。主动复现 Python / Z3 / PDDL 实验时，才需安装各自的单独依赖。
 
 | 路径 | 用途 |
 |---|---|
-| `src/*.template.html` | 三篇教程正文与组件位置 |
-| `components/` | 28 个知识可视化与 1 个阶段练习区的标记 |
+| `src/*.template.html` | 四篇教程正文与组件位置 |
+| `components/` | 知识可视化、阶段练习区与 14 天导航组件 |
 | `assets/` | 主题、交互、几何计算与图形样式 |
 | `notes/` | 可直接在 GitHub 阅读的中文 Markdown 笔记 |
-| `scripts/build.py` | 构建三篇网页，并安全内嵌 Day 2 / Day 3 运行 JSON |
+| `scripts/build.py` | 构建四篇网页，并安全内嵌 Day 2 / Day 3 运行 JSON |
 | `scripts/validate.py` | 检查构建一致性、链接、ID、依赖和语法 |
 | `tests/` | 坐标、几何、区间与逻辑边界检查 |
 | `examples/day-02/` | 可复现的真实 Z3 教学实验 |
@@ -160,7 +161,7 @@ Day 3 的 173 项符号检查包括状态不变量、失败动作不变更状态
 
 ## Day 6 · 从可渲染场景到机器人训练环境
 
-Day 6 面向 UE / PCG 已有基础，重点不是安装平台，而是建立可执行的 **robot task contract**。自包含网页包含 11 个交互学习区，依次覆盖渲染几何与物理几何、动力学参数、门 Articulation、Observation、公平性、时间同步、Action、Reward vs Success、Reset、Seed 划分、UE→物理仿真审计与完整 Episode 时间线。
+Day 6 面向 UE / PCG 已有基础，重点不是安装平台，而是建立可执行的 **robot task contract**。自包含网页包含 **16 个交互学习区**，依次覆盖：三方责任分工（UE / Isaac Sim / Isaac Lab）、渲染几何与物理几何、动力学参数、门 Articulation、Observation 与公平性、时间同步、Action、Reward vs Success、Reset、Seed 划分、**19 项 UE→物理仿真迁移审计（可勾选留痕）**、**三个反例（症状→缺哪个接口→如何独立验证）**、**规则 checker 与物理 rollout 的能力差距**、完整 Episode 时间线、**综合考题六栏答卷与五维自评**、任务合同与 Day 7 交接字段。
 
 - 网页：[day-06.html](day-06.html)
 - 文字版：[notes/day-06-tutorial.md](notes/day-06-tutorial.md)

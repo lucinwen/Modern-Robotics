@@ -1,200 +1,485 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Day 06 · 从可渲染场景到机器人训练环境</title>
-<style>
-:root{--bg:#f7f7f5;--fg:#191919;--muted:#666;--card:#fff;--line:#deded8;--accent:#275d4b;--bad:#9b2c2c}
-*{box-sizing:border-box}body{margin:0;font-family:Inter,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--fg);line-height:1.75}
-header{position:sticky;top:0;background:#fffffff0;border-bottom:1px solid var(--line);padding:14px 5vw;display:flex;justify-content:space-between;z-index:5}
-header a{color:var(--accent);text-decoration:none}main{max-width:980px;margin:auto;padding:56px 24px 100px}.hero{padding:48px 0 28px}
-.hero h1{font-size:clamp(40px,6vw,74px);line-height:1.05;margin:.2em 0}.hero p{font-size:20px;color:var(--muted);max-width:760px}
-.meta{display:flex;gap:10px;flex-wrap:wrap}.pill{border:1px solid var(--line);border-radius:999px;padding:5px 10px;font-size:12px}
-section{padding:44px 0;border-top:1px solid var(--line)}h2{font-size:34px;line-height:1.25;margin:0 0 16px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin:16px 0}.grid,.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-.controls{display:grid;grid-template-columns:1fr 1fr;gap:12px}.controls label{font-size:13px;color:var(--muted)}input[type=range]{width:100%}
-select,button,textarea,input[type=number]{font:inherit;border:1px solid var(--line);border-radius:9px;background:#fff;padding:9px}button{cursor:pointer}
-output,strong.kpi{color:var(--accent)}.status{font-weight:700}.bad{color:var(--bad)}.bar{height:16px;background:#eee;border-radius:99px;overflow:hidden}.bar>i{display:block;height:100%;background:var(--accent)}
-table{width:100%;border-collapse:collapse;font-size:14px}th,td{border-bottom:1px solid var(--line);padding:9px;text-align:left;vertical-align:top}
-code,pre{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}pre{overflow:auto;background:#111;color:#eee;padding:16px;border-radius:12px}.note{color:var(--muted);font-size:13px}
-.diagram{min-height:190px;display:grid;place-items:center;border-radius:12px;background:linear-gradient(145deg,#f0f3f0,#fff);border:1px solid var(--line)}
-.chain{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.node{padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff}.arrow{color:var(--muted)}
-textarea{width:100%;min-height:170px}.qa{border-left:4px solid var(--accent);padding-left:14px}
-@media(max-width:720px){.grid,.two,.controls{grid-template-columns:1fr}main{padding:32px 18px 80px}.hero h1{font-size:42px}h2{font-size:28px}}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f8f7">
+  <meta name="description" content="Day 6 具身智能训练环境：从 UE 可渲染场景到 Isaac Sim / Isaac Lab 可训练任务。逐层核对尺度、碰撞、质量、关节、传感、观测、动作、奖励、终止、reset、seed 与评测证据。">
+  <title>Day 06 · 从可渲染场景到机器人训练环境 | Modern Robotics 学习手记</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/site.css">
+  <link rel="stylesheet" href="assets/lesson-kit.css">
+  <script src="assets/site.js" defer></script>
+  <script src="assets/lesson-kit.js" defer></script>
+  <script src="assets/day6.js" defer></script>
 </head>
-<body>
-<header><b>Modern Robotics · Day 06</b><a href="index.html">← Day 1–3</a></header>
-<main>
-<section class="hero">
-<div class="meta"><span class="pill">Isaac Sim</span><span class="pill">Isaac Lab</span><span class="pill">UE → Physical AI</span><span class="pill">10h</span></div>
-<h1>场景能显示，<br>为什么还不能训练机器人？</h1>
-<p>从 UE 可编辑场景出发，逐层补齐尺度、碰撞、质量、关节、传感、动作、奖励、终止、reset 和评测证据。今天不把“导入成功”误写成“训练成功”。</p>
-</section>
+<body data-lesson-key="day-06" data-lesson-title="Day 06 · 我的训练环境任务合同" data-lesson-topic="UE → Isaac Sim / Isaac Lab、observation / action / reward / reset / success 契约">
+<a class="skip-link" href="#main">跳到教程正文</a>
+<header class="site-header">
+  <a class="brand" href="#start" aria-label="Modern Robotics 学习手记首页"><span class="brand-monogram">MR<span>.</span></span><span class="brand-name">Modern Robotics<small>可视化学习手记</small></span></a>
+  <div class="header-actions"><span class="edition">DAY 06 / 训练环境</span><a href="https://github.com/venividici/Modern-Robotics" target="_blank" rel="noopener noreferrer">GitHub 仓库 <span aria-hidden="true">↗</span></a><button class="btn theme-toggle" id="theme-toggle" type="button" aria-label="切换明暗主题">切换主题</button></div>
+</header>
+<div class="page-shell">
+  <aside class="sidebar" aria-label="学习导航">
+    <details class="day-switcher">
+  <summary><span class="eyebrow">学习日导航 · 14 天路线</span><strong id="day-switcher-current">选择学习日</strong><span class="day-switcher__hint">展开全部 14 天 ▾</span></summary>
+  <nav class="course-switcher" aria-label="选择学习日">
+    <a href="index.html" data-day="01"><strong>DAY 01</strong><span>空间与运动</span></a>
+    <a href="day-02.html" data-day="02"><strong>DAY 02</strong><span>约束与求解</span></a>
+    <a href="day-03.html" data-day="03"><strong>DAY 03</strong><span>状态与计划</span></a>
+    <a href="https://github.com/venividici/14plan/blob/main/TASK_GUIDES/day-04.md" data-day="04" target="_blank" rel="noopener noreferrer"><strong>DAY 04</strong><span>运动学 FK/IK ↗</span></a>
+    <a href="https://github.com/venividici/14plan/blob/main/TASK_GUIDES/day-05.md" data-day="05" target="_blank" rel="noopener noreferrer"><strong>DAY 05</strong><span>ROS2 与导航 ↗</span></a>
+    <a href="day-06.html" data-day="06"><strong>DAY 06</strong><span>训练环境</span></a>
+    <a href="https://github.com/venividici/14plan/blob/main/TASK_GUIDES/day-07.md" data-day="07" target="_blank" rel="noopener noreferrer"><strong>DAY 07</strong><span>策略与数据 ↗</span></a>
+    <a href="https://github.com/venividici/14plan/blob/main/TASK_GUIDES/day-08.md" data-day="08" target="_blank" rel="noopener noreferrer"><strong>DAY 08</strong><span>场景基线 ↗</span></a>
+    <a href="https://github.com/venividici/14plan/blob/main/TASK_GUIDES/day-09.md" data-day="09" target="_blank" rel="noopener noreferrer"><strong>DAY 09</strong><span>语音会话 ↗</span></a>
+    <a href="https://github.com/venividici/14plan/blob/main/TASK_GUIDES/day-10.md" data-day="10" target="_blank" rel="noopener noreferrer"><strong>DAY 10</strong><span>数字人 ↗</span></a>
+    <a href="https://github.com/venividici/14plan/blob/main/TASK_GUIDES/day-11.md" data-day="11" target="_blank" rel="noopener noreferrer"><strong>DAY 11</strong><span>毫米波感知 ↗</span></a>
+    <a href="https://github.com/venividici/14plan/blob/main/TASK_GUIDES/day-12.md" data-day="12" target="_blank" rel="noopener noreferrer"><strong>DAY 12</strong><span>多源融合 ↗</span></a>
+    <a href="https://github.com/venividici/14plan/blob/main/TASK_GUIDES/day-13.md" data-day="13" target="_blank" rel="noopener noreferrer"><strong>DAY 13</strong><span>XR 与传输 ↗</span></a>
+    <a href="https://github.com/venividici/14plan/blob/main/TASK_GUIDES/day-14.md" data-day="14" target="_blank" rel="noopener noreferrer"><strong>DAY 14</strong><span>模拟面试 ↗</span></a>
+  </nav>
+</details>
+    <div class="sidebar-intro"><span class="eyebrow">学习路线</span><strong>场景好看，不等于能训练。</strong></div>
+    <nav class="lesson-nav" aria-label="本页目录">
+      <a href="#start" class="is-current" aria-current="location"><span>00</span> 从这里开始</a>
+      <a href="#roles"><span>01</span> 三方责任分工</a>
+      <a href="#render-geometry"><span>02</span> 渲染几何 ≠ 物理几何</a>
+      <a href="#physics-params"><span>03</span> 质量、摩擦与步长</a>
+      <a href="#articulation"><span>04</span> 门有动画 ≠ 有铰链</a>
+      <a href="#observation"><span>05</span> Observation 与公平性</a>
+      <a href="#time-sync"><span>06</span> 时间同步</a>
+      <a href="#action"><span>07</span> Action 合同</a>
+      <a href="#reward"><span>08</span> Reward vs Success</a>
+      <a href="#reset"><span>09</span> Reset 的完整性</a>
+      <a href="#seed"><span>10</span> Seed 与数据划分</a>
+      <a href="#migration"><span>11</span> UE → 仿真审计</a>
+      <a href="#counterexamples"><span>12</span> 三个反例</a>
+      <a href="#checker"><span>13</span> checker vs rollout</a>
+      <a href="#episode"><span>14</span> 一个 Episode</a>
+      <a href="#exam"><span>15</span> 六栏答卷与自评</a>
+      <a href="#practice"><span>16</span> 写成任务合同</a>
+      <a href="#sources"><span>↗</span> 来源与边界</a>
+    </nav>
+    <div class="sidebar-note"><span class="small-label">这一页怎么用</span><p>先猜，再拖。<br>每改一个参数，<br>问一句“缺的是哪个接口”。</p><a href="https://github.com/venividici/14plan/blob/main/TASK_GUIDES/day-06.md" target="_blank" rel="noopener noreferrer">查看原 Day 6 任务手册 ↗</a></div>
+  </aside>
+  <main id="main">
+    <section id="start" class="hero lesson-section" data-nav>
+      <div class="eyebrow">MODERN ROBOTICS / 第六天</div>
+      <h1>场景能显示，<br><span>为什么还不能训练机器人？</span></h1>
+      <p class="hero-lead">一个 UE 场景能播放、门有动画，离“可训练的机器人任务”还差一整套可被物理求解、可被策略读取、可被评测复现的合同。今天我们逐层把缺口补齐。</p>
+      <div class="lesson-meta"><span>2026.10.25</span><span>Isaac Sim + Isaac Lab · 官方文档</span><span>16 个交互区</span></div>
+      <a class="start-link" href="#render-geometry">从第一处缺口开始 <span aria-hidden="true">↓</span></a>
+      <div class="opening-question"><span class="small-label">贯穿今天的一个问题</span><p>“这个场景看起来能跑，能不能直接拿去训练机器人？”</p><span>能看见 ≠ 能碰撞；能碰撞 ≠ 有物理；有物理 ≠ 有任务；训练成功 ≠ 实机成功。</span></div>
+      <div class="reading-guide"><h2>今天只练一件事：把“看起来”拆成“可验证”</h2><p>每个演示都对应一个真实系统里必须写清的字段。你已经具备 UE5 和 PCG 基础，所以这里不教安装，而是问：<strong>这个字段谁生产、单位是什么、谁消费、缺失会怎样</strong>。</p><p>本页统一采用<strong>米、秒、弧度 / 米每秒、右手系</strong>。文中“仿真”指物理引擎中的刚体求解；“实机”指真实硬件；两者都没有在本页运行，凡是教学计算都会标出来。</p></div>
+    </section>
 
-<section id="s1"><h2>01 · 渲染几何 ≠ 物理几何</h2>
-<p>先改尺度和碰撞开关，观察同一个漂亮 Mesh 在机器人任务中会产生完全不同的结论。</p>
-<div class="card controls">
-<label>UE 尺寸（cm）<input id="cm" type="range" min="20" max="300" value="100"><output id="cmv">100</output></label>
-<label>碰撞<input id="collision" type="checkbox" checked></label>
+    <section id="roles" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>01</span> 对应 14plan Day 6 · 第 2 阶段产物：角色分工图</div>
+      <h2>同一个场景，<br class="desktop-break">三个不同的责任方。</h2>
+      <p>“UE 场景能不能训练机器人”这个问题问错了对象。资产、物理世界、任务接口是三件事，分别由 UE / Isaac Sim / Isaac Lab 负责。缺任何一层，链条就断。先点三个责任方，看各自输入什么、输出什么、<strong>不负责</strong>什么。</p>
+      <div class="demo" id="day6-roles">
+        <div class="demo-head"><span class="demo-title">责任分工：谁生产、谁消费</span><span class="demo-tag">点击切换</span></div>
+        <div class="tabs" role="group" aria-label="选择责任方">
+          <button type="button" id="d6-role-ue" aria-pressed="true">UE / PCG 资产</button>
+          <button type="button" id="d6-role-sim" aria-pressed="false">Isaac Sim 物理世界</button>
+          <button type="button" id="d6-role-lab" aria-pressed="false">Isaac Lab 任务与训练</button>
+        </div>
+        <div class="role-lane" id="d6-role-panel"></div>
+        <div class="step-chain">
+          <span class="node">UE 资产</span><span class="arrow">→</span>
+          <span class="node">USD 导出</span><span class="arrow">→</span>
+          <span class="node">物理世界</span><span class="arrow">→</span>
+          <span class="node">任务接口</span><span class="arrow">→</span>
+          <span class="node">策略训练 / 评测</span>
+        </div>
+        <p class="demo-note">箭头不是“自动完成”，每一段都要交付一份显式信息：尺寸与坐标、碰撞与质量、关节与驱动、观测与动作、终止与复现。</p>
+      </div>
+      <div class="table-scroll"><table class="audit audit--wide"><caption>三层责任，别互相甩锅</caption><thead><tr><th>层</th><th>它生产什么</th><th>它消费什么</th><th>它不负责什么</th></tr></thead><tbody>
+        <tr><td>UE / PCG</td><td>视觉网格、材质、灯光、布局、门动画</td><td>美术与关卡设计意图</td><td>物理正确性、观测公平性</td></tr>
+        <tr><td>Isaac Sim</td><td>刚体、碰撞、关节、接触、传感器采样</td><td>USD 资产 + 物理参数</td><td>任务定义、训练循环、评测口径</td></tr>
+        <tr><td>Isaac Lab</td><td>observation / action / reward / termination / reset 接口</td><td>物理世界的状态与采样</td><td>资产建模、底层求解器精度</td></tr>
+      </tbody></table></div>
+      <details class="self-check"><summary>停一下：如果门推不开，应该先查哪一层？</summary><p>先查 Sim：门是否有 articulation（joint 类型、轴、限位、drive）；如果 joint 正确但仍推不开，再查 Lab 的 action 是否包含对门的操作通道；最后才怀疑策略。层错了，改多久都改不对。</p></details>
+      <p class="source-note">依据：14plan Day 6 第 2 阶段“每个字段说清谁生产、谁消费、使用何种单位与时间”；R06（Isaac Sim）与 R19（Isaac Lab）的职责划分。</p>
+    </section>
+
+    <section id="render-geometry" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>02</span> 对应 14plan Day 6 · 第 1 个核心问题</div>
+      <h2>渲染几何可以很漂亮，<br class="desktop-break">但它可能根本没有碰撞。</h2>
+      <p>UE 里看到的墙是一层<strong>视觉网格</strong>；物理引擎要判断“能不能撞上”，依赖的是<strong>碰撞几何</strong>。两者可以不一致：为了画面精细，视觉网格可能有几十万面；为了实时求解，碰撞体可能只是一个盒子。</p>
+      <div class="demo" id="day6-geometry">
+        <div class="demo-head"><span class="demo-title">同一面墙的三种身份</span><span class="demo-tag">教学模型</span></div>
+        <div class="control-grid">
+          <label class="control"><span>UE 尺寸（厘米）<output id="d6-cm-out">100</output></span><input id="d6-cm" type="range" min="20" max="300" step="5" value="100"></label>
+          <label class="control"><span>碰撞体</span><select id="d6-collision"><option value="box">Box Collision</option><option value="mesh">Complex Mesh</option><option value="none">无碰撞</option></select></label>
+        </div>
+        <div class="canvas-box"><canvas id="d6-geo-canvas"></canvas></div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>换算到仿真单位</span><strong id="d6-meters">1.00 m</strong></div>
+          <div class="kpi-block"><span>机器人能否穿过</span><strong id="d6-pass">不能</strong></div>
+          <div class="kpi-block"><span>可用于接触求解</span><strong id="d6-contact">是</strong></div>
+        </div>
+        <p class="demo-note">UE 默认按厘米建模，仿真与机器人常用米。1 m = 100 cm。没有碰撞时，机器人路径规划与物理 rollout 都会“穿墙”，而截图完全看不出问题。</p>
+      </div>
+      <div class="table-wrap"><table><caption>三种几何别混用</caption><thead><tr><th>类型</th><th>用途</th><th>缺失后果</th></tr></thead><tbody><tr><td>视觉 Mesh</td><td>渲染、拍摄、示意</td><td>画面正确但无法碰撞</td></tr><tr><td>碰撞体</td><td>接触、阻挡、抓取</td><td>穿墙、误判可达</td></tr><tr><td>Footprint</td><td>导航占据与安全余量</td><td>过门失败或擦墙</td></tr></tbody></table></div>
+      <details class="self-check"><summary>停一下：为什么“截图里机器人绕过了墙”不能作为碰撞正常的证据？</summary><p>截图只证明画面里它没穿模；真正的碰撞要由物理引擎的接触查询或 rollout 证明。视觉网格与碰撞体可以分离，所以必须独立检查 collision。</p></details>
+      <p class="source-note">依据：14plan Day 6 第 1 阶段环境审计表；Isaac Sim 官方文档中 rigid body / collision 的职责划分。</p>
+    </section>
+
+    <section id="physics-params" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>03</span> 同样的推力，不同的结果</div>
+      <h2>质量、摩擦和步长，<br class="desktop-break">决定“推了以后怎么动”。</h2>
+      <p>同样 20 N 的推力，推 5 kg 和推 40 kg 的门，响应完全不同；地面摩擦大时，净加速度还会被抵消一部分。控制频率又决定每个周期里速度改变多少。</p>
+      <div class="demo" id="day6-physics">
+        <div class="demo-head"><span class="demo-title">简化刚体推力模型</span><span class="demo-tag">一维教学近似</span></div>
+        <div class="control-grid">
+          <label class="control"><span>推力 F（N）<output id="d6-force-out">20</output></span><input id="d6-force" type="range" min="0" max="80" step="1" value="20"></label>
+          <label class="control"><span>质量 m（kg）<output id="d6-mass-out">10</output></span><input id="d6-mass" type="range" min="1" max="40" step="1" value="10"></label>
+          <label class="control"><span>摩擦系数 μ<output id="d6-mu-out">0.40</output></span><input id="d6-mu" type="range" min="0" max="10" step="1" value="4"></label>
+          <label class="control"><span>控制频率（Hz）<output id="d6-hz-out">50</output></span><input id="d6-hz" type="range" min="10" max="100" step="5" value="50"></label>
+        </div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>净加速度</span><strong id="d6-acc">0.00 m/s²</strong></div>
+          <div class="kpi-block"><span>每周期速度增量</span><strong id="d6-dv">0.000 m/s</strong></div>
+          <div class="kpi-block"><span>能否推动</span><strong id="d6-move">能</strong></div>
+        </div>
+        <div class="formula" role="math">F<sub>net</sub> = F − μ m g　　　a = F<sub>net</sub> / m　　　Δv ≈ a / f<sub>ctrl</sub></div>
+        <p class="demo-note">取 g = 9.81 m/s²。这是教学近似，不含 PhysX 的接触求解、静摩擦与多点接触。它的目的不是预测真实响应，而是让你指出“摩擦、质量、步长里缺了哪个”。</p>
+      </div>
+      <div class="explain-grid three"><div><h3>质量缺失</h3><p>物体会被“轻轻一碰就飞”，或推不动，动作幅度失真。</p></div><div><h3>摩擦缺失</h3><p>物体永远滑动，无法表现“推不动”和“抓稳”。</p></div><div><h3>步长不当</h3><p>接触穿透、抖动或能量异常，训练不稳定。</p></div></div>
+      <details class="self-check"><summary>停一下：为什么“同一个策略在仿真里很快、实机上很慢”可能与时间步有关？</summary><p>策略输出的是每步动作；若仿真步长与控制频率不匹配，单位时间内的有效动作次数不同，表现为速度、响应和稳定性差异。必须显式记录物理步长、控制频率与动作保持策略。</p></details>
+      <p class="source-note">依据：14plan Day 6 第 2–3 阶段“质量、摩擦、时间步”要求；Isaac Sim 物理对象属性说明。</p>
+    </section>
+
+    <section id="articulation" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>04</span> 门会转，不等于能被推</div>
+      <h2>门有动画，<br class="desktop-break">为什么推它没反应？</h2>
+      <p>UE 里的开门动画是一段<strong>播放时间轴</strong>；物理仿真需要的是一个<strong>铰链关节（hinge joint / revolute）</strong>：有转轴、有限位、有驱动或阻尼。只有关节存在，机器人施加的力矩才能让门真的转起来。</p>
+      <div class="demo" id="day6-articulation">
+        <div class="demo-head"><span class="demo-title">铰链门的力矩响应</span><span class="demo-tag">单自由度教学模型</span></div>
+        <div class="control-grid">
+          <label class="control"><span>施加力矩 τ（N·m）<output id="d6-torque-out">10</output></span><input id="d6-torque" type="range" min="0" max="40" step="1" value="10"></label>
+          <label class="control"><span>转动惯量 I（kg·m²）<output id="d6-inertia-out">8</output></span><input id="d6-inertia" type="range" min="1" max="30" step="1" value="8"></label>
+          <label class="control"><span>物理铰链</span><select id="d6-joint"><option value="yes">存在（revolute）</option><option value="no">只有动画 / 静态网格</option></select></label>
+          <label class="control"><span>限位（度）<output id="d6-limit-out">90</output></span><input id="d6-limit" type="range" min="0" max="120" step="5" value="90"></label>
+        </div>
+        <div class="canvas-box"><canvas id="d6-door-canvas"></canvas></div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>角加速度 α</span><strong id="d6-alpha">1.25 rad/s²</strong></div>
+          <div class="kpi-block"><span>推门结果</span><strong id="d6-door-result">门会转</strong></div>
+        </div>
+        <p class="demo-note">α = τ / I。没有关节时，力矩无处作用，门“完全不动”；这正是“有动画却没有物理铰链”的典型症状。</p>
+      </div>
+      <div class="table-wrap"><table><caption>门要成为可交互对象，至少要有</caption><thead><tr><th>字段</th><th>含义</th><th>缺失症状</th></tr></thead><tbody><tr><td>joint type</td><td>revolute / prismatic</td><td>门不动或乱动</td></tr><tr><td>axis</td><td>转轴方向</td><td>门朝错误方向开</td></tr><tr><td>limit</td><td>开合范围</td><td>门能转 360° 或穿墙</td></tr><tr><td>drive / damping</td><td>驱动与阻尼</td><td>门自己乱甩或推不动</td></tr></tbody></table></div>
+      <details class="self-check"><summary>停一下：怎样独立验证“门真的有铰链”，而不是只看它会不会转？</summary><p>查询该对象的 joint 类型、轴、限位与驱动参数；再施加已知力矩做一次小规模 rollout，检查角度响应是否符合 τ/I 的量级。只看动画播放会误判。</p></details>
+      <p class="source-note">依据：14plan Day 6 反例 2“门有动画却没有物理铰链”；Isaac Sim articulation / joint drive 文档。</p>
+    </section>
+
+    <section id="observation" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>05</span> 策略能看到的，才是观测</div>
+      <h2>Observation 是合同，<br class="desktop-break">不是世界真值。</h2>
+      <p>策略只能读取<strong>观测合同里声明的字段</strong>。如果直接给它 `door_locked` 这种现实中无法测量的真值，它在仿真里会“异常聪明”，但这属于<strong>特权观测</strong>，换到实机就不成立。</p>
+      <div class="demo" id="day6-observation">
+        <div class="demo-head"><span class="demo-title">传感器观测 vs 特权真值</span><span class="demo-tag">公平性检查</span></div>
+        <div class="control-grid">
+          <label class="control"><span>真实距离（m）<output id="d6-true-out">2.00</output></span><input id="d6-true" type="range" min="50" max="500" step="10" value="200"></label>
+          <label class="control"><span>传感噪声 σ（m）<output id="d6-noise-out">0.05</output></span><input id="d6-noise" type="range" min="0" max="30" step="1" value="5"></label>
+          <label class="control"><span>额外给策略 `door_locked` 真值</span><select id="d6-priv"><option value="no">不给（公平）</option><option value="yes">给（特权）</option></select></label>
+        </div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>策略读到的距离</span><strong id="d6-obs-range">2.00 ± 0.05 m</strong></div>
+          <div class="kpi-block"><span>观测公平性</span><strong id="d6-fair">公平</strong></div>
+        </div>
+        <p class="demo-note">现实传感里，距离来自测距/深度/视觉估计；门是否上锁通常只能通过“尝试推门 + 力矩反馈”间接判断。直接把真值塞进观测，会系统性高估策略能力。</p>
+      </div>
+      <div class="explain-grid"><div><h3>可观测（observable）</h3><p>传感器能测、带时间戳、带噪声模型。例如 RGB-D、关节编码器、IMU、力矩。</p></div><div><h3>特权信息（privileged）</h3><p>仿真器知道、现实测不到。例如物体真实位姿、门的锁状态、接触点真值。</p></div></div>
+      <details class="self-check"><summary>停一下：训练时用了特权信息，评测时该怎么办？</summary><p>要么在评测时也提供同等信息（通常不可能），要么明确把它当作“教师信号/辅助任务”，并单独评估不含特权信息的部署版本。不能把含特权的成功率当成实机能力。</p></details>
+      <p class="source-note">依据：14plan Day 6 反例 3“策略读取 door_locked 真值”；Isaac Lab observation manager 概念。</p>
+    </section>
+
+    <section id="time-sync" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>06</span> 物理、传感、控制各有自己的钟</div>
+      <h2>三个频率不对齐，<br class="desktop-break">观测就会错位。</h2>
+      <p>物理引擎可能以 120 Hz 步进，相机 30 Hz，控制 50 Hz。策略拿到的是“某一时刻的观测”，发出的动作要被“保持”到下一个控制周期。时间戳与采样策略必须写清楚。</p>
+      <div class="demo" id="day6-time">
+        <div class="demo-head"><span class="demo-title">频率换算</span><span class="demo-tag">离散时间近似</span></div>
+        <div class="control-grid">
+          <label class="control"><span>物理频率（Hz）<output id="d6-phz-out">120</output></span><input id="d6-phz" type="range" min="60" max="480" step="20" value="120"></label>
+          <label class="control"><span>相机频率（Hz）<output id="d6-chz-out">30</output></span><input id="d6-chz" type="range" min="5" max="60" step="1" value="30"></label>
+          <label class="control"><span>控制频率（Hz）<output id="d6-ctrlhz-out">50</output></span><input id="d6-ctrlhz" type="range" min="10" max="100" step="5" value="50"></label>
+        </div>
+        <div class="canvas-box"><canvas id="d6-time-canvas"></canvas></div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>每个控制周期的物理步数</span><strong id="d6-phys-per-ctrl">2.40</strong></div>
+          <div class="kpi-block"><span>两帧相机之间的物理步数</span><strong id="d6-phys-per-cam">4.00</strong></div>
+          <div class="kpi-block"><span>是否整除</span><strong id="d6-divisible">否</strong></div>
+        </div>
+        <p class="demo-note">不整除时，必须定义“最近一帧保持 / 插值 / 预测”中的哪一种，并记录时间戳。否则同一观测可能被不同动作重复消费，造成隐性延迟。</p>
+      </div>
+      <details class="self-check"><summary>停一下：为什么“观测延迟 100 ms”在慢速任务里可能没事，在快速接触里会致命？</summary><p>延迟让策略基于过去的状态决策。慢速任务状态变化小，影响有限；快速接触中 100 ms 内物体可能已经移动或碰撞结束，动作就会作用在错误状态上。</p></details>
+      <p class="source-note">依据：14plan Day 6 第 3 阶段“传感时钟”与时间戳要求。</p>
+    </section>
+
+    <section id="action" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>07</span> 动作要有单位、频率和边界</div>
+      <h2>Action 不是“一个数”，<br class="desktop-break">而是一份接口合同。</h2>
+      <p>同一个数字 0.3，可能是 0.3 m/s 的底盘速度、0.3 rad 的关节目标，或 0.3 m 的末端位移。写不清类型、单位、频率和限幅，策略输出就无法被执行器正确消费。</p>
+      <div class="demo" id="day6-action">
+        <div class="demo-head"><span class="demo-title">动作类型与消费者</span><span class="demo-tag">接口合同</span></div>
+        <div class="control-grid">
+          <label class="control"><span>动作类型</span><select id="d6-action-mode"><option value="vel">底盘速度</option><option value="joint">关节位置</option><option value="ee">末端位姿</option><option value="grip">夹爪开合</option></select></label>
+          <label class="control"><span>动作值<output id="d6-action-out">0.30</output></span><input id="d6-action-val" type="range" min="-100" max="100" step="5" value="30"></label>
+        </div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>单位</span><strong id="d6-action-unit">m/s</strong></div>
+          <div class="kpi-block"><span>消费者</span><strong id="d6-action-consumer">底盘控制器</strong></div>
+          <div class="kpi-block"><span>执行前检查</span><strong id="d6-action-check">限幅 + 碰撞</strong></div>
+        </div>
+        <p id="d6-action-explain" class="demo-note"></p>
+      </div>
+      <div class="table-wrap"><table><caption>每种动作都要回答四个问题</caption><thead><tr><th>问题</th><th>例子</th></tr></thead><tbody><tr><td>输出什么</td><td>速度 / 位置 / 位姿 / 开合</td></tr><tr><td>单位是什么</td><td>m/s、rad、m、无量纲</td></tr><tr><td>频率多少</td><td>10 / 50 / 200 Hz</td></tr><tr><td>谁执行、如何限幅</td><td>底盘控制器、关节控制器、IK</td></tr></tbody></table></div>
+      <details class="self-check"><summary>停一下：为什么“关节位置动作”不能直接当成“观测到的关节角”？</summary><p>动作是目标，观测是当前状态；控制器会把目标逐步逼近，存在延迟、限幅和误差。把目标当状态会让策略误以为动作立刻生效。</p></details>
+      <p class="source-note">依据：14plan Day 6 第 4 阶段 action 字段要求。</p>
+    </section>
+
+    <section id="reward" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>08</span> 训练信号 ≠ 任务判据</div>
+      <h2>奖励很高，<br class="desktop-break">任务可能根本没完成。</h2>
+      <p>奖励是<strong>训练信号</strong>，成功是<strong>评测谓词</strong>。如果只优化“接近终点”的进度奖励，智能体可能空车冲到终点拿高分，却没把杯子带回来。</p>
+      <div class="demo" id="day6-reward">
+        <div class="demo-head"><span class="demo-title">两种行为的奖励与成功</span><span class="demo-tag">对比</span></div>
+        <div class="tabs" role="group" aria-label="选择行为"><button type="button" id="d6-reward-a" aria-pressed="true">真正送达杯子</button><button type="button" id="d6-reward-b" aria-pressed="false">空车冲终点</button></div>
+        <table class="audit"><thead><tr><th>奖励项</th><th>权重</th><th>本行为得分</th></tr></thead><tbody id="d6-reward-rows"></tbody></table>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>总奖励</span><strong id="d6-total-reward">13</strong></div>
+          <div class="kpi-block"><span>Success 谓词</span><strong id="d6-success">真</strong></div>
+        </div>
+        <p id="d6-reward-note" class="demo-note"></p>
+      </div>
+      <details class="self-check"><summary>停一下：如果奖励设计得再好，为什么仍然需要单独的 success 检查？</summary><p>奖励是标量近似，可能被“刷分”行为利用；success 是对任务目标的明确判定，通常在 episode 结束时独立计算。二者应相关，但不能互相替代。</p></details>
+      <p class="source-note">依据：14plan Day 6 第 3 阶段“奖励与成功谓词为何不同”。</p>
+    </section>
+
+    <section id="reset" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>09</span> 把机器人拖回起点还不够</div>
+      <h2>Reset 要恢复的，<br class="desktop-break">是所有动态状态。</h2>
+      <p>如果只恢复位置，速度、关节角、门的开合、杯子的状态、随机种子都可能从上一个 episode 残留。训练会在“隐形的上一局”上继续，评测结果不可复现。</p>
+      <div class="demo" id="day6-reset">
+        <div class="demo-head"><span class="demo-title">Reset 合同自检</span><span class="demo-tag">勾选完整项</span></div>
+        <div class="gate">
+          <label><input type="checkbox" id="d6-rs-robot" checked> 机器人位置与朝向</label>
+          <label><input type="checkbox" id="d6-rs-vel"> 机器人线速度 / 角速度清零</label>
+          <label><input type="checkbox" id="d6-rs-joint"> 关节角与关节速度</label>
+          <label><input type="checkbox" id="d6-rs-door"> 门的开合与锁状态</label>
+          <label><input type="checkbox" id="d6-rs-cup"> 可移动物体（杯子）状态</label>
+          <label><input type="checkbox" id="d6-rs-rand"> 随机化参数与 seed 记录</label>
+        </div>
+        <div class="kpi-row"><div class="kpi-block"><span>Reset 完整性</span><strong id="d6-reset-status">1 / 6</strong></div></div>
+        <p id="d6-reset-note" class="demo-note"></p>
+      </div>
+      <details class="self-check"><summary>停一下：为什么“速度没清零”会导致训练不稳定？</summary><p>下一个 episode 一开始机器人就带着上一局的速度，初始状态分布被污染；策略学到的是混合了历史动量的状态，评测也无法复现。</p></details>
+      <p class="source-note">依据：14plan Day 6 第 3 阶段 reset 字段要求。</p>
+    </section>
+
+    <section id="seed" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>10</span> 别把“背题”当成泛化</div>
+      <h2>训练和测试用了<br class="desktop-break">同一个 seed 吗？</h2>
+      <p>场景随机化（家具位置、纹理、光照）由 seed 控制。如果测试集 seed 与训练集重叠，模型可能只是记住了场景，而不是学会了任务。</p>
+      <div class="demo" id="day6-seed">
+        <div class="demo-head"><span class="demo-title">Seed 划分检查</span><span class="demo-tag">数据卫生</span></div>
+        <div class="control-grid">
+          <label class="control"><span>训练 seed 数量<output id="d6-trainN-out">20</output></span><input id="d6-trainN" type="range" min="1" max="100" step="1" value="20"></label>
+          <label class="control"><span>测试 seed 是否与训练重叠</span><select id="d6-leak"><option value="no">不重叠（独立）</option><option value="yes">重叠（泄漏）</option></select></label>
+        </div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>有效训练场景</span><strong id="d6-train-eff">20</strong></div>
+          <div class="kpi-block"><span>泛化证据</span><strong id="d6-gen">可信</strong></div>
+        </div>
+        <p id="d6-seed-note" class="demo-note"></p>
+      </div>
+      <details class="self-check"><summary>停一下：为什么“在 20 个场景上都 100% 成功”仍可能没有泛化？</summary><p>如果测试用的就是这 20 个场景，成功只说明记忆/拟合；泛化要在未参与训练的 seed 上测，并报告场景分布。</p></details>
+      <p class="source-note">依据：14plan Day 6 第 5 阶段“两个 scene seed 与规则 checker 的差距”。</p>
+    </section>
+
+    <section id="migration" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>11</span> 从 UE 资产到可训练任务</div>
+      <h2>导入成功，<br class="desktop-break">只是第一步。</h2>
+      <p>把 UE 场景转成 USD / 物理场景后，要逐项审计。下表是 14plan Day 6 要求的迁移清单（这里展开成 <strong>19 项</strong>），每一项都标注<strong>谁生产、什么单位 / 坐标、谁消费、缺失会怎样</strong>。勾选你已核对的项，进度会保存在本机。</p>
+      <div class="demo" id="day6-audit">
+        <div class="demo-head"><span class="demo-title">UE → 物理仿真迁移审计表（19 项）</span><span class="demo-tag">逐项勾选</span></div>
+        <div class="table-scroll">
+          <table class="audit audit--wide">
+            <caption>单位统一为米 / 秒 / 弧度；未实测的项不要勾</caption>
+            <thead><tr><th>✓</th><th>核对项</th><th>谁生产</th><th>单位 / 坐标</th><th>谁消费</th><th>缺失后果</th></tr></thead>
+            <tbody id="d6-audit-rows"></tbody>
+          </table>
+        </div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>已核对</span><strong id="d6-audit-count">0 / 19</strong></div>
+          <div class="kpi-block"><span>未核对</span><strong id="d6-audit-left">19</strong></div>
+        </div>
+        <div class="note-actions"><button type="button" class="btn" id="d6-audit-reset">清空勾选</button><span id="d6-audit-note" class="demo-note">勾选只代表“我核对过”，不代表“已经跑通仿真”。</span></div>
+      </div>
+      <details class="self-check"><summary>停一下：为什么“导入成功”不能推出“可以训练”？</summary><p>导入只验证格式与资源可读性；训练还要求物理参数正确、观测公平、动作可执行、reset 可复现、评测可比较。这些是内容与合同层面的正确性，不是格式层面的。</p></details>
+      <p class="source-note">依据：14plan Day 6 第 4 阶段“UE → 物理仿真迁移清单（≥15 项）”。</p>
+    </section>
+
+    <section id="counterexamples" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>12</span> 对应 14plan Day 6 · 三个反例</div>
+      <h2>三个“看起来能用”的反例，<br class="desktop-break">各自缺哪一个接口。</h2>
+      <p>14plan 要求对三个反例各写<strong>症状 → 缺哪个接口 → 如何独立验证</strong>。这三条覆盖了今天最重要的三类失败：几何、关节、观测公平性。</p>
+      <div class="demo" id="day6-counterexamples">
+        <div class="demo-head"><span class="demo-title">三个反例：症状 → 缺哪个接口 → 如何独立验证</span><span class="demo-tag">对照卡</span></div>
+        <div class="card-grid">
+        <div class="case-card">
+          <h4>反例 ① Mesh 没有碰撞</h4>
+          <dl>
+            <dt>症状</dt><dd>机器人径直穿过墙，截图里却毫无异常；导航规划出一条穿墙路径。</dd>
+            <dt>缺哪个接口</dt><dd>collision geometry（碰撞体），不是视觉 Mesh。</dd>
+            <dt>如何独立验证</dt><dd>做一次射线 / 接触查询，看是否命中；或让机器人朝墙走 1 m，检查位置是否被阻挡。</dd>
+          </dl>
+        </div>
+        <div class="case-card">
+          <h4>反例 ② 门只有贴图和动画</h4>
+          <dl>
+            <dt>症状</dt><dd>序列播放时门会开，但机器人推不动；一碰就穿过去。</dd>
+            <dt>缺哪个接口</dt><dd>articulation：joint 类型（revolute）、轴、限位、drive / 阻尼。</dd>
+            <dt>如何独立验证</dt><dd>读取该门在物理世界中的 joint 数量与类型；若为 0，动画只是播放，不是机构。</dd>
+          </dl>
+        </div>
+        <div class="case-card">
+          <h4>反例 ③ 策略读取 door_locked</h4>
+          <dl>
+            <dt>症状</dt><dd>仿真成功率极高；实机上线立刻失败，因为它“提前知道”门锁着。</dd>
+            <dt>缺哪个接口</dt><dd>observation 的公平性约束：真值不能进入观测。</dd>
+            <dt>如何独立验证</dt><dd>枚举 observation 的每个字段，逐一问“实机能否测到”；把真值替换成传感器可得的估计再测一次。</dd>
+          </dl>
+        </div>
+        </div>
+      </div>
+      <details class="self-check"><summary>停一下：为什么反例 ③ 比前两个更危险？</summary><p>前两个会当场暴露（穿墙、推不开），你能立刻发现并修；特权观测不会报错，它只会让指标变得很好看，直到上实机才崩。错误藏在“成功”里，最难查。</p></details>
+      <p class="source-note">依据：14plan Day 6 补强段“①视觉 Mesh 无碰撞会穿墙；②门贴图无铰链，无法推门；③策略读取 door_locked 真值形成不公平特权观测”。</p>
+    </section>
+
+    <section id="checker" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>13</span> 对应 14plan Day 6 · 第 5 阶段产物</div>
+      <h2>规则 checker 判“摆放合法”，<br class="desktop-break">判不了“能不能做成”。</h2>
+      <p>前面几天用的 minilab 规则校验只检查离散条件：物体是否在房间内、是否互不重叠、门是否在墙上。它能给出可复现的结论，但它<strong>没有实体、没有接触、没有传感噪声、也没有 rollout</strong>。所以“检查通过”离“任务可执行”还差四次跃迁。</p>
+      <div class="demo" id="day6-checker">
+        <div class="demo-head"><span class="demo-title">规则 checker 与物理 rollout 的差距</span><span class="demo-tag">能力对照</span></div>
+        <div class="control-grid">
+          <label class="control"><span>场景 seed</span><select id="d6-chk-seed"><option value="17">seed = 17</option><option value="42">seed = 42</option></select></label>
+          <label class="control"><span>检查器能力</span><select id="d6-chk-mode"><option value="rule">只有规则 checker</option><option value="rollout">规则 checker + 物理 rollout</option></select></label>
+        </div>
+        <div class="table-scroll">
+          <table class="audit audit--wide"><thead><tr><th>问题</th><th>规则 checker 能判断</th><th>物理 rollout 才暴露</th></tr></thead><tbody id="d6-chk-rows"></tbody></table>
+        </div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>可判定项</span><strong id="d6-chk-covered">3 / 6</strong></div>
+          <div class="kpi-block"><span>结论强度</span><strong id="d6-chk-level">布局合法</strong></div>
+        </div>
+        <p id="d6-chk-note" class="demo-note"></p>
+      </div>
+      <div class="reading-guide"><h2>没有 Isaac 也能交付的替代协议</h2><p>14plan 明确允许“不安装 Isaac 也可交付任务合同”。可运行的替代实验协议长这样：</p>
+        <ol class="practice-list">
+          <li><h3>① 冻结场景与 seed</h3><p>记录资产版本、场景 seed、随机化范围，保证别人能重建同一初始状态。</p></li>
+          <li><h3>② 写状态表而不是跑仿真</h3><p>列出 reset 后每个动态对象的位置、速度、关节角，作为“初始状态断言”。</p></li>
+          <li><h3>③ 纸面 rollout</h3><p>按控制周期逐帧推演：观测 → 动作 → 预期状态变化，标出每一步依赖的物理假设。</p></li>
+          <li><h3>④ 标注未实测</h3><p>凡是没真跑过的，写“未实测 + 需要的验证方式”，不写“已验证”。</p></li>
+          <li><h3>⑤ 给出失败判据</h3><p>明确哪些现象一旦出现就说明合同有缺口（穿墙、推不动、观测超前、reset 残留）。</p></li>
+        </ol>
+      </div>
+      <details class="self-check"><summary>停一下：为什么“两个 seed 都通过 checker”不能说明方法稳定？</summary><p>checker 只覆盖离散约束，两个 seed 通过只说明这两次布局合法；稳定性要在多个 seed 上做 rollout，统计成功率与失败模式。样本量与判据都得一起报告。</p></details>
+      <p class="source-note">依据：14plan Day 6 第 5 阶段“minilab 缺失的实体运动、接触、感知噪声、重置逻辑；两个 scene seed；可运行的替代实验协议”。</p>
+    </section>
+
+    <section id="episode" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>14</span> 一次完整交互</div>
+      <h2>一个 Episode，<br class="desktop-break">到底发生了什么？</h2>
+      <p>把上面的字段串起来，就是一次闭环：reset → observation → policy → action → physics → reward / termination → next observation。点“推进一步”，看每一步的状态。</p>
+      <div class="demo" id="day6-episode">
+        <div class="demo-head"><span class="demo-title">Episode 时间线</span><span class="demo-tag">教学状态机</span></div>
+        <div class="step-chain" id="d6-chain">
+          <span class="node" data-step="0">Reset</span><span class="arrow">→</span>
+          <span class="node" data-step="1">Observation</span><span class="arrow">→</span>
+          <span class="node" data-step="2">Policy</span><span class="arrow">→</span>
+          <span class="node" data-step="3">Action</span><span class="arrow">→</span>
+          <span class="node" data-step="4">Physics</span><span class="arrow">→</span>
+          <span class="node" data-step="5">Reward / Termination</span>
+        </div>
+        <div class="canvas-box"><canvas id="d6-episode-canvas"></canvas></div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>Step</span><strong id="d6-step-no">0</strong></div>
+          <div class="kpi-block"><span>剩余距离</span><strong id="d6-dist">5.00 m</strong></div>
+          <div class="kpi-block"><span>是否持杯</span><strong id="d6-holding">否</strong></div>
+          <div class="kpi-block"><span>终止</span><strong id="d6-term">否</strong></div>
+        </div>
+        <div class="note-actions"><button type="button" class="btn" id="d6-step-btn">推进一步</button><button type="button" class="btn" id="d6-reset-btn">重置 episode</button></div>
+      </div>
+      <details class="self-check"><summary>停一下：为什么“仿真里成功率 90%”不能直接写成“实机成功率 90%”？</summary><p>仿真只覆盖了被建模的物理、传感与场景分布；实机还有未建模的摩擦、延迟、噪声、光照和硬件故障。两者之间需要 sim-to-real 证据，不能直接换算。</p></details>
+      <p class="source-note">依据：14plan Day 6 第 6–7 阶段“场景好看 ≠ 碰撞合法 ≠ 仿真可执行 ≠ 实机成功”。</p>
+    </section>
+
+    <section id="exam" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>15</span> 对应 14plan Day 6 · 综合考题与自评</div>
+      <h2>“这个场景能不能直接训练？”<br class="desktop-break">用六栏答卷回答。</h2>
+      <p>14plan 的今日综合考题是：一个 UE5 PCG 场景已经能播放、门也有动画，能不能直接说是 Isaac Lab 机器人训练环境？不要只答“不能”——要按下面六栏写出可检验的推理链。</p>
+      <div class="demo" id="day6-exam">
+        <div class="demo-head"><span class="demo-title">六栏答卷结构</span><span class="demo-tag">写进你的笔记</span></div>
+        <ol class="prompt-list">
+          <li><strong>输入 / 假设</strong><span>场景有哪些资产、单位是什么、门是动画还是机构、机器人模型从哪来。把“我不知道”也写进来。</span></li>
+          <li><strong>方法 / 接口</strong><span>缺哪些接口就能判定不成立：collision、articulation、observation、action、termination。点到具体字段。</span></li>
+          <li><strong>预测</strong><span>如果直接拿它训练，会发生什么？穿墙、推不开门、观测超前、指标虚高——写清可观察现象。</span></li>
+          <li><strong>实际证据或未实测</strong><span>哪一条你亲眼验证过（射线查询、joint 数量），哪一条只是推演。未实测必须写明。</span></li>
+          <li><strong>可能失败</strong><span>你的判断本身错在哪：也许门其实是 articulation，也许碰撞体存在但没导出。列出反证条件。</span></li>
+          <li><strong>下一步</strong><span>一次最小验证动作：读 joint 列表、做一次接触查询、跑一个 episode 并记录 seed 与终止原因。</span></li>
+        </ol>
+      </div>
+      <div class="demo" id="day6-score">
+        <div class="demo-head"><span class="demo-title">五维首次自评（0–4 分）</span><span class="demo-tag">记录首次分数</span></div>
+        <div class="score-grid">
+          <div class="score-row"><strong>概念</strong><input id="d6-sc-1" type="range" min="0" max="4" step="1" value="2" aria-label="概念得分"><output id="d6-sc-1-out">2</output></div>
+          <div class="score-row"><strong>因果</strong><input id="d6-sc-2" type="range" min="0" max="4" step="1" value="2" aria-label="因果得分"><output id="d6-sc-2-out">2</output></div>
+          <div class="score-row"><strong>工程接口</strong><input id="d6-sc-3" type="range" min="0" max="4" step="1" value="2" aria-label="工程接口得分"><output id="d6-sc-3-out">2</output></div>
+          <div class="score-row"><strong>验证</strong><input id="d6-sc-4" type="range" min="0" max="4" step="1" value="2" aria-label="验证得分"><output id="d6-sc-4-out">2</output></div>
+          <div class="score-row"><strong>经历真实性</strong><input id="d6-sc-5" type="range" min="0" max="4" step="1" value="2" aria-label="经历真实性得分"><output id="d6-sc-5-out">2</output></div>
+        </div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>总分</span><strong id="d6-sc-total">10 / 20</strong></div>
+          <div class="kpi-block"><span>证据等级</span><strong id="d6-sc-level">合同设计</strong></div>
+        </div>
+        <p id="d6-sc-note" class="demo-note"></p>
+      </div>
+      <div class="reading-guide"><h2>交给 Day 7 的字段</h2><p>Day 7 要训练策略，它需要的不只是“一个场景”，而是可复现的 episode 与示范数据。今天就可以先把字段列出来：</p>
+        <div class="chip-list"><span class="chip">episode_id</span><span class="chip">scene_id + 资产版本</span><span class="chip">seed</span><span class="chip">reset 后初始状态</span><span class="chip">observation 字段 + 频率 + 时间戳</span><span class="chip">action 类型 + 单位 + 频率</span><span class="chip">reward 分项</span><span class="chip">termination / success / timeout</span><span class="chip">策略版本</span><span class="chip">相机内参 / 外参</span><span class="chip">失败原因标签</span><span class="chip">是否人工示范</span></div>
+        <p>缺 <code>scene_id</code> 与 <code>seed</code>，数据无法复现；缺 <code>termination</code> 与 <code>success</code>，示范无法标注正负；缺 <code>action</code> 单位，策略输出无法执行。</p>
+      </div>
+      <details class="self-check"><summary>闭卷验收：1 分钟定义 + 3 分钟系统案例 + 两轮“为什么”</summary><p><strong>1 分钟</strong>：说清“仿真成功 ≠ 实机成功”，并给出一个未建模因素。<strong>3 分钟</strong>：从 UE 资产讲到任务接口，逐层说明各自的输入输出。<strong>两轮为什么</strong>：为什么需要 reset？为什么需要独立 success 谓词？为什么 seed 泄漏会造成假象？答不上来就回到对应小节重看。</p></details>
+    </section>
+
+    <section id="practice" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>16</span> 把观察变成可交接的合同</div>
+      <h2>先写下你的任务合同，<br class="desktop-break">再回头补字段。</h2>
+      <p>拿你自己熟悉的 UE / PCG 场景，按下面的字段写一份<strong>任务合同</strong>。不用跑 Isaac，先把“谁生产、单位、谁消费、缺失后果”写清楚，就已经是在做真实的具身工程。</p>
+      <ol class="practice-list">
+        <li><h3>写 scene 与 robot</h3><p>单位、原点、碰撞、footprint、joint limits、质量与摩擦。</p></li>
+        <li><h3>写 observation 与 action</h3><p>每个字段的可观测来源、时间戳、单位、频率、限幅。</p></li>
+        <li><h3>写 task 与复现</h3><p>reward、success、termination、timeout、reset、seed、场景版本。</p></li>
+      </ol>
+      <div class="personal-note"><div class="note-heading"><div><span class="eyebrow">我的理解</span><h3>我的 Day 6 任务合同</h3></div><span id="note-status" class="note-status" aria-live="polite">记录保存在此浏览器</span></div><label class="form-label" for="learning-note">scene / robot / observation / action / reward / success / termination / reset / seed / version / 证据边界</label><textarea class="form-control" id="learning-note" rows="9" placeholder="例如：&#10;scene: units=m, origin=..., collision=[...]&#10;robot: footprint=0.55m, joint_limits=...&#10;observation: rgbd(30Hz, ts), joint_state(50Hz)&#10;action: base_velocity(m/s, 10Hz)&#10;..."></textarea><div class="note-actions"><button type="button" class="btn" id="export-note">导出我的笔记 .md</button><span>浏览器自动保存；导出后可自行放入仓库，不会自动上传。</span></div></div>
+    </section>
+
+    <section id="sources" class="lesson-section sources-section" data-nav>
+      <div class="section-kicker"><span>↗</span> 来源与真实性边界</div>
+      <h2>哪些是文档，哪些是本页的模型</h2>
+      <p>本页依据 14plan 的 <a href="https://github.com/venividici/14plan/blob/main/TASK_GUIDES/day-06.md" target="_blank" rel="noopener noreferrer">Day 6 任务手册</a>、R06（Isaac Sim）与 R19（Isaac Lab）的阅读范围整理，并参考 Isaac Sim / Isaac Lab 官方文档中 rigid body、articulation、observation、action、reward、reset 的职责划分。</p>
+      <div class="source-method"><h3>真实性边界</h3><p>本页<strong>没有</strong>运行 Isaac Sim、Isaac Lab、ROS 或实体机器人。所有滑条与画布都是教学模型，用于解释字段与失败模式，不构成仿真成功率或实机成功率证据。</p><p>把本页的练习写成“合同设计”，而不是“已运行实验”。真实证据需要一次可复现的 rollout，并记录场景版本、seed、观测、动作与终止条件。</p><p><a href="notes/day-06-tutorial.md">Day 6 文字版笔记</a> · <a href="notes/day-06-validation.md">验证说明</a></p></div>
+    </section>
+    <div class="next-lesson"><span class="small-label">继续：从环境到策略</span><a href="https://github.com/venividici/14plan/blob/main/TASK_GUIDES/day-07.md" target="_blank" rel="noopener noreferrer">Day 07 · 模仿学习、RL 与 VLA（原始任务手册 ↗）</a></div>
+    <footer class="site-footer"><div><strong>Modern Robotics 学习手记</strong><p>先看见变化，再说清原因。</p></div><a href="#start">回到顶部 ↑</a></footer>
+  </main>
 </div>
-<div class="grid">
-<div class="card"><b>转换到仿真单位</b><p><strong class="kpi" id="meters">1.00 m</strong></p><div class="bar"><i id="sizebar" style="width:33%"></i></div></div>
-<div class="card"><b>机器人看到的墙</b><p id="wallstatus" class="status">可碰撞</p><p class="note">无碰撞 Mesh 可以“看起来是墙”，却让机器人直接穿过去。</p></div>
-</div></section>
-
-<section id="s2"><h2>02 · 质量、摩擦和时间步决定“推了以后怎样动”</h2>
-<div class="card controls">
-<label>推力 N<input id="force" type="range" min="0" max="80" value="20"><output id="forcev">20</output></label>
-<label>质量 kg<input id="mass" type="range" min="1" max="40" value="10"><output id="massv">10</output></label>
-<label>摩擦系数<input id="mu" type="range" min="0" max="10" value="4"><output id="muv">0.4</output></label>
-<label>控制周期 Hz<input id="hz" type="range" min="10" max="100" value="50"><output id="hzv">50</output></label>
-</div>
-<div class="card"><p>简化模型下净加速度：<strong id="acc">0</strong> m/s²；单控制周期速度变化约 <strong id="dv">0</strong> m/s。</p><p class="note">这是教学模型，不等同 PhysX 完整接触求解；重点是学会指出哪些物理参数缺失。</p></div>
-</section>
-
-<section id="s3"><h2>03 · 门有动画，不等于门有 Articulation</h2>
-<div class="two">
-<div class="diagram"><div class="chain"><span class="node">墙</span><span class="arrow">—</span><span class="node">铰链 Joint</span><span class="arrow">—</span><span class="node">门 Rigid Body</span></div></div>
-<div class="card controls">
-<label>力矩 N·m<input id="torque" type="range" min="0" max="40" value="10"><output id="torquev">10</output></label>
-<label>转动惯量 kg·m²<input id="inertia" type="range" min="1" max="30" value="8"><output id="inertiav">8</output></label>
-<label>存在物理铰链<input id="joint" type="checkbox" checked></label>
-</div></div>
-<div class="card"><p id="doorstatus" class="status"></p></div>
-</section>
-
-<section id="s4"><h2>04 · Observation 是“策略能看到什么”，不是“世界真值有什么”</h2>
-<div class="card controls">
-<label>传感噪声 σ<input id="noise" type="range" min="0" max="30" value="5"><output id="noisev">0.05</output></label>
-<label>真实距离 m<input id="trueD" type="range" min="50" max="500" value="200"><output id="trueDv">2.00</output></label>
-<label>是否偷偷给策略 door_locked 真值<input id="priv" type="checkbox"></label>
-</div>
-<div class="grid"><div class="card"><b>策略观测</b><p id="obs"></p></div><div class="card"><b>公平性检查</b><p id="privstatus" class="status"></p></div></div>
-</section>
-
-<section id="s5"><h2>05 · 传感器、物理和控制必须对齐时间</h2>
-<div class="card controls">
-<label>物理频率 Hz<input id="phz" type="range" min="60" max="480" value="120"><output id="phzv">120</output></label>
-<label>相机频率 Hz<input id="chz" type="range" min="5" max="60" value="30"><output id="chzv">30</output></label>
-<label>控制频率 Hz<input id="ctrlhz" type="range" min="10" max="100" value="50"><output id="ctrlhzv">50</output></label>
-</div>
-<div class="card"><p id="timing"></p></div>
-</section>
-
-<section id="s6"><h2>06 · Action 要写清“输出什么、单位是什么、谁执行”</h2>
-<div class="card controls">
-<label>动作模式<select id="actionMode"><option value="vel">底盘速度</option><option value="joint">关节位置</option><option value="ee">末端目标</option></select></label>
-<label>动作值<input id="actionValue" type="number" value="0.3" step="0.1"></label>
-</div>
-<div class="card"><p id="actionExplain"></p></div>
-</section>
-
-<section id="s7"><h2>07 · Reward 高，不代表任务成功</h2>
-<p>比较正常完成与“空车冲终点刷进度”的奖励。终局 success 必须单独定义。</p>
-<div class="card">
-<table><thead><tr><th>案例</th><th>进度奖励</th><th>持物奖励</th><th>总奖励</th><th>Success</th></tr></thead>
-<tbody><tr><td>真正送达杯子</td><td>8</td><td>5</td><td>13</td><td>✅</td></tr><tr><td>空车到终点</td><td>12</td><td>0</td><td>12</td><td>❌</td></tr></tbody></table>
-<p class="qa"><b>结论：</b>奖励是训练信号，success 是评测谓词；二者应相关，但不能互相替代。</p>
-</div></section>
-
-<section id="s8"><h2>08 · Reset 不是“把机器人拖回起点”</h2>
-<div class="card controls">
-<label>机器人位置已重置<input id="resetRobot" type="checkbox" checked></label>
-<label>速度已清零<input id="resetVel" type="checkbox"></label>
-<label>门角度已恢复<input id="resetDoor" type="checkbox"></label>
-<label>杯子状态已恢复<input id="resetCup" type="checkbox"></label>
-<label>随机种子已记录<input id="resetSeed" type="checkbox"></label>
-</div>
-<div class="card"><p id="resetStatus" class="status"></p></div>
-</section>
-
-<section id="s9"><h2>09 · Scene seed 和 train/test split 决定你有没有“背题”</h2>
-<div class="card controls">
-<label>训练 seed 数<input id="trainN" type="range" min="1" max="100" value="20"><output id="trainNv">20</output></label>
-<label>测试 seed 与训练重复<input id="leak" type="checkbox"></label>
-</div>
-<div class="card"><p id="leakStatus" class="status"></p></div>
-</section>
-
-<section id="s10"><h2>10 · UE → USD / Isaac Sim → Isaac Lab：20 项迁移审计</h2>
-<div class="card"><table><thead><tr><th>层</th><th>必须核对</th><th>失败后果</th></tr></thead><tbody>
-<tr><td>坐标</td><td>单位、原点、轴方向、姿态</td><td>尺度或位置错误</td></tr>
-<tr><td>几何</td><td>collision、footprint、净空</td><td>穿墙/误判可达</td></tr>
-<tr><td>物理</td><td>质量、惯量、摩擦、重力</td><td>动作响应失真</td></tr>
-<tr><td>关节</td><td>类型、轴、限位、驱动</td><td>门/机构不能交互</td></tr>
-<tr><td>传感</td><td>外参、频率、时间戳、噪声</td><td>观测错位</td></tr>
-<tr><td>动作</td><td>类型、单位、频率、控制器</td><td>策略输出无法执行</td></tr>
-<tr><td>任务</td><td>reward、success、termination</td><td>刷分或错误验收</td></tr>
-<tr><td>复现</td><td>reset、seed、版本、失败日志</td><td>实验不可比较</td></tr>
-</tbody></table></div>
-</section>
-
-<section id="s11"><h2>11 · 一次完整 Episode 到底发生什么？</h2>
-<div class="diagram"><div class="chain"><span class="node">Reset</span><span class="arrow">→</span><span class="node">Observation</span><span class="arrow">→</span><span class="node">Policy</span><span class="arrow">→</span><span class="node">Action</span><span class="arrow">→</span><span class="node">Physics</span><span class="arrow">→</span><span class="node">Reward / Termination</span><span class="arrow">↺</span></div></div>
-<div class="card"><button id="stepBtn">推进一步</button> <button id="resetBtn">重置 episode</button>
-<p>Step: <strong id="stepNo">0</strong> · 距离: <strong id="dist">5.00</strong> m · 持杯: <strong id="holding">否</strong> · 终止: <strong id="term">否</strong></p></div>
-</section>
-
-<section id="practice"><h2>练习 · 把你的 SceneWeaver 场景写成任务合同</h2>
-<p>先自己填，再对照上面的 20 项审计。这里的答案只保存在当前浏览器。</p>
-<textarea id="notes" placeholder="scene / robot / observation / action / reward / success / termination / reset / seed / version / evidence ..."></textarea>
-<p><button id="saveNote">保存到浏览器</button> <button id="copyNote">复制 Markdown</button></p>
-<p id="noteStatus" class="note"></p><pre id="mdPreview"></pre>
-</section>
-
-<section><h2>来源与真实性边界</h2>
-<p>学习范围来自 14plan 的 Day 06、R06（Isaac Sim）和 R19（Isaac Lab）任务设计。Isaac Lab 的 manager-based RL 环境把 action、physics stepping、termination、reward、reset 和 observation 组织成明确的 step 流程；本网页用简化数学模型帮助理解这些接口。</p>
-<p class="note">本页没有运行 Isaac Sim、Isaac Lab、ROS 或实体机器人。网页交互是教学计算，不应写成实机/仿真成功证据。</p>
-</section>
-</main>
-<script>
-const $=id=>document.getElementById(id);
-function bindRange(id,out,fn){const el=$(id),o=$(out);const u=()=>{o.textContent=fn?fn(+el.value):el.value;calc()};el.addEventListener('input',u);u()}
-function calc(){
-  const cm=+$('cm').value;
-  $('meters').textContent=(cm/100).toFixed(2)+' m';
-  $('sizebar').style.width=Math.min(100,cm/3)+'%';
-  $('wallstatus').textContent=$('collision').checked?'可碰撞：几何可用于接触检查':'仅视觉：机器人可能直接穿墙';
-  $('wallstatus').className=$('collision').checked?'status':'status bad';
-  const F=+$('force').value,m=+$('mass').value,mu=+$('mu').value/10,hz=+$('hz').value;
-  const net=Math.max(0,F-mu*m*9.81),a=net/m;
-  $('acc').textContent=a.toFixed(3);$('dv').textContent=(a/hz).toFixed(4);
-  const alpha=+$('torque').value/+$('inertia').value;
-  $('doorstatus').textContent=$('joint').checked?('物理铰链存在：角加速度约 '+alpha.toFixed(2)+' rad/s²'):'只有动画/静态网格：推门动作没有可求解的关节自由度';
-  $('doorstatus').className=$('joint').checked?'status':'status bad';
-  const td=+$('trueD').value/100,n=+$('noise').value/100;
-  $('obs').textContent='range ≈ '+td.toFixed(2)+' m，噪声尺度 σ='+n.toFixed(2)+' m';
-  $('privstatus').textContent=$('priv').checked?'不公平：策略读取了现实中未定义的特权真值':'公平性较好：策略只读取已声明的可观测量';
-  $('privstatus').className=$('priv').checked?'status bad':'status';
-  const ph=+$('phz').value,ch=+$('chz').value,ct=+$('ctrlhz').value;
-  $('timing').textContent='每个控制周期约 '+(ph/ct).toFixed(2)+' 个物理步；每帧相机之间约 '+(ph/ch).toFixed(2)+' 个物理步。频率不整除时需要明确采样/保持策略。';
-  const mode=$('actionMode').value,v=+$('actionValue').value;
-  const map={
-    vel:'策略输出 '+v+' m/s 级的底盘速度目标，由底盘控制器消费；还要有速度限幅和安全检查。',
-    joint:'策略输出 '+v+' rad 的关节位置目标，由关节控制器消费；不能把目标角当成观测角。',
-    ee:'策略输出末端目标（示例量 '+v+'），还需要 IK/控制器把任务空间目标映射到关节命令。'
-  };
-  $('actionExplain').textContent=map[mode];
-  const ok=$('resetRobot').checked&&$('resetVel').checked&&$('resetDoor').checked&&$('resetCup').checked&&$('resetSeed').checked;
-  $('resetStatus').textContent=ok?'Reset 合同完整：关键动态状态与复现信息都被恢复/记录':'Reset 不完整：下一个 episode 会继承上一个 episode 的隐藏状态';
-  $('resetStatus').className=ok?'status':'status bad';
-  $('leakStatus').textContent=$('leak').checked?'测试 seed 泄漏：高成功率可能只是记住训练场景，不是泛化':'训练/测试 seed 独立：至少避免这一类直接泄漏';
-  $('leakStatus').className=$('leak').checked?'status bad':'status';
-}
-bindRange('cm','cmv');bindRange('force','forcev');bindRange('mass','massv');bindRange('mu','muv',v=>(v/10).toFixed(1));bindRange('hz','hzv');
-bindRange('torque','torquev');bindRange('inertia','inertiav');bindRange('noise','noisev',v=>(v/100).toFixed(2));bindRange('trueD','trueDv',v=>(v/100).toFixed(2));
-bindRange('phz','phzv');bindRange('chz','chzv');bindRange('ctrlhz','ctrlhzv');bindRange('trainN','trainNv');
-['collision','joint','priv','actionMode','actionValue','resetRobot','resetVel','resetDoor','resetCup','resetSeed','leak'].forEach(id=>$(id).addEventListener('change',calc));
-let step=0,dist=5,holding=false,term=false;
-$('stepBtn').onclick=()=>{if(term)return;step++;dist=Math.max(0,dist-.55);if(step>=5)holding=true;if(dist===0&&holding)term=true;$('stepNo').textContent=step;$('dist').textContent=dist.toFixed(2);$('holding').textContent=holding?'是':'否';$('term').textContent=term?'成功':'否'};
-$('resetBtn').onclick=()=>{step=0;dist=5;holding=false;term=false;$('stepNo').textContent='0';$('dist').textContent='5.00';$('holding').textContent='否';$('term').textContent='否'};
-const note=$('notes');note.value=localStorage.getItem('mr-day6-note')||'';
-function md(){return '# Day 06 · 我的任务合同\n\n'+note.value+'\n'}
-$('saveNote').onclick=()=>{localStorage.setItem('mr-day6-note',note.value);$('noteStatus').textContent='已保存在当前浏览器。'};
-$('copyNote').onclick=async()=>{const t=md();$('mdPreview').textContent=t;try{await navigator.clipboard.writeText(t);$('noteStatus').textContent='Markdown 已复制；若浏览器禁止剪贴板，可直接复制下方文本。'}catch(e){$('noteStatus').textContent='浏览器未授权剪贴板，请直接复制下方文本。'}};
-calc();
-</script>
+<noscript><div class="noscript-note">文字教程可以正常阅读。交互演示需要在浏览器中启用 JavaScript。</div></noscript>
 </body>
 </html>
