@@ -13,6 +13,8 @@ PAGES = {
     'day-04.html': 'day-04.template.html',
     'day-05.html': 'day-05.template.html',
     'day-06.html': 'day-06.template.html',
+    'day-07.html': 'day-07.template.html',
+    'day-08.html': 'day-08.template.html',
 }
 
 def render(template_name='index.template.html'):

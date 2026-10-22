@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f8f7">
+  <meta name="description" content="Day 7 具身学习：state 与 observation 的差别、MDP 五要素、BC / RL / Diffusion Policy / VLA 四方法对照、动作块与反馈控制的时间尺度、observation→action→rollout 数据合同与公平评测。">
+  <title>Day 07 · 环境生成完了，策略从哪来：BC / RL / Diffusion / VLA | Modern Robotics 学习手记</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/site.css">
+  <link rel="stylesheet" href="assets/lesson-kit.css">
+  <script src="assets/site.js" defer></script>
+  <script src="assets/lesson-kit.js" defer></script>
+  <script src="assets/day7.js" defer></script>
+</head>
+<body data-lesson-key="day-07" data-lesson-title="Day 07 · 我的具身学习笔记" data-lesson-topic="state / observation / action、MDP、BC / RL / Diffusion Policy / VLA、动作块与反馈控制、数据合同与公平评测">
+<a class="skip-link" href="#main">跳到教程正文</a>
+<header class="site-header">
+  <a class="brand" href="#start" aria-label="Modern Robotics 学习手记首页"><span class="brand-monogram">MR<span>.</span></span><span class="brand-name">Modern Robotics<small>可视化学习手记</small></span></a>
+  <div class="header-actions"><span class="edition">DAY 07 / 策略与数据</span><a href="https://github.com/lucinwen/Modern-Robotics" target="_blank" rel="noopener noreferrer">GitHub 仓库 <span aria-hidden="true">↗</span></a><button class="btn theme-toggle" id="theme-toggle" type="button" aria-label="切换明暗主题">切换主题</button></div>
+</header>
+<div class="page-shell">
+  <aside class="sidebar" aria-label="学习导航">
+    <details class="day-switcher">
+  <summary><span class="eyebrow">学习日导航 · 14 天路线</span><strong id="day-switcher-current">选择学习日</strong><span class="day-switcher__hint">展开全部 14 天 ▾</span></summary>
+  <nav class="course-switcher" aria-label="选择学习日">
+    <a href="index.html" data-day="01"><strong>DAY 01</strong><span>空间与运动</span></a>
+    <a href="day-02.html" data-day="02"><strong>DAY 02</strong><span>约束与求解</span></a>
+    <a href="day-03.html" data-day="03"><strong>DAY 03</strong><span>状态与计划</span></a>
+    <a href="day-04.html" data-day="04"><strong>DAY 04</strong><span>运动学 FK/IK</span></a>
+    <a href="day-05.html" data-day="05"><strong>DAY 05</strong><span>ROS2 与导航</span></a>
+    <a href="day-06.html" data-day="06"><strong>DAY 06</strong><span>训练环境</span></a>
+    <a href="day-07.html" data-day="07"><strong>DAY 07</strong><span>策略与数据</span></a>
+    <a href="day-08.html" data-day="08"><strong>DAY 08</strong><span>场景基线</span></a>
+    <a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-09.md" data-day="09" target="_blank" rel="noopener noreferrer"><strong>DAY 09</strong><span>语音会话 ↗</span></a>
+    <a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-10.md" data-day="10" target="_blank" rel="noopener noreferrer"><strong>DAY 10</strong><span>数字人 ↗</span></a>
+    <a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-11.md" data-day="11" target="_blank" rel="noopener noreferrer"><strong>DAY 11</strong><span>毫米波感知 ↗</span></a>
+    <a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-12.md" data-day="12" target="_blank" rel="noopener noreferrer"><strong>DAY 12</strong><span>多源融合 ↗</span></a>
+    <a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-13.md" data-day="13" target="_blank" rel="noopener noreferrer"><strong>DAY 13</strong><span>XR 与传输 ↗</span></a>
+    <a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-14.md" data-day="14" target="_blank" rel="noopener noreferrer"><strong>DAY 14</strong><span>模拟面试 ↗</span></a>
+  </nav>
+</details>
+    <div class="sidebar-intro"><span class="eyebrow">学习路线</span><strong>环境能生成，不等于策略会学会。</strong></div>
+    <nav class="lesson-nav" aria-label="本页目录">
+      <a href="#start" class="is-current" aria-current="location"><span>00</span> 今天要分清的两件事</a>
+      <a href="#state-action"><span>01</span> state / observation / action</a>
+      <a href="#mdp"><span>02</span> MDP 的五个要素</a>
+      <a href="#methods"><span>03</span> 四种方法各要什么</a>
+      <a href="#chunk"><span>04</span> 动作块 vs 反馈控制</a>
+      <a href="#pipeline"><span>05</span> 五环链路与接口</a>
+      <a href="#routes"><span>06</span> 同一任务的四条路线</a>
+      <a href="#contract"><span>07</span> 一份示范数据合同</a>
+      <a href="#counter"><span>08</span> 两个可证伪反例</a>
+      <a href="#exam"><span>09</span> 综合考题六栏答卷</a>
+      <a href="#score"><span>10</span> Checkpoint B 与自评</a>
+      <a href="#sources"><span>↗</span> 来源与边界</a>
+    </nav>
+    <div class="sidebar-note"><span class="small-label">这一页怎么用</span><p>先判断它缺什么，<br>再决定用哪种方法。<br>不要反过来。</p><a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-07.md" target="_blank" rel="noopener noreferrer">查看原 Day 7 任务手册 ↗</a></div>
+  </aside>
+  <main id="main">
+    <section id="start" class="hero lesson-section" data-nav>
+      <div class="eyebrow">MODERN ROBOTICS / 第七天</div>
+      <h1>你已经会生成房间了，<br><span>那机器人是怎么“学会”开门的？</span></h1>
+      <p class="hero-lead">Day 6 把场景变成了训练环境。今天的任务是把它接上策略：说清楚 observation 从哪里来、action 送到哪里去、中间那条链路每一环归谁管。</p>
+      <div class="lesson-meta"><span>2026.10.22</span><span>概念对照 · 纸面契约 · 无训练</span><span>11 个交互演示</span></div>
+      <a class="start-link" href="#state-action">从最容易混的三个词开始 <span aria-hidden="true">↓</span></a>
+      <div class="opening-question"><span class="small-label">贯穿今天的一个问题</span><p>“你生成了 1000 个新房间，VLA 的泛化应该变好了吧？”</p><span>这句话里至少藏了四个未被验证的假设：新房间真的属于新分布、策略真的在这些房间里训练过、评测协议没变、成功率提升确实来自环境多样性而不是数据量。今天就是把它们一个个拆开。</span></div>
+      <div class="reading-guide"><h2>今天不训练任何模型</h2><p>14plan Day 7 要求的是<strong>能清楚区分“环境生成系统”与“学习型策略系统”</strong>，并定义一条 observations → actions → rollout 的可靠数据流。所以本页只做三件事：把概念分清楚、把接口写成合同、把评测设计成可证伪。</p><p>本页<strong>没有运行任何训练</strong>，也没有任何成功率数字。所有数字都是按公式实时算出来的几何/时间量，不是实验结果。凡是我没跑过的，页面上会明确写“未实测”。</p><details><summary>为什么“我有 SceneWeaver 所以我会训练 VLA”是错的？</summary><p>因为这是两条完全不同的工程链。前三天的词：环境生成负责<strong>造出可交互的世界</strong>（几何、物理、状态、任务判据）；策略学习负责<strong>在这个世界里找到从观测到动作的映射</strong>（数据、模型、训练、部署）。共享的只有中间那一层接口合同。<strong>造得好，不代表学得会；学得会，也不代表造得对。</strong></p></details></div>
+      <p class="source-note">范围依据 <a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-07.md" target="_blank" rel="noopener noreferrer">Day 7 任务手册</a> 与 <a href="https://github.com/lucinwen/14plan/blob/main/DAILY/day-07.md" target="_blank" rel="noopener noreferrer">每日计划</a>；对应资源 R18 / R17 / R07 / R08 / P01–P03。</p>
+    </section>
+
+    <section id="state-action" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>01</span> 对应 14plan Day 7 · 第 1 阶段</div>
+      <h2>state 是世界的真值，<br class="desktop-break">observation 是机器人能读到的那一小块。</h2>
+      <p>这三个词经常被当成同义词用。一旦混用，后面所有关于“泛化”“泛化失败”“数据够不够”的讨论都会失去意义。</p>
+      <div class="table-scroll"><table class="audit"><thead><tr><th>名字</th><th>是什么</th><th>谁产生</th><th>抓杯任务里的例子</th></tr></thead><tbody>
+        <tr><td><strong>state</strong></td><td>世界的完整真值，包含机器人看不到的部分</td><td>仿真器 / 真值系统（现实中通常拿不到）</td><td>杯子的精确位姿、门的真实开角、桌子的摩擦系数、机器人的真实关节角</td></tr>
+        <tr><td><strong>observation</strong></td><td>传感器实际能读到的量，可能缺失、有噪声、有延迟</td><td>相机 / 深度 / 编码器 / 力传感器</td><td>一张 RGB 图、一帧深度、编码器读数；门后的把手<strong>不在里面</strong></td></tr>
+        <tr><td><strong>action</strong></td><td>策略交给控制器的指令</td><td>策略网络</td><td>关节增量 <code>[Δq1, Δq2]</code>、末端位姿增量、夹爪开合、或者一个离散 token</td></tr>
+      </tbody></table></div>
+      <div id="day7-stateobs" class="demo">
+        <div class="demo-head"><span class="demo-title">同一时刻，两种视图</span><span class="demo-tag">遮挡门场景</span></div>
+        <div class="tabs" role="group" aria-label="切换视图">
+          <button type="button" id="d7-view-truth" aria-pressed="true">真值视图（state）</button>
+          <button type="button" id="d7-view-obs" aria-pressed="false">相机视图（observation）</button>
+        </div>
+        <div class="table-scroll"><table class="audit"><thead><tr><th>字段</th><th>真值 state</th><th>observation 里有什么</th><th>策略能否直接用</th></tr></thead><tbody id="d7-so-rows"></tbody></table></div>
+        <p class="demo-note" id="d7-so-note">门在墙后，相机只能看到门框一角。这个例子的重点不是“传感器差”，而是：<strong>策略必须仅凭 observation 决策</strong>，凡是不在 observation 里的量，都不能假装知道。</p>
+      </div>
+      <details class="self-check"><summary>停一下：训练时用 state，部署时只有 observation，会发生什么？</summary><p>这叫<strong>特权信息泄漏</strong>（privileged information leakage）。训练集里如果混进了真值（比如杯子的精确坐标），模型会学到一个部署时根本不存在的输入，测试时性能断崖式下跌，而你在训练曲线上完全看不出来。唯一可靠的检查办法：把训练输入逐个字段问一遍“实机上这个量从哪个传感器来、频率多少、延迟多少”。</p></details>
+      <div class="key-idea"><strong>先预测再往下看：</strong>“场景数量变多”是否一定改善策略泛化？在下表写下你的判断和验证条件，后面第 8、9 节会回来核对。</div>
+    </section>
+
+    <section id="mdp" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>02</span> 对应 14plan Day 7 · 第 3 阶段</div>
+      <h2>MDP 只有五个字母，<br class="desktop-break">但每个都能写错。</h2>
+      <p>MDP 是 (S, A, T, R, γ) 再加上一个策略 π。把它写成一句话：<strong>在状态 s 下做动作 a，世界按 T 转移到 s′，你拿到奖励 r，目标是让长期累积奖励最大。</strong>下面把每个要素落到抓杯任务上。</p>
+      <div id="day7-mdp" class="demo">
+        <div class="demo-head"><span class="demo-title">五要素点选</span><span class="demo-tag">点一个看定义与常见错法</span></div>
+        <div class="chip-list" role="group" aria-label="选择 MDP 要素">
+          <button type="button" class="chip is-on" id="d7-mdp-s" aria-pressed="true">S · 状态</button>
+          <button type="button" class="chip" id="d7-mdp-o" aria-pressed="false">O · 观测</button>
+          <button type="button" class="chip" id="d7-mdp-a" aria-pressed="false">A · 动作</button>
+          <button type="button" class="chip" id="d7-mdp-r" aria-pressed="false">R · 奖励</button>
+          <button type="button" class="chip" id="d7-mdp-p" aria-pressed="false">π · 策略</button>
+        </div>
+        <div class="case-card" id="d7-mdp-card">
+          <h4 id="d7-mdp-title">S · 状态</h4>
+          <dl>
+            <dt>定义</dt><dd id="d7-mdp-def">决策所需的全部信息；满足马尔可夫性时，未来只依赖当前状态。</dd>
+            <dt>抓杯任务里</dt><dd id="d7-mdp-eg">机器人关节角 + 末端位姿 + 杯子位姿 + 夹爪开合 + 桌子高度。</dd>
+            <dt>最常见的错法</dt><dd id="d7-mdp-bad">把单帧图像当状态——图像不满足马尔可夫性，杯子可能在画面外。</dd>
+          </dl>
+        </div>
+        <p class="demo-note">补一句关键的：<strong>reward 是训练信号，success 是任务判定，两者不是一回事。</strong>把 success 直接当 reward（成功给 1、其余给 0）在长任务里几乎没有梯度；只用 reward 判断成功，又会被“刷分”骗过去。</p>
+      </div>
+      <div class="explain-grid three">
+        <div class="card"><span class="concept-number">①</span><h3>为什么 observation 常常不满足马尔可夫性</h3><p>一帧图像看不到被遮挡的部分、看不到速度、看不到接触力。工程上的补救是<strong>堆历史帧</strong>或<strong>加隐状态</strong>，代价是延迟与训练难度上升。</p></div>
+        <div class="card"><span class="concept-number">②</span><h3>为什么 action 的空间决定一切</h3><p>关节增量、关节绝对角、末端位姿增量、末端速度、离散 token——不同选择对应完全不同的控制器、频率与安全边界。换机器人常常等于换 action 空间。</p></div>
+        <div class="card"><span class="concept-number">③</span><h3>为什么 γ 会改变行为</h3><p>折扣因子小，策略偏向短视、抢先拿到近处奖励；折扣因子接近 1，才可能为了“先开门再去拿杯”忍受长时间零奖励。</p></div>
+      </div>
+    </section>
+
+    <section id="methods" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>03</span> 对应 14plan Day 7 · 第 2、3 阶段</div>
+      <h2>BC、RL、Diffusion Policy、VLA<br class="desktop-break">要的东西根本不一样。</h2>
+      <p>这四种方法经常被并排放在一张“具身智能技术栈”图里，看起来像同一层的四个选项。实际上它们的<strong>数据来源、监督信号、输出形态、失败方式</strong>都不同。点开每一种，看它保证什么、不保证什么。</p>
+      <div id="day7-methods" class="demo">
+        <div class="demo-head"><span class="demo-title">四方法对照</span><span class="demo-tag">点方法切换五列</span></div>
+        <div class="tabs" role="group" aria-label="选择方法">
+          <button type="button" id="d7-m-bc" aria-pressed="true">BC</button>
+          <button type="button" id="d7-m-rl" aria-pressed="false">RL</button>
+          <button type="button" id="d7-m-dp" aria-pressed="false">Diffusion Policy</button>
+          <button type="button" id="d7-m-vla" aria-pressed="false">VLA</button>
+        </div>
+        <div class="table-scroll"><table class="audit"><thead><tr><th>维度</th><th id="d7-m-name">行为克隆 BC</th></tr></thead><tbody id="d7-m-rows"></tbody></table></div>
+        <p class="demo-note" id="d7-m-note">BC 的核心风险是 covariate shift：一旦策略犯一个小错，它就进入了示范数据里从未出现过的状态，之后的动作没有参考答案。</p>
+      </div>
+      <h3>为什么“VLA 懂语义”不等于“机械臂不会撞墙”</h3>
+      <p>VLA 把视觉和语言对齐到了动作空间，它能听懂“把杯子放到水槽左边”。但这句话到关节力矩之间还隔着好几层：<strong>动作空间的表示与归一化、逆运动学求解、碰撞检查、速度与力矩限幅、控制频率匹配</strong>。语言层的“理解正确”和物理层的“轨迹安全”是两个独立的失败点。</p>
+      <div class="table-scroll"><table class="audit"><thead><tr><th>层级</th><th>VLA 通常负责</th><th>谁来兜底</th><th>这一层失败长什么样</th></tr></thead><tbody>
+        <tr><td>语义</td><td>听懂指令、定位目标物体</td><td>VLA 自己</td><td>拿错物体、理解错方位词</td></tr>
+        <tr><td>动作表示</td><td>输出动作 token 或动作块</td><td>动作 tokenizer / 归一化层</td><td>不同机器人动作空间不对齐，输出无意义</td></tr>
+        <tr><td>运动学</td><td>不负责</td><td>IK 求解器</td><td>目标不可达、超关节限位（Day 4）</td></tr>
+        <tr><td>安全</td><td>不负责</td><td>碰撞检查 / 限幅 / 急停</td><td>轨迹穿墙、速度超限</td></tr>
+        <tr><td>执行</td><td>不负责</td><td>底层控制器（PD / 阻抗）</td><td>跟不上、抖动、接触失稳</td></tr>
+      </tbody></table></div>
+      <div class="key-idea"><strong>一句话结论：</strong>VLA 把“做什么”变成了可学习的，但“怎么安全地做到”仍然要靠 Day 4–6 那套运动学、ROS 接口与仿真合同。<strong>它不跳过控制接口，只是把接口前面的部分变得更通用。</strong></div>
+      <h3>每种方法最大的两个误区</h3>
+      <p>14plan 第 7 阶段要求记下 BC / RL / Diffusion / VLA 各自的“两个最大误区”。这四个容易混的说法，考试和面试里出现的频率最高。</p>
+      <div class="table-scroll"><table class="audit"><thead><tr><th>方法</th><th>误区一</th><th>误区二</th></tr></thead><tbody>
+        <tr><td><strong>BC</strong></td><td>“数据越多越好”——其实<strong>覆盖度</strong>比数量重要，同一条轨迹重复 200 遍几乎没有新信息</td><td>“成功率低是模型太小”——更常见的原因是分布偏移（covariate shift），不是容量不足</td></tr>
+        <tr><td><strong>RL</strong></td><td>“reward 高就是任务成功”——奖励一旦写歪，策略会精确地优化到你没想要的地方</td><td>“仿真里学会就能上真机”——sim2real gap 来自摩擦、延迟、传感器噪声与执行误差</td></tr>
+        <tr><td><strong>Diffusion Policy</strong></td><td>“块越长越稳”——块内开环越长，对突发变化的响应越差（第 4 节已量化）</td><td>“去噪步数越多越好”——推理延迟直接吃掉闭环频率</td></tr>
+        <tr><td><strong>VLA</strong></td><td>“语义理解对了就能执行”——动作空间未对齐时，输出维度根本没有物理意义</td><td>“换机器人只要改最后一层”——动作维度、归一化统计量、控制频率都要重做</td></tr>
+      </tbody></table></div>
+    </section>
+
+    <section id="chunk" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>04</span> 对应 14plan Day 7 · 第 2 阶段核验</div>
+      <h2>动作块把控制频率<br class="desktop-break">偷偷降了下来。</h2>
+      <p>很多现代策略（ACT、Diffusion Policy、VLA）不再一步一步输出动作，而是一次输出<strong>一整段动作块</strong>（action chunk）：<code>H</code> 步 × <code>d</code> 维。好处是时序一致、少抖动；代价是这一块执行期间，策略是<strong>开环</strong>的。</p>
+      <div id="day7-chunk" class="demo">
+        <div class="demo-head"><span class="demo-title">动作块长度 → 开环时长 → 纠错频率</span><span class="demo-tag">按公式实时计算</span></div>
+        <div class="control-grid">
+          <div class="control"><label class="form-label" for="d7-h">动作块长度 H（步）<output id="d7-h-out">8</output></label><input class="form-range" id="d7-h" type="range" min="1" max="32" step="1" value="8"></div>
+          <div class="control"><label class="form-label" for="d7-f">控制频率 f（Hz）<output id="d7-f-out">10</output></label><input class="form-range" id="d7-f" type="range" min="2" max="50" step="1" value="10"></div>
+        </div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>开环时长 H / f</span><strong id="d7-chunk-t">0.80 s</strong></div>
+          <div class="kpi-block"><span>每秒纠错次数 f / H</span><strong id="d7-chunk-rate">1.25 次/s</strong></div>
+          <div class="kpi-block"><span>门在 0.8 s 关闭时</span><strong id="d7-chunk-verdict">块内错过</strong></div>
+        </div>
+        <div class="timeline-h" id="d7-chunk-bars" aria-hidden="true"></div>
+        <div class="legend"><span><i style="background:var(--viz-series-1)"></i>已执行的动作步</span><span><i style="background:var(--viz-series-2)"></i>门关闭事件发生的时刻</span><span><i style="background:var(--border)"></i>块内剩余步（不会重新观测）</span></div>
+        <p class="demo-note" id="d7-chunk-note">块越长，单位时间内的纠错次数越少。门、行人、滑落的物体都是“块内突变”，越长越容易错过。</p>
+      </div>
+      <div class="explain-grid">
+        <div class="card"><h3>开环 ≠ 一定失败</h3><p>如果环境在块内确实没变化（比如自由空间搬运），开环执行完全合理，还能减少抖动。问题只出在<strong>块内发生突变</strong>的任务上。</p></div>
+        <div class="card"><h3>闭环 ≠ 一定更好</h3><p>每步都重新推理意味着更高延迟与更差的时序一致性。工程上常用折中：<strong>块内插值执行，块外重叠重规划</strong>（receding horizon）。</p></div>
+      </div>
+      <div class="key-idea"><strong>面试里最容易被追问的一句：</strong>“你的动作块多长？为什么是这个长度？”正确答案必须同时说出<strong>任务的最短突变时间尺度</strong>和<strong>推理延迟</strong>，而不是“论文里用的 16”。</div>
+    </section>
+
+    <section id="pipeline" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>05</span> 对应 14plan Day 7 · 第 5、6 阶段</div>
+      <h2>从观测到动作，中间有五环，<br class="desktop-break">每一环都要写合同。</h2>
+      <p>“observation → policy → action chunk → controller → new observation”这句话说起来很顺，但真正决定系统能不能跑起来的，是每一环之间的<strong>接口约定</strong>：频率、单位、坐标系、维度、延迟、限位。点每一环看它的合同。</p>
+      <div id="day7-pipeline" class="demo">
+        <div class="demo-head"><span class="demo-title">五环链路</span><span class="demo-tag">点节点看契约</span></div>
+        <div class="step-chain" role="group" aria-label="选择链路环节">
+          <button type="button" class="node is-active" id="d7-p-1">观测 observation</button><span class="arrow" aria-hidden="true">→</span>
+          <button type="button" class="node" id="d7-p-2">策略 policy</button><span class="arrow" aria-hidden="true">→</span>
+          <button type="button" class="node" id="d7-p-3">动作块 chunk</button><span class="arrow" aria-hidden="true">→</span>
+          <button type="button" class="node" id="d7-p-4">控制器 controller</button><span class="arrow" aria-hidden="true">→</span>
+          <button type="button" class="node" id="d7-p-5">新观测 rollout</button>
+        </div>
+        <div class="case-card" id="d7-p-card">
+          <h4 id="d7-p-title">① 观测 observation</h4>
+          <dl>
+            <dt>必须写清的字段</dt><dd id="d7-p-fields">分辨率、色彩空间、帧率、时间戳来源、相机内参、相对哪个 frame</dd>
+            <dt>谁负责</dt><dd id="d7-p-owner">传感器驱动 + 时间同步（Day 6 的 observation 公平性）</dd>
+            <dt>这一环失败会怎样</dt><dd id="d7-p-fail">策略看到的是过期帧，动作与场景错位</dd>
+          </dl>
+        </div>
+        <p class="demo-note">注意：VLA 只出现在第 2 环。它前面有观测合同，后面有控制器与安全层。<strong>把 VLA 当成整条链路，是面试里最常见的越界。</strong></p>
+      </div>
+      <h3>这套链路的“责任边界”画出来是这样</h3>
+      <div class="table-scroll"><table class="audit"><thead><tr><th>系统</th><th>负责</th><th>不负责</th><th>交付物</th></tr></thead><tbody>
+        <tr><td>环境生成（SceneWeaver / UE / PCG）</td><td>几何、物理、状态、任务判据、seed 与 reset</td><td>策略长什么样、训练是否收敛</td><td>可交互环境 + 任务合同（Day 6）</td></tr>
+        <tr><td>策略学习（BC / RL / VLA）</td><td>从观测到动作的映射、数据与训练</td><td>碰撞检查、力矩限幅、安全急停</td><td>策略权重 + 推理接口</td></tr>
+        <tr><td>控制与执行（ROS 2 / 控制器）</td><td>跟踪、限幅、安全、实时性</td><td>语义理解、任务规划</td><td>可执行轨迹与状态反馈（Day 5）</td></tr>
+      </tbody></table></div>
+    </section>
+
+    <section id="routes" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>06</span> 对应 14plan Day 7 · 第 4 阶段</div>
+      <h2>同一个“开门取杯”，<br class="desktop-break">四条路线各有各的死法。</h2>
+      <p>任务固定：机器人要走到门边、推开门、进去、把杯子拿到桌上。下面四条路线都能声称“能解”，但它们的<strong>数据需求、成功条件、失败模式</strong>完全不同。切换看看。</p>
+      <div id="day7-routes" class="demo">
+        <div class="demo-head"><span class="demo-title">四路线对照</span><span class="demo-tag">数据需求 / 成功条件 / 失败模式</span></div>
+        <div class="tabs" role="group" aria-label="选择路线">
+          <button type="button" id="d7-r-tamp" aria-pressed="true">符号 TAMP</button>
+          <button type="button" id="d7-r-bc" aria-pressed="false">BC</button>
+          <button type="button" id="d7-r-rl" aria-pressed="false">RL</button>
+          <button type="button" id="d7-r-vla" aria-pressed="false">VLA</button>
+        </div>
+        <div class="table-scroll"><table class="audit"><thead><tr><th>问题</th><th id="d7-r-name">符号 TAMP</th></tr></thead><tbody id="d7-r-rows"></tbody></table></div>
+        <p class="demo-note" id="d7-r-note">TAMP 不需要训练数据，但需要准确的符号模型与几何模型；模型错一处，规划出的动作原语就不可执行。</p>
+      </div>
+      <h3>四句话记住区别</h3>
+      <ul class="practice-list">
+        <li><strong>TAMP 靠模型。</strong>它会告诉你“先开门再进去”是唯一可行顺序，但它不知道门把手有多涩。</li>
+        <li><strong>BC 靠示范。</strong>它模仿人怎么做，但人没做过的情况它没见过——这就是 covariate shift。</li>
+        <li><strong>RL 靠试错。</strong>它能在仿真里试一万次，但奖励一旦写歪，它就会找到你最不想看到的解法。</li>
+        <li><strong>VLA 靠规模。</strong>它见过很多“杯子”和“左边”，但把它变成不撞墙的关节轨迹是另一套工程。</li>
+      </ul>
+      <details class="self-check"><summary>追问：多模态模型怎么适配不同机器人的动作空间？</summary><p>常见做法有三种：①<strong>动作 tokenizer</strong>——把连续动作离散成 token，跨机器人共享词表；②<strong>归一化 + 维度对齐</strong>——每个机器人一套归一化统计量，缺的维度补齐或屏蔽；③<strong>只输出末端位姿增量</strong>——把差异推给下层的 IK 与控制器。三种都在“通用性”和“精度”之间做交换。⚠️ 具体实现依模型与机器人而异，本页不声称某一种最优。</p></details>
+    </section>
+
+    <section id="contract" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>07</span> 对应 14plan Day 7 · 第 5 阶段</div>
+      <h2>一条示范数据里，<br class="desktop-break">必须有哪些字段？</h2>
+      <p>下面这份 schema 来自 14plan 的字段示意，<strong>它是纸面示例，不是采集到的机器人数据</strong>。请特别注意最后的 <code>evidence</code> 字段：它的作用就是防止把合成数据说成实测数据。</p>
+      <div class="formula">{"episode_id":"example01","timestamp_s":0.0,
+ "observation":{"rgb":"synthetic_frame","joint_positions_rad":[0,0]},
+ "action":{"joint_delta_rad":[0.02,-0.03],"rate_hz":10},
+ "goal":"cup_on_table","evidence":"synthetic_example_only"}</div>
+      <div id="day7-contract" class="demo">
+        <div class="demo-head"><span class="demo-title">字段完整性检查</span><span class="demo-tag">勾选你已写清的字段</span></div>
+        <div class="gate" id="d7-ct-gate">
+          <label><input type="checkbox" id="d7-ct-1"> <span><code>episode_id</code>：同一次连续交互的唯一标识，可追溯到 seed 与场景版本</span></label>
+          <label><input type="checkbox" id="d7-ct-2"> <span><code>timestamp_s</code>：统一时基（仿真时间还是墙钟时间，必须写明）</span></label>
+          <label><input type="checkbox" id="d7-ct-3"> <span><code>observation</code>：只放传感器能读到的量，注明 frame 与单位</span></label>
+          <label><input type="checkbox" id="d7-ct-4"> <span><code>action</code>：动作类型（增量/绝对/末端）、维度、单位、<code>rate_hz</code></span></label>
+          <label><input type="checkbox" id="d7-ct-5"> <span><code>goal</code> 与 <code>success</code>：任务目标与判定条件分开写</span></label>
+          <label><input type="checkbox" id="d7-ct-6"> <span><code>evidence</code>：synthetic / simulated / real，三级证据必须自报</span></label>
+        </div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>字段完成</span><strong id="d7-ct-count">0 / 6</strong></div>
+          <div class="kpi-block"><span>能否支撑公平比较</span><strong id="d7-ct-verdict">不能</strong></div>
+        </div>
+        <p class="demo-note" id="d7-ct-note">缺 <code>evidence</code> 的数据集最危险：它看起来和真数据一样，却可能全部来自合成渲染。</p>
+      </div>
+      <h3>为什么 <code>rule_task_feasible</code> 不能当控制日志？</h3>
+      <div class="table-scroll"><table class="audit"><thead><tr><th>它给了什么</th><th>它没给什么</th><th>后果</th></tr></thead><tbody>
+        <tr><td>任务在规则层面是否可行（前置条件、顺序）</td><td>关节轨迹、速度、力矩、接触</td><td>无法训练连续控制策略</td></tr>
+        <tr><td>一个布尔/符号判定</td><td>时间戳、频率、观测帧</td><td>无法构造 (observation, action) 对</td></tr>
+        <tr><td>几何合法性检查</td><td>动力学响应、执行误差</td><td>“可行”不等于“能执行”（Day 4 的结论）</td></tr>
+      </tbody></table></div>
+      <div class="key-idea"><strong>公平测试的三个“同”：</strong>同机器人（同一 URDF 与限位）、同 seed（同一场景与物体初始位姿）、同任务（同一 success 判据与 timeout）。<strong>只允许一个变量不同</strong>，否则你无法把差异归因给方法。</div>
+    </section>
+
+    <section id="counter" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>08</span> 对应 14plan Day 7 · 补强任务</div>
+      <h2>两个能被证伪的反例，<br class="desktop-break">比十句“效果更好”有用。</h2>
+      <p>“泛化能力更强”不是一个可检验的命题，除非你说清<strong>在什么分布上、用什么指标、怎么排除其他解释</strong>。下面两个反例都可以用一行改动来证伪。</p>
+      <div id="day7-counter" class="demo">
+        <div class="demo-head"><span class="demo-title">反例切换</span><span class="demo-tag">预测 → 如何证伪 → 失败环节</span></div>
+        <div class="tabs" role="group" aria-label="选择反例">
+          <button type="button" id="d7-c-1" aria-pressed="true">反例 A · 换视角</button>
+          <button type="button" id="d7-c-2" aria-pressed="false">反例 B · 门突然关闭</button>
+        </div>
+        <div class="case-card" id="d7-c-card">
+          <h4 id="d7-c-title">反例 A · 训练只见正面摄像头</h4>
+          <dl>
+            <dt>设置</dt><dd id="d7-c-setup">训练集全部来自正面固定机位；测试时把相机移到侧面 45°，其余条件完全不变。</dd>
+            <dt>预测</dt><dd id="d7-c-pred">成功率显著下降。因为输入的观测分布发生了转移（observation distribution shift），而动作标签没变。</dd>
+            <dt>如何证伪</dt><dd id="d7-c-test">固定机器人、seed、任务、物体；只改相机外参，跑同一测试集。若不下降，说明策略对该视角确实不变——这才叫证据。</dd>
+            <dt>失败环节</dt><dd id="d7-c-where">观测层（第 1 环），不是策略容量不足。</dd>
+          </dl>
+        </div>
+        <p class="demo-note" id="d7-c-note">注意区分两种“分布偏移”：<strong>观测分布偏移</strong>（看到的东西变了）与<strong>状态分布偏移</strong>（走到的地方变了，即 covariate shift）。前者靠数据增强能缓解一部分，后者只能靠闭环纠错或覆盖更多状态。</p>
+      </div>
+      <h3>训练/测试分割：怎么避免“泄漏”</h3>
+      <p>“我随机划分了 80/20”这句话在具身任务里几乎没有意义——同一条走廊换个角度看还是同一条走廊。要按<strong>场景/资产/布局</strong>切，而不是按帧切。</p>
+      <div id="day7-leak" class="demo">
+        <div class="demo-head"><span class="demo-title">泄漏自检</span><span class="demo-tag">五项全过才算独立测试集</span></div>
+        <div class="gate">
+          <label><input type="checkbox" id="d7-lk-1"> <span>测试场景的<strong>房间布局</strong>没有在训练集中出现过</span></label>
+          <label><input type="checkbox" id="d7-lk-2"> <span>测试场景的<strong>物体资产</strong>（同一把椅子的同一 mesh）没有出现过</span></label>
+          <label><input type="checkbox" id="d7-lk-3"> <span>测试场景的<strong>纹理/材质</strong>没有直接复用训练集</span></label>
+          <label><input type="checkbox" id="d7-lk-4"> <span>训练与测试的 <strong>seed 范围</strong>不重叠，且 seed 记录在案</span></label>
+          <label><input type="checkbox" id="d7-lk-5"> <span>指标是 <strong>rollout 成功率</strong>，不是渲染相似度或几何合法率</span></label>
+        </div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>通过项</span><strong id="d7-lk-count">0 / 5</strong></div>
+          <div class="kpi-block"><span>判定</span><strong id="d7-lk-verdict">存在泄漏风险</strong></div>
+        </div>
+        <p class="demo-note">五项里任何一项没过，你测的就不是“泛化到新环境”，而是“在新采样上重复已见过的分布”。</p>
+      </div>
+    </section>
+
+    <section id="exam" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>09</span> 今日综合考题</div>
+      <h2>“我生成了 1000 个新房间，<br class="desktop-break">所以 VLA 泛化提高了。”</h2>
+      <p>这句话<strong>不能直接成立</strong>。它需要四个额外前提，任何一个不成立，结论就垮。先自己写，再对照下面的清单。</p>
+      <div id="day7-exam" class="demo">
+        <div class="demo-head"><span class="demo-title">六栏答卷</span><span class="demo-tag">勾选表示你已写下</span></div>
+        <div class="table-scroll"><table class="audit"><thead><tr><th>六栏</th><th>这一题该写什么</th><th>已写</th></tr></thead><tbody>
+          <tr><td>① 输入 / 假设</td><td>1000 个房间的生成分布、与训练集的重叠程度、机器人型号与动作空间</td><td><input type="checkbox" id="d7-ex-1" aria-label="已完成输入与假设"></td></tr>
+          <tr><td>② 方法 / 接口</td><td>这些房间怎么进训练管线：重训？微调？只做评测？observation 与 action 合同是否一致</td><td><input type="checkbox" id="d7-ex-2" aria-label="已完成方法与接口"></td></tr>
+          <tr><td>③ 预测</td><td>先写“在什么测试集上、哪个指标、大约变化多少”，再跑</td><td><input type="checkbox" id="d7-ex-3" aria-label="已完成预测"></td></tr>
+          <tr><td>④ 实际证据</td><td>固定测试集 + 固定 seed + 置信区间；<strong>没跑就写“未实测”</strong></td><td><input type="checkbox" id="d7-ex-4" aria-label="已记录实际证据"></td></tr>
+          <tr><td>⑤ 可能失败</td><td>资产泄漏、布局模板复用、成功率提升其实来自数据量、评测协议被改动</td><td><input type="checkbox" id="d7-ex-5" aria-label="已写可能失败"></td></tr>
+          <tr><td>⑥ 下一步</td><td>先做一个“只换布局不换资产”的对照，把变量减到一个</td><td><input type="checkbox" id="d7-ex-6" aria-label="已写下一步"></td></tr>
+        </tbody></table></div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>六栏完成度</span><strong id="d7-ex-count">0 / 6</strong></div>
+          <div class="kpi-block"><span>证据等级</span><strong id="d7-ex-level">未开始</strong></div>
+        </div>
+        <p class="demo-note" id="d7-ex-note">标准答案的骨架：<strong>“不能直接说。要证明它，我需要（1）一个不共享资产与布局的测试集；（2）同一套 rollout 评测协议与 seed；（3）训练只增加环境多样性、其他变量不变；（4）报告置信区间而不是单点。”四个条件里少一个，这句话就只能说成“我们生成了更多环境，效果有待验证”。</strong></p>
+      </div>
+      <div class="key-idea"><strong>换一种更安全的说法：</strong>“我们生成了 1000 个新布局用于扩充训练分布；在固定测试集上，rollout 成功率从 X 变为 Y（n=…，95% CI …），且测试集与训练集不共享资产。至于这是环境多样性带来的还是数据量带来的，我们做了只改布局的对照实验。”——这句话每个字都能被追问，也就每个字都站得住。</div>
+    </section>
+
+    <section id="score" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>10</span> Checkpoint B 与首次自评</div>
+      <h2>先接受六个追问，<br class="desktop-break">再给自己打分。</h2>
+      <p>Checkpoint B 是 14plan 第 7 阶段的 45 分钟追问。下面六条是必须能闭卷回答的，技术侧与经历侧各占一半。</p>
+      <div id="day7-score" class="demo">
+        <div class="demo-head"><span class="demo-title">追问卡 + 五维自评</span><span class="demo-tag">0–4 分，首次记录</span></div>
+        <ol class="prompt-list">
+          <li><strong>state 和 observation 差在哪？</strong><span>要说清“真值 vs 可测”，并举一个被遮挡的反例。</span></li>
+          <li><strong>BC 和 RL 的数据从哪来？</strong><span>示范 vs 交互；监督信号分别是动作标签和奖励。</span></li>
+          <li><strong>Diffusion Policy 为什么能表达多模态？</strong><span>它建模的是动作序列的分布，而不是单一均值动作。</span></li>
+          <li><strong>VLA 的动作空间怎么和你的机器人对齐？</strong><span>tokenizer / 归一化 / 只输出末端增量，三选一要说清代价。</span></li>
+          <li><strong>为什么更多场景不等于更强泛化？</strong><span>分布重叠、资产泄漏、评测协议、数据量混淆。</span></li>
+          <li><strong>你今天说的哪些是实测、哪些是纸面设计？</strong><span>这一条答不好，前五条都白搭。</span></li>
+        </ol>
+        <div class="score-grid">
+          <div class="score-row"><strong>概念</strong><input id="d7-sc-1" type="range" min="0" max="4" step="1" value="2" aria-label="概念得分"><output id="d7-sc-1-out">2</output></div>
+          <div class="score-row"><strong>因果</strong><input id="d7-sc-2" type="range" min="0" max="4" step="1" value="2" aria-label="因果得分"><output id="d7-sc-2-out">2</output></div>
+          <div class="score-row"><strong>工程接口</strong><input id="d7-sc-3" type="range" min="0" max="4" step="1" value="1" aria-label="工程接口得分"><output id="d7-sc-3-out">1</output></div>
+          <div class="score-row"><strong>验证</strong><input id="d7-sc-4" type="range" min="0" max="4" step="1" value="0" aria-label="验证得分"><output id="d7-sc-4-out">0</output></div>
+          <div class="score-row"><strong>经历真实性</strong><input id="d7-sc-5" type="range" min="0" max="4" step="1" value="2" aria-label="经历真实性得分"><output id="d7-sc-5-out">2</output></div>
+        </div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>总分</span><strong id="d7-sc-total">7 / 20</strong></div>
+          <div class="kpi-block"><span>建议</span><strong id="d7-sc-tip">先补验证</strong></div>
+        </div>
+        <p class="demo-note" id="d7-sc-note">“验证”这一维今天给 0 分是诚实的：本页没有训练、没有 rollout、没有成功率。把 0 记下来，才有后面从 0 到 1 的空间。</p>
+      </div>
+      <div class="personal-note"><div class="note-heading"><div><span class="eyebrow">我的理解</span><h3>写给明天做方法对照的自己</h3></div><span id="note-status" class="note-status" aria-live="polite">记录保存在此浏览器</span></div><label class="form-label" for="learning-note">今天哪个概念最容易被我说成“差不多”？你打算用哪一句话把它和相邻概念切开？</label><textarea class="form-control" id="learning-note" rows="7" placeholder="例如：我以前把 BC 的失败说成“数据不够”，其实更准确的说法是 covariate shift——策略一旦偏离示范分布，就没有对应标签了。切开的句子是……"></textarea><div class="note-actions"><button type="button" class="btn" id="export-note">导出我的笔记 .md</button><span>浏览器自动保存；导出后可自行放入仓库，不会自动上传。</span></div></div>
+    </section>
+
+    <section id="sources" class="lesson-section sources-section" data-nav>
+      <div class="section-kicker"><span>↗</span> 来源与边界</div>
+      <h2>这一页对应哪些原始材料</h2>
+      <p>范围来自 <a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-07.md" target="_blank" rel="noopener noreferrer">Day 7 任务手册</a>：R18（AVCLab 状态/动作/BC/Chunking）、R17（LeRobot 的 Record / Train / Deploy / Evaluate）、P01–P03（π0 等 VLA 概览）、R07 / R08（MDP 与强化学习基础）。</p>
+      <div class="source-method"><h3>本页做了什么、没做什么</h3><p>本页是<strong>概念对照与接口契约</strong>：四方法的五列对照、动作块与纠错频率的换算、五环链路的字段合同、schema 的字段清单，均按公开资料的标准结论整理。动作块时长、纠错频率、字段完整性计数由浏览器实时计算，属几何/时间换算。</p><p><strong>本页没有训练任何模型、没有采集任何机器人数据、没有跑任何 rollout</strong>，因此不提供任何成功率、泛化增益或对比实验数字。页内 JSON 是 14plan 给出的字段示意，标注 <code>synthetic_example_only</code>，不是采集结果。</p><p>四方法的具体实现细节（动作维度、块长、tokenizer 方案）<strong>依模型与机器人而异</strong>，本页不声称存在通用最优配置。涉及企业经历的部分只使用可披露的高层事实；今天的概念练习<strong>不计作任何历史研发成果</strong>。</p></div>
+    </section>
+    <div class="next-lesson"><span class="small-label">继续：把方法放进文献里比</span><a href="day-08.html">Day 08 · MANSION / SceneWeaver / Holodeck 方法对照 →</a></div>
+    <footer class="site-footer"><div><strong>Modern Robotics 学习手记</strong><p>先看见变化，再说清原因。</p></div><a href="#start">回到顶部 ↑</a></footer>
+  </main>
+</div>
+<noscript><div class="noscript-note">文字教程可以正常阅读。交互演示需要在浏览器中启用 JavaScript。</div></noscript>
+</body>
+</html>

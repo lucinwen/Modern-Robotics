@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f8f7">
+  <meta name="description" content="Day 8 相关工作与研究证据：MANSION / NeurIPS SceneWeaver / Holodeck 五维方法对照、两个反例（跨楼层锁门、楼梯净空）、个人贡献四分类、公平基线协议与申请材料冻结。">
+  <title>Day 08 · 同名不同物：MANSION / SceneWeaver / Holodeck 怎么比 | Modern Robotics 学习手记</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/site.css">
+  <link rel="stylesheet" href="assets/lesson-kit.css">
+  <script src="assets/site.js" defer></script>
+  <script src="assets/lesson-kit.js" defer></script>
+  <script src="assets/day8.js" defer></script>
+</head>
+<body data-lesson-key="day-08" data-lesson-title="Day 08 · 我的相关工作笔记" data-lesson-topic="MANSION / SceneWeaver / Holodeck 五维对照、反例、贡献四分类、公平基线与材料冻结">
+<a class="skip-link" href="#main">跳到教程正文</a>
+<header class="site-header">
+  <a class="brand" href="#start" aria-label="Modern Robotics 学习手记首页"><span class="brand-monogram">MR<span>.</span></span><span class="brand-name">Modern Robotics<small>可视化学习手记</small></span></a>
+  <div class="header-actions"><span class="edition">DAY 08 / 场景基线</span><a href="https://github.com/lucinwen/Modern-Robotics" target="_blank" rel="noopener noreferrer">GitHub 仓库 <span aria-hidden="true">↗</span></a><button class="btn theme-toggle" id="theme-toggle" type="button" aria-label="切换明暗主题">切换主题</button></div>
+</header>
+<div class="page-shell">
+  <aside class="sidebar" aria-label="学习导航">
+    {{component:course-switcher}}
+    <div class="sidebar-intro"><span class="eyebrow">学习路线</span><strong>没读到，就写“待查”。</strong></div>
+    <nav class="lesson-nav" aria-label="本页目录">
+      <a href="#start" class="is-current" aria-current="location"><span>00</span> 三个名字，三种东西</a>
+      <a href="#names"><span>01</span> 先分清谁是谁</a>
+      <a href="#matrix"><span>02</span> 五维方法矩阵</a>
+      <a href="#counter"><span>03</span> 两个反例</a>
+      <a href="#evidence"><span>04</span> 贡献四分类</a>
+      <a href="#protocol"><span>05</span> 公平基线协议</a>
+      <a href="#pitch"><span>06</span> 90 秒科研叙事</a>
+      <a href="#freeze"><span>07</span> 材料冻结核验</a>
+      <a href="#exam"><span>08</span> 综合考题六栏答卷</a>
+      <a href="#score"><span>09</span> 五维自评</a>
+      <a href="#sources"><span>↗</span> 来源与边界</a>
+    </nav>
+    <div class="sidebar-note"><span class="small-label">这一页怎么用</span><p>每写一句“它做了 X”，<br>都要能指出在哪一节读到。<br>指不出，就写“待查”。</p><a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-08.md" target="_blank" rel="noopener noreferrer">查看原 Day 8 任务手册 ↗</a></div>
+  </aside>
+  <main id="main">
+    <section id="start" class="hero lesson-section" data-nav>
+      <div class="eyebrow">MODERN ROBOTICS / 第八天</div>
+      <h1>评委问：“你的 SceneWeaver<br><span>和 MANSION 不是做一样的事吗？”</span></h1>
+      <p class="hero-lead">这一问的难点不在技术，在于<strong>你必须有证据说话</strong>。今天不写代码，只做一件事：把“我知道的”和“我需要从原论文核实的”分开，然后设计一个能被公平比较的实验。</p>
+      <div class="lesson-meta"><span>2026.10.22</span><span>文献对照 · 证据分界 · 不复制论文数字</span><span>9 个交互演示</span></div>
+      <a class="start-link" href="#names">先分清三个名字 <span aria-hidden="true">↓</span></a>
+      <div class="opening-question"><span class="small-label">贯穿今天的一个问题</span><p>“你这个和那篇论文有什么区别？”</p><span>如果回答是“我们的效果更好”，评委追问一句“在什么任务上、同一预算吗、成功率多少”，就答不上来了。可如果回答是“相似在我们都做多房间生成，不同在我的输出目标是可交互环境，但这一点我还没有端到端证据”——这句话没人能驳倒，因为它诚实。</span></div>
+      <div class="reading-guide"><h2>今天最重要的产出不是结论，是“证据等级”</h2><p>四个等级要一直挂在嘴边：<strong>论文已展示</strong>（原文写了，我能指到章节）、<strong>个人已验证</strong>（我自己跑过、有截图/日志）、<strong>纸面设计</strong>（我设计了但没实现）、<strong>待查</strong>（我还没读到）。</p><p>混用这四级，是面试里最致命的错误——比“不知道”严重得多，因为“不知道”可以补，说错过的经历补不回来。</p><details><summary>为什么本页不复述论文的具体指标数字？</summary><p>因为数字脱离任务设定就没有意义：同一篇论文在不同数据划分、不同机器人尺寸下结论会变。本页只记录<strong>方法的结构性问题</strong>（输入是什么、表示是什么、能不能处理动态状态、有没有公平基线），具体数值留给你回原文核对。凡是我没有把握的地方，页面上会写“待查”，而不是编一个听起来合理的答案。</p></details></div>
+      <p class="source-note">范围依据 <a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-08.md" target="_blank" rel="noopener noreferrer">Day 8 任务手册</a> 与 <a href="https://github.com/lucinwen/14plan/blob/main/DAILY/day-08.md" target="_blank" rel="noopener noreferrer">每日计划</a>；对应资源 P06 / P07 / P08 / P09 / R20 / P04 / P05。</p>
+    </section>
+
+    <section id="names" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>01</span> 对应 14plan Day 8 · 第 2 阶段</div>
+      <h2>“SceneWeaver”这个名字，<br class="desktop-break">至少对应两个不同的工作。</h2>
+      <p>同名不同物是文献阅读里最常见的坑。你有一个个人项目叫 SceneWeaver，NeurIPS 上也有一篇叫 SceneWeaver——<strong>它们是两个东西</strong>。把它们混着谈，评委立刻知道你没读原文。</p>
+      <div id="day8-names" class="demo">
+        <div class="demo-head"><span class="demo-title">三个工作，四个格子</span><span class="demo-tag">输入 / 中间状态 / 产物 / 限制</span></div>
+        <div class="tabs" role="group" aria-label="选择工作">
+          <button type="button" id="d8-n-mansion" aria-pressed="true">MANSION</button>
+          <button type="button" id="d8-n-sw" aria-pressed="false">SceneWeaver（NeurIPS）</button>
+          <button type="button" id="d8-n-holo" aria-pressed="false">Holodeck</button>
+        </div>
+        <div class="table-scroll"><table class="audit"><thead><tr><th>维度</th><th id="d8-n-name">MANSION</th></tr></thead><tbody id="d8-n-rows"></tbody></table></div>
+        <p class="demo-note" id="d8-n-note">判断依据只有一条：这句话在原文哪一节？指不出来，就写“待查”。</p>
+      </div>
+      <div class="key-idea"><strong>一个自检句：</strong>“我说它做了 X——这句话我能指到摘要、方法第 3 节，还是只记得别人转述过？”三种来源的可信度差一个数量级。</div>
+      <h3>先闭卷重画这条主线</h3>
+      <p>14plan 第 1 阶段的第一个动作是闭卷重画整条主线。它把前七天串成一句话：语言给出目标，空间表示把它落到坐标，几何决定形状是否合法，任务层决定动作顺序，机器人决定能不能执行，反馈把执行结果送回观测。</p>
+      <div class="step-chain" aria-label="具身系统主线">
+        <span class="node">语言目标</span><span class="arrow" aria-hidden="true">→</span>
+        <span class="node">空间表示</span><span class="arrow" aria-hidden="true">→</span>
+        <span class="node">几何</span><span class="arrow" aria-hidden="true">→</span>
+        <span class="node">任务</span><span class="arrow" aria-hidden="true">→</span>
+        <span class="node">机器人</span><span class="arrow" aria-hidden="true">→</span>
+        <span class="node">反馈</span>
+      </div>
+      <p class="text-small text-muted">画不出来，说明某一天的内容还只是“听过”。这条链上每一环对应一篇教程：Day 1（空间/几何）、Day 2（约束）、Day 3（任务）、Day 4–5（机器人）、Day 6（环境与反馈）、Day 7–8（策略与文献）。</p>
+    </section>
+
+    <section id="matrix" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>02</span> 对应 14plan Day 8 · 第 3 阶段</div>
+      <h2>五个维度，一条纪律：<br class="desktop-break">不许替论文补它没写的东西。</h2>
+      <p>用同一张表比四个工作：输入任务、空间表示、动态状态与交互、实验基线、已证明范围。每个格子后面都跟一个证据等级——这一列比内容本身更重要。</p>
+      <div id="day8-matrix" class="demo">
+        <div class="demo-head"><span class="demo-title">五维方法矩阵</span><span class="demo-tag">点工作切换，格子带证据等级</span></div>
+        <div class="tabs" role="group" aria-label="选择对照对象">
+          <button type="button" id="d8-x-mansion" aria-pressed="true">MANSION</button>
+          <button type="button" id="d8-x-sw" aria-pressed="false">SceneWeaver（NeurIPS）</button>
+          <button type="button" id="d8-x-holo" aria-pressed="false">Holodeck</button>
+          <button type="button" id="d8-x-mine" aria-pressed="false">我的 SceneWeaver</button>
+        </div>
+        <div class="table-scroll"><table class="audit audit--wide"><thead><tr><th>维度</th><th>记录</th><th>证据等级</th></tr></thead><tbody id="d8-x-rows"></tbody></table></div>
+        <p class="demo-note" id="d8-x-note">这张表的作用不是“证明我比它强”，而是让你在被追问时，能一句话说清“我读到哪、没读到哪”。</p>
+      </div>
+      <h3>四个证据等级要一直挂在嘴上</h3>
+      <div class="table-scroll"><table class="audit"><thead><tr><th>等级</th><th>含义</th><th>可以说的话</th><th>不可以说的话</th></tr></thead><tbody>
+        <tr><td><strong>论文已展示</strong></td><td>原文明确写了，我能指到章节/图表</td><td>“它报告了 X（原文 Table 2）”</td><td>“它证明了 X 在真实机器人上也成立”（除非原文做了真机）</td></tr>
+        <tr><td><strong>个人已验证</strong></td><td>我跑过、有日志或截图</td><td>“在我这台机器上，这个输入跑出了这个输出”</td><td>“我们的方法比它好”（没有公平基线就不成立）</td></tr>
+        <tr><td><strong>纸面设计</strong></td><td>我设计了接口/算法，但没实现</td><td>“我设计了这样的接口，尚未实现”</td><td>“我实现了……”</td></tr>
+        <tr><td><strong>待查</strong></td><td>我还没读到或没读懂</td><td>“这一点我还没核实”</td><td>“它没做这件事”——这是最容易翻车的一句</td></tr>
+      </tbody></table></div>
+      <details class="self-check"><summary>为什么“它没做 X”比“我不知道”更危险？</summary><p>因为“我不知道”是可以被补上的缺口，而“它没做”是一个关于别人工作的断言。评委只要说“它第 4 节做了”，你的可信度就整体归零——连带前面所有正确的部分。规则很简单：<strong>没有原文证据时，只能写“待查”，不能写“没做”。</strong></p></details>
+    </section>
+
+    <section id="counter" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>03</span> 对应 14plan Day 8 · 第 3 阶段主任务</div>
+      <h2>两个反例，专门用来<br class="desktop-break">区分“合法”和“能执行”。</h2>
+      <p>14plan 要求设计两种错误输入，看每篇工作的机制有没有足够信息处理。注意这里的判断只有三种：<strong>有信息 / 信息不足 / 待查</strong>——不是“它不行”。</p>
+      <div id="day8-counter" class="demo">
+        <div class="demo-head"><span class="demo-title">两个反例</span><span class="demo-tag">切换看逐方法判定</span></div>
+        <div class="tabs" role="group" aria-label="选择反例">
+          <button type="button" id="d8-c-1" aria-pressed="true">反例 A · 跨楼层锁门</button>
+          <button type="button" id="d8-c-2" aria-pressed="false">反例 B · 楼梯净空</button>
+        </div>
+        <div class="case-card" id="d8-c-card">
+          <h4 id="d8-c-title">反例 A · 二楼的门锁着，机器人没有开锁技能</h4>
+          <dl>
+            <dt>输入设置</dt><dd id="d8-c-setup">两层住宅，楼梯净宽 1.1 m、门洞 0.9 m，全部满足几何合法性；但二楼通往目标房间的门处于 locked 状态，且机器人没有开锁动作。</dd>
+            <dt>问题在哪一层</dt><dd id="d8-c-layer">静态拓扑与几何<strong>全部合法</strong>，失败发生在<strong>动态状态层</strong>：门的可通行性随状态变化。</dd>
+          </dl>
+        </div>
+        <div class="table-scroll"><table class="audit"><thead><tr><th>工作</th><th>有无足够信息处理</th><th>缺什么</th><th>该写什么结论</th></tr></thead><tbody id="d8-c-rows"></tbody></table></div>
+        <p class="demo-note" id="d8-c-note">这个反例的价值：它把“几何合法率”与“任务可行率”彻底分开了。前者 100% 的场景，后者可能是 0%。</p>
+      </div>
+      <div class="explain-grid">
+        <div class="card"><h3>几何合法 ≠ 任务可行</h3><p>门洞够宽、楼梯够高，只说明“形状上过得去”。门是锁的、抽屉是关的、地面是滑的，都属于<strong>状态层</strong>，几何检查看不到。</p></div>
+        <div class="card"><h3>任务可行 ≠ rollout 成功</h3><p>规划层说“有解”，执行层还要面对控制误差、感知误差、动力学偏差。三层指标必须分开报（第 5 节）。</p></div>
+      </div>
+    </section>
+
+    <section id="evidence" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>04</span> 对应 14plan Day 8 · 第 4 阶段</div>
+      <h2>简历上的每一行，<br class="desktop-break">都属于四类中的一类。</h2>
+      <p>14plan 要求把经历分成四类：<strong>本人做过 / 团队成果 / 开源现有功能 / 拟研究</strong>。给下面每一行选一个类别，看整体画像是否经得起追问。</p>
+      <div id="day8-evidence" class="demo">
+        <div class="demo-head"><span class="demo-title">贡献分界卡</span><span class="demo-tag">六行，逐行标注</span></div>
+        <div class="table-scroll"><table class="audit"><thead><tr><th>经历条目（示意）</th><th>类别</th></tr></thead><tbody id="d8-e-rows"></tbody></table></div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>已标注</span><strong id="d8-e-count">0 / 6</strong></div>
+          <div class="kpi-block"><span>风险提示</span><strong id="d8-e-verdict">尚未标注</strong></div>
+        </div>
+        <p class="demo-note" id="d8-e-note">四类里最容易出事的是“把团队成果说成个人成果”，以及“把拟研究说成已完成”。这两类在追问第二层时一定会露。</p>
+      </div>
+      <h3>安全分界：一页纸上的三栏</h3>
+      <div class="table-scroll"><table class="audit"><thead><tr><th>栏</th><th>能写什么</th><th>绝对不能写什么</th></tr></thead><tbody>
+        <tr><td>可披露的高层技术</td><td>用了什么类型的方法、解决了什么类型的问题、公开的成果形式</td><td>内部实现细节、未公开的场景与数据、内部代号</td></tr>
+        <tr><td>团队成果</td><td>“团队完成了 X，我负责其中的 Y 部分”</td><td>把团队 GDC 成果写成个人成果</td></tr>
+        <tr><td>在研 / 拟研究</td><td>问题定义、拟采用的方法、拟验证的指标</td><td>“已实现”“已提升 X%”</td></tr>
+      </tbody></table></div>
+      <h3>一个容易被自己含糊过去的分界</h3>
+      <p>“布局求解器”和“完整具身环境生成”经常被同一句话带过，但它们证明的东西完全不同。这一格含糊，面试第二层追问就会塌。</p>
+      <div class="table-scroll"><table class="audit"><thead><tr><th>层级</th><th>输出</th><th>它能证明什么</th><th>它不能证明什么</th></tr></thead><tbody>
+        <tr><td>约束 / 布局求解（例如 Einstein Layout 一类的求解器）</td><td>满足约束的物体或房间摆放方案</td><td>约束可满足、布局在几何上合法</td><td>物理可执行、机器人能完成任务、策略能学会</td></tr>
+        <tr><td>规则 PCG</td><td>按规则拼装的房间与资产</td><td>生成流程可复现、风格可控</td><td>任务可行性、动态状态（锁/抽屉）</td></tr>
+        <tr><td>完整具身环境生成</td><td>可交互场景 + 任务合同（Day 6）</td><td>场景能运行、任务有判定、观测与动作有合同</td><td>策略一定能学会、能迁移到真机</td></tr>
+      </tbody></table></div>
+      <div class="key-idea"><strong>一条硬规则：</strong>没有公司披露许可，不上传内部源码、未公开数据、内部文档截图到任何公开仓库——包括“看起来无害”的架构图。</div>
+    </section>
+
+    <section id="protocol" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>05</span> 对应 14plan Day 8 · 第 5 阶段</div>
+      <h2>想比，就得先把<br class="desktop-break">五个量固定下来。</h2>
+      <p>公平比较不是“都用同一个数据集”这么简单。任务集、机器人、资产池、预算、种子，五个量任何一个不同，结论就不可比。再加一条：<strong>三层指标必须分开报</strong>。</p>
+      <div id="day8-protocol" class="demo">
+        <div class="demo-head"><span class="demo-title">基线协议与结果表</span><span class="demo-tag">未跑仿真就只能是空表</span></div>
+        <div class="table-scroll"><table class="audit"><thead><tr><th>必须固定</th><th>本协议取值</th><th>为什么不能变</th></tr></thead><tbody>
+          <tr><td>任务集</td><td>同一批 20 个多房间任务，冻结版本号</td><td>换了任务就等于换了考题</td></tr>
+          <tr><td>机器人</td><td>同一 URDF：footprint、高度、关节限位</td><td>净空判定依赖机器人尺寸</td></tr>
+          <tr><td>资产池</td><td>同一批资产，冻结版本</td><td>资产差异会直接改变难度</td></tr>
+          <tr><td>预算</td><td>同一生成次数 / 同一墙钟时间</td><td>否则比的是算力不是方法</td></tr>
+          <tr><td>种子</td><td>同一批 seed（如 0–19）</td><td>否则差异可能来自初始位姿</td></tr>
+        </tbody></table></div>
+        <div class="tabs" role="group" aria-label="是否已运行仿真">
+          <button type="button" id="d8-p-yes" aria-pressed="false">已运行仿真</button>
+          <button type="button" id="d8-p-no" aria-pressed="true">未运行（只交协议）</button>
+        </div>
+        <div class="table-scroll"><table class="audit"><thead><tr><th>方法</th><th>几何合法率</th><th>规划可行率</th><th>rollout 成功率</th></tr></thead><tbody id="d8-p-rows"></tbody></table></div>
+        <p class="demo-note" id="d8-p-note">未运行时，三列都必须写“—（未实测）”。<strong>空表不是丢人，编数字才是。</strong></p>
+      </div>
+      <h3>三层指标为什么必须分开</h3>
+      <div class="table-scroll"><table class="audit"><thead><tr><th>层</th><th>问的问题</th><th>失败说明什么</th></tr></thead><tbody>
+        <tr><td>几何合法</td><td>房间形状、门洞、净空是否自洽</td><td>生成器本身有问题（重叠、穿墙）</td></tr>
+        <tr><td>规划可行</td><td>给定机器人，是否存在一条可行路径与动作序列</td><td>几何对了但任务层不可解（锁门、抽屉）</td></tr>
+        <tr><td>rollout 成功</td><td>在仿真里真正执行，任务判据是否满足</td><td>规划对了但执行失败（控制、摩擦、感知）</td></tr>
+      </tbody></table></div>
+      <div class="key-idea"><strong>最常见的学术不诚实（往往是无意的）：</strong>用几何合法率代替成功率，然后说“生成质量提升”。这两列在同一个系统上可能相差几十个百分点。</div>
+    </section>
+
+    <section id="pitch" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>06</span> 对应 14plan Day 8 · 第 6 阶段</div>
+      <h2>90 秒，说清三句话。</h2>
+      <p>14plan 要求录一段 90 秒的科研定位：<strong>已做 / 正在研究 / 需训练营验证</strong>。每句都必须是可核查的。在下面写，页面会按中文语速估算时长。</p>
+      <div id="day8-pitch" class="demo">
+        <div class="demo-head"><span class="demo-title">三句话叙事</span><span class="demo-tag">按 ≈3.5 字/秒估算</span></div>
+        <div class="control">
+          <label class="form-label" for="d8-pitch-1">① 已做（有证据的部分）</label>
+          <textarea class="form-control" id="d8-pitch-1" rows="3" placeholder="例：我做过一个从概念图到 UE5 场景的端到端流程，能跑通几何与材质生成，但 AI 推理部分尚未接入真实模型。"></textarea>
+          <span class="text-small text-muted" id="d8-pitch-1-out">0 字 · 0.0 s</span>
+        </div>
+        <div class="control">
+          <label class="form-label" for="d8-pitch-2">② 正在研究（纸面设计或进行中）</label>
+          <textarea class="form-control" id="d8-pitch-2" rows="3" placeholder="例：我正在研究带空间约束的多房间场景生成，重点是让生成的场景对特定机器人可执行，而不只是几何合法。"></textarea>
+          <span class="text-small text-muted" id="d8-pitch-2-out">0 字 · 0.0 s</span>
+        </div>
+        <div class="control">
+          <label class="form-label" for="d8-pitch-3">③ 需训练营验证（未知 / 待验证）</label>
+          <textarea class="form-control" id="d8-pitch-3" rows="3" placeholder="例：我想验证的是：把机器人尺寸与关节状态纳入生成约束后，rollout 成功率是否真的提升。这一点我还没有实测。"></textarea>
+          <span class="text-small text-muted" id="d8-pitch-3-out">0 字 · 0.0 s</span>
+        </div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>总时长估算</span><strong id="d8-pitch-total">0.0 s</strong></div>
+          <div class="kpi-block"><span>判定</span><strong id="d8-pitch-verdict">还没开始写</strong></div>
+        </div>
+        <p class="demo-note" id="d8-pitch-note">三句话里最容易被跳过的是第三句。但评委真正想听的就是它——你有没有一个自己都还没答案、但可以验证的问题。</p>
+      </div>
+    </section>
+
+    <section id="freeze" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>07</span> 对应 14plan Day 8 · 第 7 阶段</div>
+      <h2>10 月 27 日之前，<br class="desktop-break">每一行都要有状态。</h2>
+      <p>冻结不是“写完”，是“每一行都知道自己处于哪一格”。给下面七项标状态，然后过一遍安全清单。</p>
+      <div id="day8-freeze" class="demo">
+        <div class="demo-head"><span class="demo-title">材料冻结核验</span><span class="demo-tag">已完成 / 团队 / 计划 / 需核实</span></div>
+        <div class="table-scroll"><table class="audit"><thead><tr><th>条目</th><th>状态</th></tr></thead><tbody id="d8-f-rows"></tbody></table></div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>已标状态</span><strong id="d8-f-count">0 / 7</strong></div>
+          <div class="kpi-block"><span>待核实</span><strong id="d8-f-check">0 项</strong></div>
+        </div>
+        <div class="gate">
+          <label><input type="checkbox" id="d8-f-safe-1"> <span>公开仓库里没有手机号、身份证号、报名回执截图</span></label>
+          <label><input type="checkbox" id="d8-f-safe-2"> <span>没有任何企业内部源码、未公开数据或内部文档截图</span></label>
+          <label><input type="checkbox" id="d8-f-safe-3"> <span>每个头衔与成果都能被追问两层（时间、角色、产出）</span></label>
+          <label><input type="checkbox" id="d8-f-safe-4"> <span>“在研”与“已完成”用词已分开，没有混淆</span></label>
+        </div>
+        <p class="demo-note" id="d8-f-note">“需核实”不是失败状态，它是诚实状态。真正危险的是把“需核实”直接填成“已完成”。</p>
+      </div>
+    </section>
+
+    <section id="exam" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>08</span> 今日综合考题</div>
+      <h2>“你的 SceneWeaver 和 MANSION<br class="desktop-break">不是做一样的事吗？”</h2>
+      <p>在没有端到端证据的前提下，这道题的正确答法不是辩解，是<strong>把相似、差异、证据、缺口四件事分开说</strong>。先自己写，再对照骨架。</p>
+      <h3>先关掉资料，答这三问</h3>
+      <ol class="prompt-list">
+        <li><strong>Q61 · MANSION 和你的方法，相似在哪、不同在哪？</strong><span>必须给出“相似的具体一层”与“不同的具体一层”，不能用“整体思路不同”糊过去。</span></li>
+        <li><strong>Q62 · NeurIPS 那篇同名的 SceneWeaver 做了什么？</strong><span>答不出就直说“我还没读到这一篇”。同名不是加分项，装懂才是减分项。</span></li>
+        <li><strong>Q63 · Holodeck 的主张边界在哪？</strong><span>关键是说出“它证明了什么”与“它没有主张什么”，而不是评价它好不好。</span></li>
+      </ol>
+      <div id="day8-exam" class="demo">
+        <div class="demo-head"><span class="demo-title">六栏答卷</span><span class="demo-tag">勾选表示你已写下</span></div>
+        <div class="table-scroll"><table class="audit"><thead><tr><th>六栏</th><th>这一题该写什么</th><th>已写</th></tr></thead><tbody>
+          <tr><td>① 输入 / 先决条件</td><td>两者各自的输入（语言？概念图？布局约束？）、对机器人与资产的要求</td><td><input type="checkbox" id="d8-ex-1" aria-label="已完成输入与先决条件"></td></tr>
+          <tr><td>② 相关算法 / 接口</td><td>相似在“约束下的室内场景生成”，差异在输出目标（静态网格 vs 可交互环境）</td><td><input type="checkbox" id="d8-ex-2" aria-label="已完成算法与接口"></td></tr>
+          <tr><td>③ 预计输出</td><td>我的输出是 UE 里可运行的环境与任务合同；它的输出以论文原文为准（待查项要标出）</td><td><input type="checkbox" id="d8-ex-3" aria-label="已完成预计输出"></td></tr>
+          <tr><td>④ 失败原因</td><td>我的：AI 推理未接真实模型、无公平基线；它的：以原文限制为准，不臆测</td><td><input type="checkbox" id="d8-ex-4" aria-label="已完成失败原因"></td></tr>
+          <tr><td>⑤ 可验证证据</td><td>我能拿出的：跑通的流程与截图；<strong>拿不出的：rollout 成功率（未实测）</strong></td><td><input type="checkbox" id="d8-ex-5" aria-label="已完成可验证证据"></td></tr>
+          <tr><td>⑥ 无法保证的部分</td><td>无法保证“比它更好”；只能说“目标不同、证据等级不同、对照实验尚未做”</td><td><input type="checkbox" id="d8-ex-6" aria-label="已完成无法保证的部分"></td></tr>
+        </tbody></table></div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>六栏完成度</span><strong id="d8-ex-count">0 / 6</strong></div>
+          <div class="kpi-block"><span>证据等级</span><strong id="d8-ex-level">未开始</strong></div>
+        </div>
+        <p class="demo-note">标准答法骨架：“相似的地方是都做约束下的室内场景生成。不同的地方是我把输出目标定在 UE 里可交互的环境，而不是单张静态结果——<strong>但这一点我目前只有流程跑通的证据，没有 rollout 层面的证据</strong>。如果要做公平比较，需要同一批任务、同一机器人、同一预算与种子，三层指标分开报；这个对照我还没做。”</p>
+      </div>
+    </section>
+
+    <section id="score" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>09</span> 首次自评</div>
+      <h2>先记第一次的分数。</h2>
+      <div id="day8-score" class="demo">
+        <div class="demo-head"><span class="demo-title">五维自评（0–4 分）</span><span class="demo-tag">首次 / 修订分开记</span></div>
+        <div class="score-grid">
+          <div class="score-row"><strong>概念</strong><input id="d8-sc-1" type="range" min="0" max="4" step="1" value="2" aria-label="概念得分"><output id="d8-sc-1-out">2</output></div>
+          <div class="score-row"><strong>因果</strong><input id="d8-sc-2" type="range" min="0" max="4" step="1" value="2" aria-label="因果得分"><output id="d8-sc-2-out">2</output></div>
+          <div class="score-row"><strong>工程接口</strong><input id="d8-sc-3" type="range" min="0" max="4" step="1" value="2" aria-label="工程接口得分"><output id="d8-sc-3-out">2</output></div>
+          <div class="score-row"><strong>验证</strong><input id="d8-sc-4" type="range" min="0" max="4" step="1" value="0" aria-label="验证得分"><output id="d8-sc-4-out">0</output></div>
+          <div class="score-row"><strong>经历真实性</strong><input id="d8-sc-5" type="range" min="0" max="4" step="1" value="2" aria-label="经历真实性得分"><output id="d8-sc-5-out">2</output></div>
+        </div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>总分</span><strong id="d8-sc-total">8 / 20</strong></div>
+          <div class="kpi-block"><span>建议</span><strong id="d8-sc-tip">先补验证</strong></div>
+        </div>
+        <p class="demo-note" id="d8-sc-note">今天“验证”给 0 分是诚实的：没有跑仿真、没有公平基线、没有成功率。这份 0 分是你后面三个月要填的坑。</p>
+      </div>
+      <div class="personal-note"><div class="note-heading"><div><span class="eyebrow">我的理解</span><h3>写给要拿这份材料去面试的自己</h3></div><span id="note-status" class="note-status" aria-live="polite">记录保存在此浏览器</span></div><label class="form-label" for="learning-note">今天最可能被追问、而你现在还答不上的那一句是什么？你打算用什么最小实验把它补上？</label><textarea class="form-control" id="learning-note" rows="7" placeholder="例如：最可能被问“你怎么证明生成的环境对机器人是可执行的”。我现在只能答几何合法。最小实验是用同一批 20 个任务、同一机器人跑一次 rollout，哪怕只有 5 个 seed……"></textarea><div class="note-actions"><button type="button" class="btn" id="export-note">导出我的笔记 .md</button><span>浏览器自动保存；导出后可自行放入仓库，不会自动上传。</span></div></div>
+    </section>
+
+    <section id="sources" class="lesson-section sources-section" data-nav>
+      <div class="section-kicker"><span>↗</span> 来源与边界</div>
+      <h2>这一页对应哪些原始材料</h2>
+      <p>范围来自 <a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-08.md" target="_blank" rel="noopener noreferrer">Day 8 任务手册</a>：P06（MANSION）、P07（NeurIPS 同名 SceneWeaver）、P08（Holodeck）、P09（个人研究现状）、R20（相关工作五维表）、P04 / P05。原文链接与章节请按 14plan 的资源页进入。</p>
+      <div class="source-method"><h3>本页做了什么、没做什么</h3><p>本页提供的是<strong>比较方法</strong>：五维矩阵的填写纪律、证据四级分类、两个反例的判定框架、公平基线的五个固定量与三层指标、材料冻结的状态表。</p><p><strong>本页不复述任何论文的具体实验数值</strong>，也不声称完整读过三篇论文的全部实验。凡涉及具体机制细节的格子，标注为“待查”或“二手摘要层”，需要你回原文核对后自行升级。这是刻意的：比错数字更糟的是“看起来读过了”。</p><p>关于个人项目（SceneWeaver / Concept2Scene）：页内只使用可披露的高层描述（输入类型、输出目标、已知缺口），<strong>不包含任何企业内部实现、未公开数据或内部文档</strong>。个人项目的证据等级按“局部已验证”记录，不声称端到端成功率，也不与论文做优劣比较——因为公平基线尚未建立。</p></div>
+    </section>
+    <div class="next-lesson"><span class="small-label">继续：让环境开口说话</span><a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-09.md" target="_blank" rel="noopener noreferrer">Day 09 · 语音打断与会话一致性 ↗</a></div>
+    <footer class="site-footer"><div><strong>Modern Robotics 学习手记</strong><p>先看见变化，再说清原因。</p></div><a href="#start">回到顶部 ↑</a></footer>
+  </main>
+</div>
+<noscript><div class="noscript-note">文字教程可以正常阅读。交互演示需要在浏览器中启用 JavaScript。</div></noscript>
+</body>
+</html>

@@ -2,11 +2,11 @@
 
 面向初学者的中文学习笔记。先通过交互观察空间变化，再解释概念、公式与适用条件。
 
-目前包含 **Day 1–6** 六篇连续教程，全部对齐 `14plan` 对应日的任务手册。基础链为 Day 1 空间与五层合法性 → Day 2 约束与 Z3 → Day 3 任务规划与 TAMP；身体与系统链为 **Day 4 运动学（FK/IK/Jacobian）** → **Day 5 ROS2 / TF / Nav2 接口** → **Day 6 UE → Isaac Sim / Isaac Lab 训练环境**。
+目前包含 **Day 1–8** 八篇连续教程，全部对齐 `14plan` 对应日的任务手册。基础链为 Day 1 空间与五层合法性 → Day 2 约束与 Z3 → Day 3 任务规划与 TAMP；身体与系统链为 **Day 4 运动学（FK/IK/Jacobian）** → **Day 5 ROS2 / TF / Nav2 接口** → **Day 6 UE → Isaac Sim / Isaac Lab 训练环境**；策略与文献链为 **Day 7 BC / RL / Diffusion Policy / VLA** → **Day 8 MANSION / SceneWeaver / Holodeck 方法对照**。
 
 ## 打开教程
 
-- **Day 1**：[index.html](index.html) · **Day 2**：[day-02.html](day-02.html) · **Day 3**：[day-03.html](day-03.html) · **Day 4**：[day-04.html](day-04.html) · **Day 5**：[day-05.html](day-05.html) · **Day 6**：[day-06.html](day-06.html)。下载并解压完整仓库后，直接用浏览器打开对应文件；网页交互无须安装依赖。GitHub 文件页显示源码，要操作可视化请打开本地网页，或启用下述 Pages。
+- **Day 1**：[index.html](index.html) · **Day 2**：[day-02.html](day-02.html) · **Day 3**：[day-03.html](day-03.html) · **Day 4**：[day-04.html](day-04.html) · **Day 5**：[day-05.html](day-05.html) · **Day 6**：[day-06.html](day-06.html) · **Day 7**：[day-07.html](day-07.html) · **Day 8**：[day-08.html](day-08.html)。下载并解压完整仓库后，直接用浏览器打开对应文件；网页交互无须安装依赖。GitHub 文件页显示源码，要操作可视化请打开本地网页，或启用下述 Pages。
 - **在线地址（GitHub Pages，已发布）**：<https://lucinwen.github.io/Modern-Robotics/>。推送到 `main` 后会自动重新发布，不需要再改设置。
 - 本地预览（推荐，交互最稳）：在仓库根目录执行 `python -m http.server 8000`，浏览器打开 <http://localhost:8000>。
 - **完整文字版**：[Day 01 教程](notes/day-01-tutorial.md) · [Day 02 教程](notes/day-02-tutorial.md) · [Day 03 教程](notes/day-03-tutorial.md) · [Day 06 教程](notes/day-06-tutorial.md)。
@@ -118,15 +118,15 @@ Day 3 已核对指定讲次与 MIT 2022 课表，未取得本轮 B 站整段视�
 
 ## 维护与扩展
 
-这是一个无第三方浏览器运行时依赖的静态网站。Python 构建脚本把本地组件和预运行数据嵌入六篇网页；编译后的 `index.html`、`day-02.html` 与 `day-03.html` 一同提交，因此在线与离线阅读都不需要构建。主动复现 Python / Z3 / PDDL 实验时，才需安装各自的单独依赖。
+这是一个无第三方浏览器运行时依赖的静态网站。Python 构建脚本把本地组件和预运行数据嵌入八篇网页；编译后的 `index.html`、`day-02.html` 与 `day-03.html` 一同提交，因此在线与离线阅读都不需要构建。主动复现 Python / Z3 / PDDL 实验时，才需安装各自的单独依赖。
 
 | 路径 | 用途 |
 |---|---|
-| `src/*.template.html` | 六篇教程正文与组件位置 |
+| `src/*.template.html` | 八篇教程正文与组件位置 |
 | `components/` | 知识可视化、阶段练习区与 14 天导航组件 |
 | `assets/` | 主题、交互、几何计算与图形样式 |
 | `notes/` | 可直接在 GitHub 阅读的中文 Markdown 笔记 |
-| `scripts/build.py` | 构建六篇网页，并安全内嵌 Day 2 / Day 3 运行 JSON |
+| `scripts/build.py` | 构建八篇网页，并安全内嵌 Day 2 / Day 3 运行 JSON |
 | `scripts/validate.py` | 检查构建一致性、链接、ID、依赖和语法 |
 | `tests/` | 坐标、几何、区间与逻辑边界检查 |
 | `examples/day-02/` | 可复现的真实 Z3 教学实验 |
@@ -176,6 +176,20 @@ Topic / Service / Action 的语义选择、八条箭头的消息合同（含义/
 Day 6 面向 UE / PCG 已有基础，重点不是安装平台，而是建立可执行的 **robot task contract**。自包含网页包含 **16 个交互学习区**，依次覆盖：三方责任分工（UE / Isaac Sim / Isaac Lab）、渲染几何与物理几何、动力学参数、门 Articulation、Observation 与公平性、时间同步、Action、Reward vs Success、Reset、Seed 划分、**19 项 UE→物理仿真迁移审计（可勾选留痕）**、**三个反例（症状→缺哪个接口→如何独立验证）**、**规则 checker 与物理 rollout 的能力差距**、完整 Episode 时间线、**综合考题六栏答卷与五维自评**、任务合同与 Day 7 交接字段。
 
 - 网页：[day-06.html](day-06.html)
+
+## Day 7 · 环境生成完了，策略从哪来：BC / RL / Diffusion Policy / VLA
+
+把“环境生成系统”和“学习型策略系统”彻底分开：state / observation / action 的差别、MDP 五要素、四方法的五列对照（训练来源 / 条件输入 / 输出 / 控制粒度 / 部署困难）、动作块长度与闭环纠错频率的换算、`observation → policy → action chunk → controller → new observation` 五环接口合同、同一“开门取杯”任务的四条路线、示范数据 schema 与证据字段、两个可证伪反例（换视角 / 块内门关闭）与训练测试分割泄漏自检。
+
+- 网页：[day-07.html](day-07.html)
+- **本页没有训练任何模型、没有采集机器人数据、没有跑 rollout**，因此不提供任何成功率数字。
+
+## Day 8 · 同名不同物：MANSION / SceneWeaver / Holodeck 怎么比
+
+把文献阅读变成可辩护的证据：三个工作的输入/中间状态/产物/限制、五维方法矩阵（输入任务 / 空间表示 / 动态状态与交互 / 实验基线 / 已证明范围）、证据四级分类（论文已展示 / 个人已验证 / 纸面设计 / 待查）、两个反例（跨楼层锁门、楼梯净空 0.62 m）、贡献四分类与安全分界、公平基线五个固定量与三层指标、90 秒科研叙事、申请材料冻结核验。
+
+- 网页：[day-08.html](day-08.html)
+- **本页不复述任何论文的具体实验数值**；未核实处一律标“待查”，不替论文补它没写的东西。
 - 文字版：[notes/day-06-tutorial.md](notes/day-06-tutorial.md)
 - 验证范围：[notes/day-06-validation.md](notes/day-06-validation.md)
 - 可复现实验：[examples/day-06/README.md](examples/day-06/README.md)
