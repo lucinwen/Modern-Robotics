@@ -10,6 +10,8 @@ PAGES = {
     'index.html': 'index.template.html',
     'day-02.html': 'day-02.template.html',
     'day-03.html': 'day-03.template.html',
+    'day-04.html': 'day-04.template.html',
+    'day-05.html': 'day-05.template.html',
     'day-06.html': 'day-06.template.html',
 }
 

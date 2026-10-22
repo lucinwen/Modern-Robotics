@@ -106,3 +106,6 @@
   .control-grid { grid-template-columns: 1fr; }
   .day-switcher .course-switcher { grid-template-columns: 1fr 1fr; }
 }
+
+button.chip { font: inherit; font-size: 11px; cursor: pointer; }
+button.chip.is-on { color: var(--accent-foreground); }

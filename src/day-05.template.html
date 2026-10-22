@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f8f7">
+  <meta name="description" content="Day 5 ROS2 与导航：Topic / Service / Action 的选择、消息拓扑、TF 坐标树、URDF、Nav2 Planner 与 Controller、Costmap 膨胀与故障注入。">
+  <title>Day 05 · 一条“去 B 房间”的消息链：ROS2 / TF / Nav2 | Modern Robotics 学习手记</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/site.css">
+  <link rel="stylesheet" href="assets/lesson-kit.css">
+  <script src="assets/site.js" defer></script>
+  <script src="assets/lesson-kit.js" defer></script>
+  <script src="assets/day5.js" defer></script>
+</head>
+<body data-lesson-key="day-05" data-lesson-title="Day 05 · 我的 ROS2 / Nav2 接口笔记" data-lesson-topic="Topic / Service / Action、TF、URDF、Nav2 Planner / Controller、Costmap、故障注入">
+<a class="skip-link" href="#main">跳到教程正文</a>
+<header class="site-header">
+  <a class="brand" href="#start" aria-label="Modern Robotics 学习手记首页"><span class="brand-monogram">MR<span>.</span></span><span class="brand-name">Modern Robotics<small>可视化学习手记</small></span></a>
+  <div class="header-actions"><span class="edition">DAY 05 / 系统接口</span><a href="https://github.com/lucinwen/Modern-Robotics" target="_blank" rel="noopener noreferrer">GitHub 仓库 <span aria-hidden="true">↗</span></a><button class="btn theme-toggle" id="theme-toggle" type="button" aria-label="切换明暗主题">切换主题</button></div>
+</header>
+<div class="page-shell">
+  <aside class="sidebar" aria-label="学习导航">
+    {{component:course-switcher}}
+    <div class="sidebar-intro"><span class="eyebrow">学习路线</span><strong>每个箭头都要说清五个字段。</strong></div>
+    <nav class="lesson-nav" aria-label="本页目录">
+      <a href="#start" class="is-current" aria-current="location"><span>00</span> 一个失败现场</a>
+      <a href="#comm"><span>01</span> Topic / Service / Action</a>
+      <a href="#topology"><span>02</span> 消息拓扑：八条箭头</a>
+      <a href="#tf"><span>03</span> TF：坐标变换带时间戳</a>
+      <a href="#urdf"><span>04</span> URDF 管形状，不管定位</a>
+      <a href="#costmap"><span>05</span> Costmap 与膨胀</a>
+      <a href="#action"><span>06</span> Action 状态机与取消</a>
+      <a href="#faults"><span>07</span> 故障注入表</a>
+      <a href="#contract"><span>08</span> UE 场景 → 导航接口合同</a>
+      <a href="#exam"><span>09</span> 综合考题与自评</a>
+      <a href="#sources"><span>↗</span> 来源与边界</a>
+    </nav>
+    <div class="sidebar-note"><span class="small-label">这一页怎么用</span><p>先问“谁生产、谁消费”，<br>再问“frame 是哪个”，<br>最后问“失败时谁该知道”。</p><a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-05.md" target="_blank" rel="noopener noreferrer">查看原 Day 5 任务手册 ↗</a></div>
+  </aside>
+  <main id="main">
+    <section id="start" class="hero lesson-section" data-nav>
+      <div class="eyebrow">MODERN ROBOTICS / 第五天</div>
+      <h1>目标发出去了，<br><span>机器人在门口停住了。</span></h1>
+      <p class="hero-lead">上层说“去 B 房间”。它没有失败、没有报错，只是停住。今天要能拆开这条链，指出停在哪个接口上、该谁负责。</p>
+      <div class="lesson-meta"><span>2026.10.22</span><span>ROS2 / Nav2 概念合同</span><span>8 个交互演示</span></div>
+      <a class="start-link" href="#comm">从三种通信语义开始 <span aria-hidden="true">↓</span></a>
+      <div class="opening-question"><span class="small-label">现场记录</span><p>请求：从房间 A 前往房间 B。结果：机器人在门口停下，Action 返回“失败”。</p><span>是没规划出路径？还是规划出来了但控制器走不动？还是 TF 早就断了，只是没人检查？这三种情况，日志里的第一行应该完全不同。</span></div>
+      <div class="reading-guide"><h2>今天不装环境，也能学会接口</h2><p>原手册明确写了：ROS2 安装超过 90 分钟就改用官方架构文档、手绘消息与状态图。这一页就是那张图的可交互版本——<strong>本页不声称运行过 ROS2 或 Nav2</strong>，它是概念合同，不是实测记录。</p><p>整个页面只有一个判断标准：<strong>每条箭头能不能说出“消息含义、方向、单位、参考坐标系、发布者”</strong>。说不出来，就还没理解这条链。</p></div>
+      <p class="source-note">范围依据 <a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-05.md" target="_blank" rel="noopener noreferrer">Day 5 任务手册</a>（R02 古月居 / ROS 官方，R05 Nav2 概念文档）。消息字段名仅用于示意，不对应任何特定 ROS2 发行版的完整定义。</p>
+    </section>
+
+    <section id="comm" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>01</span> 对应 14plan Day 5 · 第 2 阶段</div>
+      <h2>三种通信语义，<br class="desktop-break">选错就要自己补语义。</h2>
+      <p>Topic、Service、Action 的差别不在“新不新”，而在<strong>它们承诺了什么</strong>。选错不是性能问题，是语义缺失。</p>
+      <div class="table-scroll"><table class="audit audit--wide"><thead><tr><th>语义</th><th>形状</th><th>有反馈吗</th><th>能取消吗</th><th>典型用途</th><th>用错的后果</th></tr></thead><tbody>
+        <tr><td><strong>Topic</strong></td><td>持续发布 / 订阅，单向</td><td>没有“这次请求的结果”</td><td>不能</td><td>里程计、激光、图像、TF</td><td>把长任务塞进 Topic：没人知道成没成</td></tr>
+        <tr><td><strong>Service</strong></td><td>请求 → 应答，短</td><td>只有一次应答</td><td>不能</td><td>查询地图、切换模式、清空代价地图</td><td>把导航做成 Service：执行中无法反馈、无法取消</td></tr>
+        <tr><td><strong>Action</strong></td><td>目标 → 反馈流 → 结果</td><td>有，周期性</td><td>能</td><td>导航、抓取、长时运动</td><td>短查询用 Action：多出不必要的状态机</td></tr>
+      </tbody></table></div>
+      <div id="day5-comm" class="demo">
+        <div class="demo-head"><span class="demo-title">这个需求该用哪种语义？</span><span class="demo-tag">选一个场景</span></div>
+        <div class="tabs" role="group" aria-label="选择场景">
+          <button type="button" id="d5-c-1" aria-pressed="true">每 50 ms 上报一次轮速</button>
+          <button type="button" id="d5-c-2" aria-pressed="false">查询当前地图版本号</button>
+          <button type="button" id="d5-c-3" aria-pressed="false">去 B 房间，中途要能取消</button>
+          <button type="button" id="d5-c-4" aria-pressed="false">开门，需要 8 秒且可能卡住</button>
+        </div>
+        <article class="case-card" id="d5-comm-panel" aria-live="polite"></article>
+        <p class="demo-note" id="d5-comm-note"></p>
+      </div>
+      <div class="key-idea"><strong>为什么导航必须是 Action</strong><p>因为它同时需要三件 Topic 和 Service 都给不了的东西：<strong>执行中的进度反馈</strong>（还剩多远）、<strong>可取消</strong>（人改主意了）、<strong>明确的终态</strong>（成功 / 失败 / 被取消，而不是“没消息了”）。</p></div>
+    </section>
+
+    <section id="topology" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>02</span> 对应 14plan Day 5 · 第 3 阶段</div>
+      <h2>八条箭头，<br class="desktop-break">每条都要填满五个字段。</h2>
+      <p>下面是“去 B 房间”的最小拓扑。点任意一条箭头，看它该带什么信息、以及它断掉时谁会先出问题。</p>
+      <div class="step-chain">
+        <span class="node is-active">任务层</span><span class="arrow">→</span>
+        <span class="node">Nav2 Action</span><span class="arrow">→</span>
+        <span class="node">Planner</span><span class="arrow">→</span>
+        <span class="node">Controller</span><span class="arrow">→</span>
+        <span class="node">机器人</span><span class="arrow">→</span>
+        <span class="node">TF / 传感</span>
+      </div>
+      <div id="day5-topology" class="demo">
+        <div class="demo-head"><span class="demo-title">箭头合同</span><span class="demo-tag">消息 / 方向 / 单位 / frame / 发布者</span></div>
+        <div class="chip-list" role="group" aria-label="选择一条箭头">
+          <button type="button" class="chip is-on" id="d5-t-1">① goal_pose</button>
+          <button type="button" class="chip" id="d5-t-2">② 规划请求</button>
+          <button type="button" class="chip" id="d5-t-3">③ path</button>
+          <button type="button" class="chip" id="d5-t-4">④ cmd_vel</button>
+          <button type="button" class="chip" id="d5-t-5">⑤ odom / TF</button>
+          <button type="button" class="chip" id="d5-t-6">⑥ 传感 → costmap</button>
+          <button type="button" class="chip" id="d5-t-7">⑦ costmap → 规划</button>
+          <button type="button" class="chip" id="d5-t-8">⑧ Action 反馈</button>
+        </div>
+        <div class="table-scroll"><table class="audit"><thead><tr><th>字段</th><th>这一条该怎么填</th></tr></thead><tbody id="d5-topo-rows"></tbody></table></div>
+        <p class="demo-note" id="d5-topo-note"></p>
+      </div>
+      <p>写不出来的时候，用一个笨办法：<strong>把箭头念成一句话</strong>——“谁，在什么坐标系下，以什么单位，多久一次，告诉谁，什么量”。念不通，就是还没定义清楚。</p>
+    </section>
+
+    <section id="tf" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>03</span> TF · 坐标变换树</div>
+      <h2>TF 不是“位置”，<br class="desktop-break">是带时间戳的换算关系。</h2>
+      <p>导航里最常见的三个 frame 各有分工：<code>map</code> 是全局一致但会跳变的地图系；<code>odom</code> 是连续但会漂移的里程计系；<code>base_link</code> 是机器人本体。三者串起来，才能把“地图上的目标点”换成“车体该往哪走”。</p>
+      <div class="table-scroll"><table class="audit"><thead><tr><th>变换</th><th>谁发布</th><th>特性</th><th>断了会怎样</th></tr></thead><tbody>
+        <tr><td><code>map → odom</code></td><td>定位模块（AMCL / SLAM）</td><td>不连续，用于修正累积漂移</td><td>目标点无法落到机器人附近，规划直接失效</td></tr>
+        <tr><td><code>odom → base_link</code></td><td>轮式里程计</td><td>连续，但长时间会漂</td><td>速度积分失去参照，位置越走越偏</td></tr>
+        <tr><td><code>base_link → sensor</code></td><td>URDF / 静态变换</td><td>固定安装关系</td><td>点云贴到错误位置，costmap 出现“幽灵障碍”</td></tr>
+      </tbody></table></div>
+      <div id="day5-tf" class="demo">
+        <div class="demo-head"><span class="demo-title">TF 有多旧？</span><span class="demo-tag">阈值 0.5 s</span></div>
+        <label class="control"><span>最新 TF 距今（秒）</span><input id="d5-tf-age" type="range" min="0" max="2" step="0.05" value="0.1"><output id="d5-tf-age-out">0.10 s</output></label>
+        <div class="step-chain" id="d5-tf-chain"></div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>TF 状态</span><strong id="d5-tf-state">可用</strong></div>
+          <div class="kpi-block"><span>导航该做什么</span><strong id="d5-tf-act">继续执行</strong></div>
+        </div>
+        <p class="demo-note" id="d5-tf-note"></p>
+      </div>
+      <p><strong>陈旧 TF 最危险的地方是它不报错。</strong>系统仍然能算出一个变换，只是那个变换对应的是几百毫秒前的世界。机器人会“自信地”走向一个已经不存在的位置，然后停在门口。</p>
+      <details class="self-check"><summary>停一下：为什么不能把 <code>base_link</code> 直接当成 <code>map</code> 用？</summary><p>因为 <code>base_link</code> 的原点跟着机器人走，它在 <code>map</code> 里的位置本身就是待求量。把两者混同，等于假设“机器人永远在原点”，一旦移动，所有目标点都会错位。<strong>frame 的语义是“这个坐标系原点在哪、随谁动”，不是名字。</strong></p></details>
+    </section>
+
+    <section id="urdf" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>04</span> URDF · 机器人的形状描述</div>
+      <h2>URDF 描述身体，<br class="desktop-break">不负责知道自己在哪。</h2>
+      <p>URDF 定义连杆、关节、几何形状、质量与惯性。它回答“这台机器人长什么样、关节怎么连”，<strong>不回答“它现在在哪”</strong>。定位是 TF 与定位模块的事，避障是 costmap 的事。</p>
+      <div class="table-scroll"><table class="audit"><thead><tr><th>常见误解</th><th>实际职责</th><th>后果</th></tr></thead><tbody>
+        <tr><td>“URDF 里有 base_link，所以知道位置了”</td><td>URDF 只给结构，位姿要由 TF 提供</td><td>把结构当成状态，规划用的是过期坐标</td></tr>
+        <tr><td>“URDF 写得细，避障就好了”</td><td>避障靠 costmap + footprint + 传感器</td><td>模型再精细，没有障碍数据照样撞</td></tr>
+        <tr><td>“footprint 随便填个圆就行”</td><td>footprint 决定能不能过门</td><td>过窄门被判可行，实际卡住</td></tr>
+      </tbody></table></div>
+      <p>下面这个演示把“footprint 填多大”直接换算成“过不过得去”。注意：<strong>真正卡住的往往不是机器人宽度，而是膨胀后的代价地图</strong>。</p>
+    </section>
+
+    <section id="costmap" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>05</span> Costmap · 代价地图与膨胀</div>
+      <h2>门明明比机器人宽，<br class="desktop-break">代价地图还是堵住了。</h2>
+      <p>障碍物会被“膨胀”（inflation）一圈，用来给控制器留安全距离。于是<strong>有效通行宽度 ≈ 门宽 − 2 × 膨胀半径</strong>。这一步不算，就会得出“门宽 0.6 m、机器人 0.55 m，应该能过”这种结论。</p>
+      <div id="day5-costmap" class="demo">
+        <div class="demo-head"><span class="demo-title">门宽 × 膨胀 × 机器人宽度</span><span class="demo-tag">几何判定，非规划器实测</span></div>
+        <div class="control-grid">
+          <label class="control"><span>门洞净宽（m）</span><input id="d5-door" type="range" min="0.4" max="1.4" step="0.01" value="0.9"><output id="d5-door-out">0.90</output></label>
+          <label class="control"><span>机器人宽度（m）</span><input id="d5-robot" type="range" min="0.3" max="0.9" step="0.01" value="0.55"><output id="d5-robot-out">0.55</output></label>
+          <label class="control"><span>膨胀半径（m）</span><input id="d5-infl" type="range" min="0" max="0.4" step="0.01" value="0.15"><output id="d5-infl-out">0.15</output></label>
+        </div>
+        <div class="canvas-box"><canvas id="d5-costmap-canvas" role="img" aria-label="门洞、膨胀区域与机器人宽度的俯视示意"></canvas></div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>有效通行宽度</span><strong id="d5-eff">0.60</strong></div>
+          <div class="kpi-block"><span>判定</span><strong id="d5-verdict">可通过</strong></div>
+        </div>
+        <p class="demo-note" id="d5-cm-note"></p>
+      </div>
+      <div class="key-idea"><strong>三种“过不去”要说清是哪一种</strong><p>① 几何上本来就不够宽（净宽 &lt; 机器人宽）；② 几何够宽，但膨胀后没有可行通道（净宽 − 2×膨胀 &lt; 机器人宽）；③ 都够，但规划器仍失败（代价设置、分辨率、起点在障碍里）。<strong>修复动作完全不同。</strong></p></div>
+    </section>
+
+    <section id="action" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>06</span> Action · 目标、反馈与取消</div>
+      <h2>“取消”不是“没消息了”。</h2>
+      <p>Action 的生命周期是一条<strong>有终态的状态机</strong>。取消是一个明确事件，不是“等它不发反馈了”。下面点按钮走一遍，注意每次转移都在哪个状态、返回什么终态。</p>
+      <div id="day5-action" class="demo">
+        <div class="demo-head"><span class="demo-title">Action 状态机</span><span class="demo-tag">点按钮推进</span></div>
+        <div class="step-chain" id="d5-act-chain"></div>
+        <div class="note-actions">
+          <button type="button" class="btn" id="d5-act-send">发送目标</button>
+          <button type="button" class="btn" id="d5-act-cancel">请求取消</button>
+          <button type="button" class="btn" id="d5-act-fail">模拟失败</button>
+          <button type="button" class="btn" id="d5-act-timeout">模拟超时</button>
+          <button type="button" class="btn" id="d5-act-reset">重置</button>
+        </div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>当前状态</span><strong id="d5-act-state">空闲</strong></div>
+          <div class="kpi-block"><span>最近事件</span><strong id="d5-act-event">—</strong></div>
+        </div>
+        <p class="demo-note" id="d5-act-note"></p>
+      </div>
+      <div class="table-scroll"><table class="audit"><thead><tr><th>状态</th><th>含义</th><th>还能取消吗</th><th>上层该做什么</th></tr></thead><tbody>
+        <tr><td>accepted</td><td>目标已接受，尚未开始执行</td><td>能</td><td>等待反馈；超时未执行要主动取消</td></tr>
+        <tr><td>executing</td><td>正在执行，周期性反馈</td><td>能</td><td>监控进度；异常时取消并记录原因</td></tr>
+        <tr><td>succeeded</td><td>到达目标（终态）</td><td>不需要</td><td>用 success 谓词再确认一次，不要只看终态</td></tr>
+        <tr><td>canceled</td><td>被主动取消（终态）</td><td>—</td><td>区分“人取消”和“系统超时取消”</td></tr>
+        <tr><td>aborted</td><td>执行失败（终态）</td><td>—</td><td>读失败码，定位是规划、控制还是 TF</td></tr>
+      </tbody></table></div>
+      <details class="self-check"><summary>停一下：如果导航用 Service 而不是 Action，会缺哪三样东西？</summary><p>① 执行中的<strong>进度反馈</strong>（没有，只能等最终应答）；② <strong>取消</strong>（Service 没有取消语义，只能等它返回）；③ <strong>中间失败的可观测性</strong>（过程不可见，出问题只能看日志）。这三样恰恰是长时任务最需要的。</p></details>
+    </section>
+
+    <section id="faults" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>07</span> 对应 14plan Day 5 · 第 5 阶段</div>
+      <h2>三种故障，<br class="desktop-break">三种不同的“第一眼”。</h2>
+      <p>故障注入是纸面练习就能做的：先写“第一步查什么”，再写“上层应该看到什么码”。这两件事写不出来，说明接口没定义。</p>
+      <div id="day5-faults" class="demo">
+        <div class="demo-head"><span class="demo-title">故障注入</span><span class="demo-tag">选一个故障</span></div>
+        <div class="tabs" role="group" aria-label="选择故障">
+          <button type="button" id="d5-f-1" aria-pressed="true">TF 时间戳陈旧</button>
+          <button type="button" id="d5-f-2" aria-pressed="false">门洞宽度不足</button>
+          <button type="button" id="d5-f-3" aria-pressed="false">门锁了但地图是空的</button>
+        </div>
+        <article class="case-card" id="d5-fault-panel" aria-live="polite"></article>
+        <p class="demo-note" id="d5-fault-note"></p>
+      </div>
+      <div class="table-scroll"><table class="audit"><thead><tr><th>故障</th><th>先诊断什么</th><th>上层应看到</th><th>绝不能假设</th></tr></thead><tbody>
+        <tr><td>TF 陈旧</td><td>时间戳、frame 方向、发布频率</td><td><code>tf_unavailable</code>，并停止执行</td><td>“再等等就好了”</td></tr>
+        <tr><td>门宽不足</td><td>costmap / footprint / 安全余量</td><td><code>blocked</code> + 失败位置 + 来源</td><td>“控制器调参能挤过去”</td></tr>
+        <tr><td>门锁但地图空洞</td><td>物体状态模型、是否有开锁动作</td><td>任务语义缺失（不是导航失败）</td><td>“Nav2 会自动开门”</td></tr>
+      </tbody></table></div>
+    </section>
+
+    <section id="contract" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>08</span> 对应 14plan Day 5 · 第 4 阶段</div>
+      <h2>把 UE 场景交给导航，<br class="desktop-break">要交的是合同，不是模型。</h2>
+      <p>SceneWeaver 导出一间有门的房间，交给导航系统之前，必须转成导航能吃的形式。缺任何一项，对接就会变成“你那边看是通的啊”。</p>
+      <div class="table-scroll"><table class="audit"><thead><tr><th>要交的东西</th><th>单位 / 形式</th><th>缺了会怎样</th><th>已确认</th></tr></thead><tbody>
+        <tr><td>米制障碍地图（占据栅格或几何体）</td><td>m，与 UE 单位换算已核对</td><td>地图尺度错 100 倍</td><td><input type="checkbox" id="d5-ct-1" aria-label="已确认米制障碍地图"></td></tr>
+        <tr><td>机器人 footprint</td><td>m，含安全余量</td><td>过窄门被判可行</td><td><input type="checkbox" id="d5-ct-2" aria-label="已确认 footprint"></td></tr>
+        <tr><td>门的净宽与开合状态</td><td>m + 布尔/枚举</td><td>把锁着的门当通道</td><td><input type="checkbox" id="d5-ct-3" aria-label="已确认门宽与状态"></td></tr>
+        <tr><td>goal 的 frame 与坐标</td><td><code>map</code> 系，m</td><td>目标落到墙里</td><td><input type="checkbox" id="d5-ct-4" aria-label="已确认目标坐标系"></td></tr>
+        <tr><td>失败码约定</td><td>枚举：tf_unavailable / blocked / timeout …</td><td>上层无法区分失败原因</td><td><input type="checkbox" id="d5-ct-5" aria-label="已确认失败码"></td></tr>
+        <tr><td>超时与取消策略</td><td>秒 + 谁发起</td><td>任务卡死不释放</td><td><input type="checkbox" id="d5-ct-6" aria-label="已确认超时与取消"></td></tr>
+      </tbody></table></div>
+      <div class="kpi-row">
+        <div class="kpi-block"><span>合同完成度</span><strong id="d5-ct-count">0 / 6</strong></div>
+        <div class="kpi-block"><span>可交接吗</span><strong id="d5-ct-verdict">还不能</strong></div>
+      </div>
+      <p><strong>注意“已确认”的含义</strong>：它只表示你在纸面上写清了这一项，不表示真机验证过。真实对接还需要在目标机器上跑一遍，并把实测结果单独记录。</p>
+    </section>
+
+    <section id="exam" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>09</span> 综合考题与首次自评</div>
+      <h2>停在门口，<br class="desktop-break">三方各自干了什么？</h2>
+      <p>题目：上层发出“去 B 房间”，机器人在狭窄门口停下。<code>Planner</code>、<code>Controller</code>、<code>TF</code> 各自做了什么？分别可能贡献了哪种失败？先自己写，再对照下面的检查项。</p>
+      <div class="table-scroll"><table class="audit"><thead><tr><th>六栏</th><th>要写什么</th><th>已写</th></tr></thead><tbody>
+        <tr><td>① 输入 / 假设</td><td>门宽、footprint、膨胀半径、TF 频率</td><td><input type="checkbox" id="d5-ex-1" aria-label="已完成输入与假设"></td></tr>
+        <tr><td>② 方法 / 接口</td><td>goal → path → cmd_vel 三段，各自的 frame</td><td><input type="checkbox" id="d5-ex-2" aria-label="已完成方法与接口"></td></tr>
+        <tr><td>③ 预测</td><td>先写“我认为停在规划还是控制”</td><td><input type="checkbox" id="d5-ex-3" aria-label="已完成预测"></td></tr>
+        <tr><td>④ 实际证据</td><td>日志里的失败码；未实测就写“未实测”</td><td><input type="checkbox" id="d5-ex-4" aria-label="已记录实际证据"></td></tr>
+        <tr><td>⑤ 可能失败</td><td>三种过不去的区别 + TF 陈旧</td><td><input type="checkbox" id="d5-ex-5" aria-label="已写可能失败"></td></tr>
+        <tr><td>⑥ 下一步</td><td>该谁改：场景 / 参数 / 接口 / 状态模型</td><td><input type="checkbox" id="d5-ex-6" aria-label="已写下一步"></td></tr>
+      </tbody></table></div>
+      <div class="kpi-row">
+        <div class="kpi-block"><span>六栏完成度</span><strong id="d5-ex-count">0 / 6</strong></div>
+        <div class="kpi-block"><span>证据等级</span><strong id="d5-ex-level">未开始</strong></div>
+      </div>
+      <div id="day5-score" class="demo">
+        <div class="demo-head"><span class="demo-title">五维自评（0–4 分）</span><span class="demo-tag">首次分数</span></div>
+        <div class="score-grid">
+          <div class="score-row"><strong>概念</strong><input id="d5-sc-1" type="range" min="0" max="4" step="1" value="2" aria-label="概念得分"><output id="d5-sc-1-out">2</output></div>
+          <div class="score-row"><strong>因果</strong><input id="d5-sc-2" type="range" min="0" max="4" step="1" value="2" aria-label="因果得分"><output id="d5-sc-2-out">2</output></div>
+          <div class="score-row"><strong>工程接口</strong><input id="d5-sc-3" type="range" min="0" max="4" step="1" value="2" aria-label="工程接口得分"><output id="d5-sc-3-out">2</output></div>
+          <div class="score-row"><strong>验证</strong><input id="d5-sc-4" type="range" min="0" max="4" step="1" value="1" aria-label="验证得分"><output id="d5-sc-4-out">1</output></div>
+          <div class="score-row"><strong>经历真实性</strong><input id="d5-sc-5" type="range" min="0" max="4" step="1" value="1" aria-label="经历真实性得分"><output id="d5-sc-5-out">1</output></div>
+        </div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>总分</span><strong id="d5-sc-total">8 / 20</strong></div>
+          <div class="kpi-block"><span>建议</span><strong id="d5-sc-tip">先补验证</strong></div>
+        </div>
+        <p class="demo-note">“经历真实性”这一维今天要特别小心：没装过 ROS2、没跑过 Nav2，就明确写“概念合同，未实测”。这不是减分项，把没跑过的说成跑过才是。</p>
+      </div>
+      <div class="personal-note"><div class="note-heading"><div><span class="eyebrow">我的理解</span><h3>写给明天做训练环境的自己</h3></div><span id="note-status" class="note-status" aria-live="polite">记录保存在此浏览器</span></div><label class="form-label" for="learning-note">如果要和机械控制同学对接，你最先要确认的三个字段是什么？</label><textarea class="form-control" id="learning-note" rows="7" placeholder="例如：goal 的 frame 是 map 还是 odom；footprint 含不含余量；TF 的期望频率是多少。"></textarea><div class="note-actions"><button type="button" class="btn" id="export-note">导出我的笔记 .md</button><span>浏览器自动保存；导出后可自行放入仓库，不会自动上传。</span></div></div>
+    </section>
+
+    <section id="sources" class="lesson-section sources-section" data-nav>
+      <div class="section-kicker"><span>↗</span> 来源与边界</div>
+      <h2>这一页哪里是事实，哪里是示意</h2>
+      <p>通信语义、TF 的 frame 分工、Nav2 的 Planner / Controller / Costmap 结构，依据 ROS 2 官方文档与 Nav2 概念文档（对应 R02 / R05）。具体的消息字段名与参数名在不同发行版之间会变，本页只保留语义，不承诺字段完全一致。</p>
+      <div class="source-method"><h3>明确的边界</h3><p>本页<strong>没有安装或运行 ROS 2 / Nav2</strong>。所有“判定”都由页面内的小模型计算：costmap 部分只做几何宽度比较，不模拟真实代价地图的分辨率、障碍膨胀算法与规划器行为；Action 状态机是教学简化版，省略了中间过渡状态与并发目标处理。</p><p>因此本页可用于建立接口直觉与写交接合同，<strong>不能作为“跑通过 Nav2”的证据</strong>。真机或仿真实测需要单独记录环境、版本、命令与输出。</p></div>
+    </section>
+    <div class="next-lesson"><span class="small-label">继续：把场景变成训练环境</span><a href="day-06.html">Day 06 · 从可渲染场景到机器人训练环境 →</a></div>
+    <footer class="site-footer"><div><strong>Modern Robotics 学习手记</strong><p>先看见变化，再说清原因。</p></div><a href="#start">回到顶部 ↑</a></footer>
+  </main>
+</div>
+<noscript><div class="noscript-note">文字教程可以正常阅读。交互演示需要在浏览器中启用 JavaScript。</div></noscript>
+</body>
+</html>

@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f8f7">
+  <meta name="description" content="Day 4 机器人运动学：平面二连杆的正运动学、逆运动学、雅可比与奇异位形。区分工作空间、关节限位与无碰撞可达，理解“可达 ≠ 可执行”。">
+  <title>Day 04 · 机械臂够得到吗：FK / IK / Jacobian | Modern Robotics 学习手记</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/site.css">
+  <link rel="stylesheet" href="assets/lesson-kit.css">
+  <script src="assets/site.js" defer></script>
+  <script src="assets/lesson-kit.js" defer></script>
+  <script src="assets/day4.js" defer></script>
+</head>
+<body data-lesson-key="day-04" data-lesson-title="Day 04 · 我的运动学笔记" data-lesson-topic="平面二连杆 FK / IK / Jacobian、工作空间、关节限位与奇异性">
+<a class="skip-link" href="#main">跳到教程正文</a>
+<header class="site-header">
+  <a class="brand" href="#start" aria-label="Modern Robotics 学习手记首页"><span class="brand-monogram">MR<span>.</span></span><span class="brand-name">Modern Robotics<small>可视化学习手记</small></span></a>
+  <div class="header-actions"><span class="edition">DAY 04 / 运动学</span><a href="https://github.com/lucinwen/Modern-Robotics" target="_blank" rel="noopener noreferrer">GitHub 仓库 <span aria-hidden="true">↗</span></a><button class="btn theme-toggle" id="theme-toggle" type="button" aria-label="切换明暗主题">切换主题</button></div>
+</header>
+<div class="page-shell">
+  <aside class="sidebar" aria-label="学习导航">
+    {{component:course-switcher}}
+    <div class="sidebar-intro"><span class="eyebrow">学习路线</span><strong>够得到，不等于抓得着。</strong></div>
+    <nav class="lesson-nav" aria-label="本页目录">
+      <a href="#start" class="is-current" aria-current="location"><span>00</span> 今天只解一个问题</a>
+      <a href="#spaces"><span>01</span> 三种“空间”别混</a>
+      <a href="#fk"><span>02</span> FK：给角度算位置</a>
+      <a href="#workspace"><span>03</span> 可达域长什么样</a>
+      <a href="#limits"><span>04</span> 关节限位砍掉一半解</a>
+      <a href="#ik"><span>05</span> IK：给位置求角度</a>
+      <a href="#jacobian"><span>06</span> Jacobian：速度怎么传</a>
+      <a href="#singular"><span>07</span> 奇异位形</a>
+      <a href="#failchain"><span>08</span> 可达 ≠ 可执行</a>
+      <a href="#verify"><span>09</span> 数值校验与六栏答卷</a>
+      <a href="#score"><span>10</span> 五维自评</a>
+      <a href="#sources"><span>↗</span> 来源与边界</a>
+    </nav>
+    <div class="sidebar-note"><span class="small-label">这一页怎么用</span><p>先算，再拖。<br>每次只改一个角度，<br>先预测末端往哪走。</p><a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-04.md" target="_blank" rel="noopener noreferrer">查看原 Day 4 任务手册 ↗</a></div>
+  </aside>
+  <main id="main">
+    <section id="start" class="hero lesson-section" data-nav>
+      <div class="eyebrow">MODERN ROBOTICS / 第四天</div>
+      <h1>机械臂够得到门把手，<br><span>为什么还是开不了门？</span></h1>
+      <p class="hero-lead">Day 3 让任务层说“去开门”。今天要回答的是身体这一侧的问题：末端能不能到、到得了的角度合不合法、到的时候还转不转得动。</p>
+      <div class="lesson-meta"><span>2026.10.22</span><span>平面二连杆 · 手推 + 数值核对</span><span>8 个交互演示</span></div>
+      <a class="start-link" href="#spaces">从最容易混的三个词开始 <span aria-hidden="true">↓</span></a>
+      <div class="opening-question"><span class="small-label">贯穿今天的一个问题</span><p>“去把隔壁房间桌上的杯子拿过来。”</p><span>杯子在任务空间里的哪里？机械臂的工作空间覆盖它吗？覆盖了，关节角在限位内吗？限位内，肘部会不会撞到桌沿？都没有问题，控制器跟得上吗？</span></div>
+      <div class="reading-guide"><h2>今天只用两连杆，但结论不是玩具</h2><p>平面二连杆是所有机械臂里最简单的模型：两段长度 <code>l1</code>、<code>l2</code>，两个关节角 <code>q1</code>、<code>q2</code>。它已经能完整暴露 FK、IK、Jacobian、奇异位形、关节限位这五件事的全部结构。</p><p>六轴机械臂只是把这个结构重复堆叠、再加三维旋转。<strong>两连杆想不清楚，六轴只会更糊。</strong>所以今天不碰 DH 参数，不碰四元数。</p><details><summary>“角度用度还是弧度”为什么会算错？</summary><p>本页所有推导用弧度，界面显示用度。程序里 <code>sin(90)</code> 算的是 90 弧度，不是 90 度——这是运动学作业里最常见的第一个错误。拖动滑条时注意看输出：界面写 <code>90°</code>，公式里代入的是 <code>π/2 ≈ 1.5708</code>。</p></details></div>
+      <p class="source-note">范围依据 <a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-04.md" target="_blank" rel="noopener noreferrer">Day 4 任务手册</a> 与 <a href="https://github.com/lucinwen/14plan/blob/main/DAILY/day-04.md" target="_blank" rel="noopener noreferrer">每日计划</a>；课程对应 Modern Robotics 第 4–5 章（P21 / P23 / P25 / P28 / P30–32）。</p>
+    </section>
+
+    <section id="spaces" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>01</span> 对应 14plan Day 4 · 第 1 阶段</div>
+      <h2>构型空间、工作空间、任务空间<br class="desktop-break">是三个不同的地方。</h2>
+      <p>这三个词经常被混着说，一混，后面的判断就全错。它们回答的是不同的问题，写在不同长度的向量上。</p>
+      <div class="table-scroll"><table class="audit"><thead><tr><th>名字</th><th>装的是什么</th><th>两连杆里的维数</th><th>回答的问题</th></tr></thead><tbody>
+        <tr><td><strong>构型空间</strong>（configuration space）</td><td>描述机器人自身姿态的那组独立参数</td><td>2 维：<code>(q1, q2)</code></td><td>机器人现在是什么姿势？</td></tr>
+        <tr><td><strong>工作空间</strong>（workspace）</td><td>末端在所有合法构型下能到达的位置集合</td><td>2 维：<code>(x, y)</code> 的一个环形区域</td><td>末端最远能伸到哪？</td></tr>
+        <tr><td><strong>任务空间</strong>（task space）</td><td>任务本身关心的量：位置、姿态、力</td><td>这里取 2 维位置；真实抓取还要 3 维姿态</td><td>任务要求末端处于什么状态？</td></tr>
+      </tbody></table></div>
+      <div class="key-idea"><strong>关键的不对称</strong><p>FK 是<strong>一对一</strong>的：给定 <code>(q1, q2)</code>，末端位置唯一。IK 是<strong>多对一甚至无解</strong>的：一个末端位置可能对应两组关节角，也可能一组都没有。所有“逆解难”的问题，根源都在这个不对称上。</p></div>
+      <p>还有一个更隐蔽的坑：<strong>工作空间是几何集合，不是可行性证明</strong>。“这个点在可达域里”只说明存在某个关节角能到，不说明那个关节角在限位内，更不说明沿路不撞东西。</p>
+    </section>
+
+    <section id="fk" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>02</span> Forward Kinematics · 正运动学</div>
+      <h2>给两个角度，<br class="desktop-break">算出末端在哪。</h2>
+      <p>第一段从基座出发，方向由 <code>q1</code> 决定；第二段的方向是 <code>q1 + q2</code>——注意是<strong>加起来</strong>，因为 <code>q2</code> 是相对第一段的角，不是相对世界坐标的角。这一步搞错，后面的雅可比会全错。</p>
+      <p class="formula">x = l<sub>1</sub>cos(q<sub>1</sub>) + l<sub>2</sub>cos(q<sub>1</sub>+q<sub>2</sub>)　　y = l<sub>1</sub>sin(q<sub>1</sub>) + l<sub>2</sub>sin(q<sub>1</sub>+q<sub>2</sub>)</p>
+      <div class="try-this"><span>动手看</span><p>先把 <code>q1</code> 拖到 0°、<code>q2</code> 拖到 90°。预测末端落在哪，再看读数：应该是 <code>(1, 1)</code>。然后把 <code>q2</code> 改回 0°，看机械臂变成完全伸直。</p></div>
+      <div id="day4-fk" class="demo">
+        <div class="demo-head"><span class="demo-title">平面二连杆 · 改角度看末端</span><span class="demo-tag">l₁ = l₂ = 1 m</span></div>
+        <div class="control-grid">
+          <label class="control"><span>q₁（度）</span><input id="d4-q1" type="range" min="-180" max="180" step="1" value="0"><output id="d4-q1-out">0°</output></label>
+          <label class="control"><span>q₂（度，相对角）</span><input id="d4-q2" type="range" min="-180" max="180" step="1" value="90"><output id="d4-q2-out">90°</output></label>
+        </div>
+        <div class="canvas-box"><canvas id="d4-canvas" role="img" aria-label="平面二连杆机械臂，显示两段连杆、末端点与速度椭圆"></canvas></div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>末端 x（m）</span><strong id="d4-x">1.000</strong></div>
+          <div class="kpi-block"><span>末端 y（m）</span><strong id="d4-y">1.000</strong></div>
+          <div class="kpi-block"><span>|J| = l₁l₂·sin q₂</span><strong id="d4-det">1.000</strong></div>
+        </div>
+        <div class="chip-list" role="group" aria-label="快速跳到典型姿态">
+          <button type="button" class="chip" id="d4-preset-a">伸直 q₂ = 0°</button>
+          <button type="button" class="chip" id="d4-preset-b">直角 q₂ = 90°</button>
+          <button type="button" class="chip" id="d4-preset-c">折回 q₂ = 180°</button>
+        </div>
+        <p class="demo-note" id="d4-fk-note"></p>
+      </div>
+      <div class="worked-example"><h3>手算一遍，再对照屏幕</h3><p>取 <code>q1 = 0°</code>、<code>q2 = 90°</code>，即 <code>π/2</code> 弧度：</p><p class="formula">x = 1·cos0 + 1·cos(0+π/2) = 1 + 0 = 1　　y = 1·sin0 + 1·sin(π/2) = 0 + 1 = 1</p><p>第一段沿 <code>+x</code>，第二段垂直向上，末端落在 <code>(1, 1)</code>。长度也对得上：两点距离 <code>√2 ≈ 1.414</code>，正是等腰直角三角形的斜边。</p></div>
+    </section>
+
+    <section id="workspace" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>03</span> Workspace · 可达域</div>
+      <h2>可达域是一个环，<br class="desktop-break">不是一个圆。</h2>
+      <p>两段各 1 m 的机械臂，末端最远到 2 m（完全伸直），最近到 0 m（完全折回）。<strong>如果两段不等长</strong>，中间会挖掉一个洞：最近只能到 <code>|l1 − l2|</code>，那个小圆盘是盲区。</p>
+      <p>下面这张图把三件事画在一起：可达环（浅色区域）、当前目标点、以及两组逆解对应的两个肘部姿态。点击“放下目标”可以把目标拖到你好奇的位置。</p>
+      <div id="day4-workspace" class="demo">
+        <div class="demo-head"><span class="demo-title">目标点与两组逆解</span><span class="demo-tag">肘上 / 肘下</span></div>
+        <div class="control-grid">
+          <label class="control"><span>目标 x（m）</span><input id="d4-tx" type="range" min="-2.5" max="2.5" step="0.05" value="1"><output id="d4-tx-out">1.00</output></label>
+          <label class="control"><span>目标 y（m）</span><input id="d4-ty" type="range" min="-2.5" max="2.5" step="0.05" value="1"><output id="d4-ty-out">1.00</output></label>
+        </div>
+        <div class="canvas-box canvas-box--tall"><canvas id="d4-ik-canvas" role="img" aria-label="可达环、目标点与两组逆解机械臂姿态"></canvas></div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>到基座距离 r</span><strong id="d4-r">1.414</strong></div>
+          <div class="kpi-block"><span>是否在工作空间</span><strong id="d4-reach">是</strong></div>
+          <div class="kpi-block"><span>逆解组数</span><strong id="d4-branches">2</strong></div>
+        </div>
+        <p class="demo-note" id="d4-ws-note"></p>
+      </div>
+      <div class="card-grid">
+        <article class="case-card"><h4>目标 (1, 1)</h4><dl><div><dt>r</dt><dd>1.414 m，落在 0–2 m 之间</dd></div><div><dt>结论</dt><dd>有解，且有两组：<code>(q1, q2) = (0°, 90°)</code> 与 <code>(90°, −90°)</code></dd></div></dl></article>
+        <article class="case-card"><h4>目标 (3, 0)</h4><dl><div><dt>r</dt><dd>3.0 m，大于 l₁ + l₂ = 2 m</dd></div><div><dt>结论</dt><dd>无解。<strong>不要</strong>让求解器“凑”一个最近点然后当成解</dd></div></dl></article>
+        <article class="case-card"><h4>目标 (0, 0)</h4><dl><div><dt>r</dt><dd>0 m，等于 |l₁ − l₂|</dd></div><div><dt>结论</dt><dd>退化：两段完全重叠，<code>q2 = 180°</code>，此时朝哪个方向都不唯一</dd></div></dl></article>
+      </div>
+    </section>
+
+    <section id="limits" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>04</span> Joint Limits · 关节限位</div>
+      <h2>数学上有解，<br class="desktop-break">关节不一定允许。</h2>
+      <p>把两个关节的允许范围都限制在 <code>[−45°, 45°]</code>。目标还是 <code>(1, 1)</code>：几何上它明明白白在可达域里，两组解却分别是 <code>(0°, 90°)</code> 和 <code>(90°, −90°)</code>——<strong>没有一组落在限位内</strong>。</p>
+      <div id="day4-limits" class="demo">
+        <div class="demo-head"><span class="demo-title">打开限位，看哪组解还活着</span><span class="demo-tag">±45°</span></div>
+        <div class="chip-list" role="group" aria-label="关节限位开关">
+          <button type="button" class="chip is-on" id="d4-lim-off">不限位</button>
+          <button type="button" class="chip" id="d4-lim-on">限位 ±45°</button>
+        </div>
+        <div class="table-scroll"><table class="audit"><thead><tr><th>解</th><th>q₁</th><th>q₂</th><th>是否在限位内</th></tr></thead><tbody id="d4-lim-rows"></tbody></table></div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>可用解</span><strong id="d4-lim-ok">2 / 2</strong></div>
+          <div class="kpi-block"><span>结论</span><strong id="d4-lim-verdict">可达且可执行</strong></div>
+        </div>
+        <p class="demo-note" id="d4-lim-note"></p>
+      </div>
+      <div class="key-idea"><strong>三种判断必须分开写</strong><p>① 目标在<strong>工作空间</strong>内（几何）；② 逆解落在<strong>关节限位</strong>内（机械约束）；③ 从当前姿态到该解<strong>无碰撞</strong>（路径约束）。三条都成立才叫“可执行”，写成一句话就会漏掉后两条。</p></div>
+    </section>
+
+    <section id="ik" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>05</span> Inverse Kinematics · 逆运动学</div>
+      <h2>逆解有两组，<br class="desktop-break">选哪组是策略问题。</h2>
+      <p>平面两连杆有解析解，不需要迭代。先由余弦定理求出 <code>q2</code>，再反推 <code>q1</code>：</p>
+      <p class="formula">cos q<sub>2</sub> = (r² − l<sub>1</sub>² − l<sub>2</sub>²) / (2 l<sub>1</sub> l<sub>2</sub>)　　q<sub>2</sub> = ± arccos(…)</p>
+      <p class="formula">q<sub>1</sub> = atan2(y, x) − atan2(l<sub>2</sub>sin q<sub>2</sub>, l<sub>1</sub> + l<sub>2</sub>cos q<sub>2</sub>)</p>
+      <p>正负号给出两组解，就是上一节图里“肘上 / 肘下”两条手臂。两组都到达同一个点，但<strong>肘部扫过的空间完全不同</strong>——这正是抓取姿态会影响后续通行的原因。</p>
+      <div class="table-scroll"><table class="audit"><thead><tr><th>情况</th><th>数学表现</th><th>该怎么报</th></tr></thead><tbody>
+        <tr><td>目标太远</td><td>r &gt; l₁ + l₂，<code>cos q₂ &lt; −1</code></td><td>无解；可给出“最近可达点”作为参考，但不能当成解</td></tr>
+        <tr><td>目标太近</td><td>r &lt; |l₁ − l₂|，<code>cos q₂ &gt; 1</code></td><td>无解；中间盲区</td></tr>
+        <tr><td>恰在边界</td><td><code>cos q₂ = ±1</code></td><td>唯一解（退化），此时处于奇异位形</td></tr>
+        <tr><td>有解但超限位</td><td>解存在，<code>q</code> 越界</td><td>报“逆解存在但不可用”，不要说“无解”</td></tr>
+      </tbody></table></div>
+      <details class="self-check"><summary>停一下：为什么六轴机械臂一般不用解析解，而用数值迭代？</summary><p>六轴带三维旋转后，解析解要按腕部构型分支讨论，公式长且对奇异敏感。工程上常用数值迭代（雅可比伪逆、阻尼最小二乘），代价是要给初值、可能收敛到不同分支、也可能在奇异附近震荡。<strong>“有解析解”是两连杆的特殊福利，不是通例。</strong></p></details>
+    </section>
+
+    <section id="jacobian" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>06</span> Jacobian · 雅可比</div>
+      <h2>关节转一点，<br class="desktop-break">末端动多少？</h2>
+      <p>把 FK 的两个式子分别对 <code>q1</code>、<code>q2</code> 求偏导，得到 2×2 雅可比矩阵。它做的事是<strong>把关节速度映射成末端速度</strong>：<code>ẋ = J(q)·q̇</code>。</p>
+      <p class="formula">J = [ −l₁sin q₁ − l₂sin(q₁+q₂)　−l₂sin(q₁+q₂) ;　l₁cos q₁ + l₂cos(q₁+q₂)　l₂cos(q₁+q₂) ]</p>
+      <p>图里那个椭圆，就是把“关节速度取单位圆”映射到末端后得到的形状。<strong>椭圆越扁，说明某些方向的运动越困难</strong>；扁成一条线，就是奇异位形。</p>
+      <div class="table-scroll"><table class="audit"><thead><tr><th>姿态</th><th>J 的数值</th><th>|J|</th><th>含义</th></tr></thead><tbody id="d4-jac-rows"></tbody></table></div>
+      <div class="mini-matrix"><table><tbody id="d4-jmat"></tbody></table></div>
+      <p class="demo-note" id="d4-jac-note">拖动上面的 <code>q1</code>／<code>q2</code> 滑条，这张表和椭圆会一起变。先预测 <code>q2 = 0°</code> 时 |J| 是多少。</p>
+      <div class="key-idea"><strong>行列式的几何意义</strong><p>|J| 是“关节空间单位面积”映射到“任务空间面积”的缩放比。它趋近 0，意味着有一整个方向的运动被压没了——关节怎么动，末端都动不了那个方向。</p></div>
+    </section>
+
+    <section id="singular" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>07</span> Singularity · 奇异位形</div>
+      <h2>伸直的那一刻，<br class="desktop-break">手臂少了一个方向。</h2>
+      <p>代入 <code>q2 = 0</code>：两段共线，末端只能沿径向伸缩，无法沿切向移动。<code>|J| = l₁l₂ sin 0 = 0</code>。这就是奇异位形。</p>
+      <div class="chip-list" role="group" aria-label="跳到典型姿态">
+        <button type="button" class="chip is-on" id="d4-sing-a">q₂ = 0°（全伸展）</button>
+        <button type="button" class="chip" id="d4-sing-b">q₂ = 90°</button>
+        <button type="button" class="chip" id="d4-sing-c">q₂ = 180°（全折回）</button>
+      </div>
+      <p>三种后果，按严重程度排：</p>
+      <ol class="practice-list">
+        <li><h3>逆解退化</h3><p>边界上两组解合并成一组，无法再通过“换一组解”绕开障碍。</p></li>
+        <li><h3>数值求解发散</h3><p>雅可比不可逆，伪逆在奇异附近数值爆炸，关节速度出现尖峰。工程上用阻尼最小二乘（DLS）压制，代价是末端精度下降。</p></li>
+        <li><h3>力传递失效</h3><p>奇异方向上末端对外力的抵抗能力趋近于零。推门时如果正好在这个方向，手臂会被门推着走。</p></li>
+      </ol>
+      <details class="self-check"><summary>停一下：为什么“避开奇异”不能只靠“别让 q₂ 等于 0”？</summary><p>因为奇异不是单个点，而是构型空间里的一片区域（这里是 <code>q2 = 0</code> 与 <code>q2 = π</code> 两条线）。而且实际任务的目标点可能只有经过奇异附近才连得上——这时要做的是<strong>路径规划时加惩罚项或绕行</strong>，而不是假装它不存在。</p></details>
+    </section>
+
+    <section id="failchain" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>08</span> 对应 14plan Day 4 · 第 4 阶段</div>
+      <h2>从“够得到”到“抓得着”，<br class="desktop-break">中间还有四道关。</h2>
+      <p>面试里说“这个点可达”通常只覆盖第一道关。下面四种失败，责任人和证据都不一样，混在一起讲就会被追问穿。</p>
+      <div id="day4-failchain" class="demo">
+        <div class="demo-head"><span class="demo-title">四条失败链</span><span class="demo-tag">选一条看归因</span></div>
+        <div class="tabs" role="group" aria-label="选择失败类型">
+          <button type="button" id="d4-fail-1" aria-pressed="true">① 逆解无解</button>
+          <button type="button" id="d4-fail-2" aria-pressed="false">② 关节超限</button>
+          <button type="button" id="d4-fail-3" aria-pressed="false">③ 路径碰撞</button>
+          <button type="button" id="d4-fail-4" aria-pressed="false">④ 控制跟不上</button>
+        </div>
+        <article class="case-card" id="d4-fail-panel" aria-live="polite"></article>
+        <p class="demo-note" id="d4-fail-note"></p>
+      </div>
+      <h3>责任链：谁该被反馈</h3>
+      <div class="step-chain">
+        <span class="node">符号任务<br><small>open(door)</small></span><span class="arrow">→</span>
+        <span class="node">IK<br><small>关节角</small></span><span class="arrow">→</span>
+        <span class="node">路径规划<br><small>无碰撞轨迹</small></span><span class="arrow">→</span>
+        <span class="node">控制<br><small>跟踪误差</small></span><span class="arrow">→</span>
+        <span class="node">接触 / 触觉<br><small>抓稳了没有</small></span>
+      </div>
+      <div class="table-scroll"><table class="audit"><thead><tr><th>失败</th><th>反馈给谁</th><th>该改什么</th></tr></thead><tbody>
+        <tr><td>逆解无解（超出可达域）</td><td>任务层 / 场景层</td><td>换目标点、换站位、换任务；不要改 IK 算法硬凑</td></tr>
+        <tr><td>有解但超关节限位</td><td>任务层（换另一组解或换站位）</td><td>尝试另一分支；若都超限，需移动基座或换臂</td></tr>
+        <tr><td>IK 有解但路径碰撞</td><td>路径规划层</td><td>换中间姿态、换接近方向，不是“再解一次 IK”</td></tr>
+        <tr><td>轨迹可行但跟踪超差</td><td>控制层</td><td>降速、加增益、改轨迹平滑度；与几何无关</td></tr>
+        <tr><td>抓住了但滑落</td><td>接触 / 抓取规划</td><td>改夹持点、加力控；运动学完全正确也可能抓不住</td></tr>
+      </tbody></table></div>
+      <p>这张表就是“为什么环境生成不等于运动控制”的答案：<strong>每一层都有自己的输入、输出和失败模式</strong>，上一层通过不蕴含下一层通过。</p>
+    </section>
+
+    <section id="verify" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>09</span> 对应 14plan Day 4 · 第 5 阶段</div>
+      <h2>两个目标，一个能解，<br class="desktop-break">一个不能。</h2>
+      <p>取 <code>l1 = l2 = 1</code>，比较 <code>(1, 1)</code> 与 <code>(3, 0)</code>。下表的数字由本页按解析公式实时计算，不是抄来的答案；你可以自己按 <code>cos q2 = (r² − 2) / 2</code> 手算核对。</p>
+      <div id="day4-verify" class="demo">
+        <div class="demo-head"><span class="demo-title">数值校核</span><span class="demo-tag">只验几何，不含碰撞与动力学</span></div>
+        <div class="table-scroll"><table class="audit"><thead><tr><th>目标</th><th>r</th><th>cos q₂</th><th>q₂</th><th>q₁</th><th>判定</th></tr></thead><tbody id="d4-ver-rows"></tbody></table></div>
+        <p class="demo-note">本页只验证平面几何运动学：没有障碍物、没有关节限位冲突、没有动力学与力矩。真实抓取还要另算。</p>
+      </div>
+      <div class="table-scroll"><table class="audit"><thead><tr><th>六栏</th><th>要写什么</th><th>已写</th></tr></thead><tbody>
+        <tr><td>① 输入 / 假设</td><td>l₁ = l₂ = 1 m、角度单位、目标坐标与原点</td><td><input type="checkbox" id="d4-ex-1" aria-label="已完成输入与假设"></td></tr>
+        <tr><td>② 方法 / 接口</td><td>FK 公式、余弦定理、atan2 反解；哪个模块负责</td><td><input type="checkbox" id="d4-ex-2" aria-label="已完成方法与接口"></td></tr>
+        <tr><td>③ 预测</td><td>先写“哪个有解、几组解、q 大约多少”</td><td><input type="checkbox" id="d4-ex-3" aria-label="已完成预测"></td></tr>
+        <tr><td>④ 实际证据</td><td>本页读数或自己跑出的数值；未运行就写“未实测”</td><td><input type="checkbox" id="d4-ex-4" aria-label="已记录实际证据"></td></tr>
+        <tr><td>⑤ 可能失败</td><td>超限位、碰撞、奇异性、被抓物体挡住</td><td><input type="checkbox" id="d4-ex-5" aria-label="已写可能失败"></td></tr>
+        <tr><td>⑥ 下一步</td><td>要不要加障碍、要不要换分支、要不要算力矩</td><td><input type="checkbox" id="d4-ex-6" aria-label="已写下一步"></td></tr>
+      </tbody></table></div>
+      <div class="kpi-row">
+        <div class="kpi-block"><span>六栏完成度</span><strong id="d4-ex-count">0 / 6</strong></div>
+        <div class="kpi-block"><span>证据等级</span><strong id="d4-ex-level">未开始</strong></div>
+      </div>
+    </section>
+
+    <section id="score" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>10</span> 首次自评</div>
+      <h2>先记下第一次的分数，<br class="desktop-break">隔一天再看。</h2>
+      <div id="day4-score" class="demo">
+        <div class="demo-head"><span class="demo-title">五维自评（0–4 分）</span><span class="demo-tag">首次 / 修订分开记</span></div>
+        <div class="score-grid">
+          <div class="score-row"><strong>概念</strong><input id="d4-sc-1" type="range" min="0" max="4" step="1" value="2" aria-label="概念得分"><output id="d4-sc-1-out">2</output></div>
+          <div class="score-row"><strong>因果</strong><input id="d4-sc-2" type="range" min="0" max="4" step="1" value="2" aria-label="因果得分"><output id="d4-sc-2-out">2</output></div>
+          <div class="score-row"><strong>工程接口</strong><input id="d4-sc-3" type="range" min="0" max="4" step="1" value="1" aria-label="工程接口得分"><output id="d4-sc-3-out">1</output></div>
+          <div class="score-row"><strong>验证</strong><input id="d4-sc-4" type="range" min="0" max="4" step="1" value="1" aria-label="验证得分"><output id="d4-sc-4-out">1</output></div>
+          <div class="score-row"><strong>经历真实性</strong><input id="d4-sc-5" type="range" min="0" max="4" step="1" value="2" aria-label="经历真实性得分"><output id="d4-sc-5-out">2</output></div>
+        </div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>总分</span><strong id="d4-sc-total">8 / 20</strong></div>
+          <div class="kpi-block"><span>建议</span><strong id="d4-sc-tip">先补验证</strong></div>
+        </div>
+        <p class="demo-note" id="d4-sc-note">“经历真实性”这一维问的是：你今天讲的例子，哪些是自己推的、哪些是看来的、哪些还没实测。分开标注，比把所有东西说成“做过”更容易通过追问。</p>
+      </div>
+      <div class="personal-note"><div class="note-heading"><div><span class="eyebrow">我的理解</span><h3>写给明天学 ROS2 的自己</h3></div><span id="note-status" class="note-status" aria-live="polite">记录保存在此浏览器</span></div><label class="form-label" for="learning-note">今天的哪个量最容易搞错？你打算用什么办法在真机上核对它？</label><textarea class="form-control" id="learning-note" rows="7" placeholder="例如：我一开始把 q2 当成世界坐标角，导致雅可比第二列写错。纠正后我核对的办法是……"></textarea><div class="note-actions"><button type="button" class="btn" id="export-note">导出我的笔记 .md</button><span>浏览器自动保存；导出后可自行放入仓库，不会自动上传。</span></div></div>
+    </section>
+
+    <section id="sources" class="lesson-section sources-section" data-nav>
+      <div class="section-kicker"><span>↗</span> 来源与边界</div>
+      <h2>这一页对应哪些原始材料</h2>
+      <p>课程范围来自 <a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-04.md" target="_blank" rel="noopener noreferrer">Day 4 任务手册</a>：指定短片为 R01 的 P21 / P23 / P25 / P28 / P30–32，合计约 36 分钟；对应 Modern Robotics 第 4–5 章的正运动学、逆运动学与雅可比。</p>
+      <div class="source-method"><h3>本页做了什么、没做什么</h3><p>本页的公式、推导与判定逻辑按公开教材的标准结论编写；所有数值由浏览器按解析公式实时计算，界面显示四舍五入到三位小数。<strong>演示是二维平面模型</strong>：不含三维姿态、不含 DH 参数、不含障碍物、不含动力学与力矩。</p><p>“可执行”在本页严格指：有逆解 → 在关节限位内 → 假设路径无碰撞。真实系统的“可执行”还需要控制带宽、力矩上限与接触稳定性，本页不声称覆盖。</p><p>练习与首次答案属于个人学习记录，不计作任何企业或实验室的历史研发成果。</p></div>
+    </section>
+    <div class="next-lesson"><span class="small-label">继续：让机器人真的动起来</span><a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-05.md" target="_blank" rel="noopener noreferrer">Day 05 · ROS2 / TF / Nav2 ↗</a></div>
+    <footer class="site-footer"><div><strong>Modern Robotics 学习手记</strong><p>先看见变化，再说清原因。</p></div><a href="#start">回到顶部 ↑</a></footer>
+  </main>
+</div>
+<noscript><div class="noscript-note">文字教程可以正常阅读。交互演示需要在浏览器中启用 JavaScript。</div></noscript>
+</body>
+</html>

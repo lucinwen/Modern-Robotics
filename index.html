@@ -21,6 +21,7 @@
   <script src="assets/perception.js" defer></script>
   <script src="assets/rooms.js" defer></script>
   <script src="assets/lesson-kit.js" defer></script>
+  <script src="assets/day1-verify.js" defer></script>
 </head>
 <body data-lesson-key="day-01" data-lesson-title="Day 01 · 我的空间与运动学习笔记" data-lesson-topic="刚体自由度、构型空间、坐标系与齐次变换">
 <a class="skip-link" href="#main">跳到教程正文</a>
@@ -36,8 +37,8 @@
     <a href="index.html" data-day="01"><strong>DAY 01</strong><span>空间与运动</span></a>
     <a href="day-02.html" data-day="02"><strong>DAY 02</strong><span>约束与求解</span></a>
     <a href="day-03.html" data-day="03"><strong>DAY 03</strong><span>状态与计划</span></a>
-    <a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-04.md" data-day="04" target="_blank" rel="noopener noreferrer"><strong>DAY 04</strong><span>运动学 FK/IK ↗</span></a>
-    <a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-05.md" data-day="05" target="_blank" rel="noopener noreferrer"><strong>DAY 05</strong><span>ROS2 与导航 ↗</span></a>
+    <a href="day-04.html" data-day="04"><strong>DAY 04</strong><span>运动学 FK/IK</span></a>
+    <a href="day-05.html" data-day="05"><strong>DAY 05</strong><span>ROS2 与导航</span></a>
     <a href="day-06.html" data-day="06"><strong>DAY 06</strong><span>训练环境</span></a>
     <a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-07.md" data-day="07" target="_blank" rel="noopener noreferrer"><strong>DAY 07</strong><span>策略与数据 ↗</span></a>
     <a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-08.md" data-day="08" target="_blank" rel="noopener noreferrer"><strong>DAY 08</strong><span>场景基线 ↗</span></a>
@@ -59,7 +60,8 @@
       <a href="#transforms"><span>05</span> 位姿与坐标变换</a>
       <a href="#perception"><span>06</span> 相机如何看见空间</a>
       <a href="#room-validation"><span>07</span> 机器人真的能过门吗</a>
-      <a href="#practice"><span>08</span> 亲手解释与记录</a>
+      <a href="#legality"><span>08</span> 五层合法性与 10 条约束</a>
+      <a href="#practice"><span>09</span> 亲手解释与记录</a>
       <a href="#sources"><span>↗</span> 对应课程与来源</a>
     </nav>
     <div class="sidebar-note"><span class="small-label">这一页怎么用</span><p>每次学一小节。<br>先观察，改一个参数，<br>再用自己的话解释。</p><a href="https://github.com/lucinwen/14plan/blob/main/DAILY/day-01.md" target="_blank" rel="noopener noreferrer">查看原 Day 1 计划 ↗</a></div>
@@ -69,7 +71,7 @@
       <div class="eyebrow">MODERN ROBOTICS / 第一天</div>
       <h1>看懂空间，<br><span>再理解运动。</span></h1>
       <p class="hero-lead">从一本书的摆放，到机器人找到隔壁房间里的杯子。把 Day 1 的抽象概念，拆成可以观察、可以操作的小问题。</p>
-      <div class="lesson-meta"><span>2026.10.20</span><span>6 个指定短片 + MIT 讲义选读</span><span>9 个交互演示</span></div>
+      <div class="lesson-meta"><span>2026.10.20</span><span>6 个指定短片 + MIT 讲义选读</span><span>13 个交互演示</span></div>
       <a class="start-link" href="#rigid-body">从第一幅图开始 <span aria-hidden="true">↓</span></a>
       <div class="opening-question"><span class="small-label">贯穿今天的一个问题</span><p>“机器人，去隔壁房间拿一个杯子。”</p><span>杯子在哪里？坐标相对谁？手够得到吗？门能过去吗？看见了就能抓住吗？</span></div>
       <div class="reading-guide"><h2>不需要先学完线性代数</h2><p>遇到一个新词，先看它在图里对应什么。看到公式时，先问它的<strong>输入是什么、输出是什么、坐标相对谁</strong>。一节中只改一个滑条，猜一猜结果再拖动。</p><p>本教程统一采用<strong>米、右手坐标系、列向量</strong>。像 <code>(1, 2, 0)</code> 这样的三个数，按顺序表示 x、y、z；纸面上横着写只是为了方便阅读。</p><details><summary>“点、向量、矩阵”还陌生？先看这 3 句话</summary><ul><li><strong>点的位置</strong>：从选定原点出发，沿三根轴分别走多远。</li><li><strong>向量</strong>：带方向和长度的箭头，例如“向右移动 1 米”；坐标表通常也写成一列数。</li><li><strong>矩阵</strong>：按行列排列的数字表。本页里的旋转矩阵，记录三根新坐标轴分别指向哪里。它怎样作用于一个点，会在第 3 节拆开。</li></ul></details></div>
@@ -431,11 +433,89 @@
       <p class="source-note">来源：<a href="https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/TASK_GUIDES/day-01.md" target="_blank" rel="noopener noreferrer">Day 1 任务手册</a> 与 <a href="https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/minilab/validate.py" target="_blank" rel="noopener noreferrer">MiniLab 实际规则</a>。这一节是计划中的应用补充，不属于 Modern Robotics 六个短片的逐字内容。</p>
     </section>
 
+    <section id="legality" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>08</span> 对应 14plan Day 1 · 五层合法性与 10 条约束</div>
+      <h2>“能走通”是五个问题，<br class="desktop-break">不是一个问题。</h2>
+      <p>面试里最容易被追问翻车的一句话是“这个场景应该可以”。Day 1 的原计划要求把判断拆成<strong>五层</strong>：拓扑、几何、状态、能力、执行。每层都能单独失败，也各自需要不同的证据。<strong>上层通过不蕴含下层通过</strong>，所以五层不能合成一个“能 / 不能”。</p>
+      <div id="day1-layers" class="demo">
+        <div class="demo-head"><span class="demo-title">五层合法性：逐层追问</span><span class="demo-tag">点一层，看它的反例与证据</span></div>
+        <div class="tabs" role="group" aria-label="选择合法性层级">
+          <button type="button" id="d1-layer-1" aria-pressed="true">① 拓扑</button>
+          <button type="button" id="d1-layer-2" aria-pressed="false">② 几何</button>
+          <button type="button" id="d1-layer-3" aria-pressed="false">③ 状态</button>
+          <button type="button" id="d1-layer-4" aria-pressed="false">④ 能力</button>
+          <button type="button" id="d1-layer-5" aria-pressed="false">⑤ 执行</button>
+        </div>
+        <article class="case-card" id="d1-layer-panel" aria-live="polite"></article>
+        <p class="demo-note" id="d1-layer-note"></p>
+      </div>
+      <p>这五层的顺序不能颠倒：先问“有没有路”，再问“路够不够宽”，再问“门此刻让不让过”，再问“机器人会不会用”，最后才问“真机跑一次成不成”。<strong>越靠下越贵</strong>：拓扑错了要改图，几何错了要改场景，状态错了改规则，能力错了补技能，只有执行层的误差是跑出来才发现的。</p>
+
+      <div id="three-points-constraints" class="subsection-anchor"><h3>10 条空间 / 交互约束，归成 4 类</h3><p>原计划要求“列出 10 种空间或交互约束并归为图关系、几何、状态、机器人能力”。分类的意义在于：同一类约束可以用同一套证据去验，跨类混淆就会写出无法验证的结论。</p></div>
+      <div id="day1-constraints" class="demo">
+        <div class="demo-head"><span class="demo-title">十约束清单</span><span class="demo-tag">按类别筛选</span></div>
+        <div class="chip-list" role="group" aria-label="按类别筛选约束">
+          <button type="button" class="chip is-on" id="d1-con-all">全部 10 条</button>
+          <button type="button" class="chip" id="d1-con-graph">图关系</button>
+          <button type="button" class="chip" id="d1-con-geom">几何</button>
+          <button type="button" class="chip" id="d1-con-state">状态</button>
+          <button type="button" class="chip" id="d1-con-cap">机器人能力</button>
+        </div>
+        <div class="table-scroll"><table class="audit"><thead><tr><th>#</th><th>约束</th><th>类别</th><th>不满足时最先暴露的失败</th></tr></thead><tbody id="d1-con-rows"></tbody></table></div>
+        <p class="demo-note">列表里的每一条都能用一句“可检查的话”写出来：条件 + 阈值 + 数据来源。写不出数据来源的，就是还没验证。</p>
+      </div>
+
+      <div id="three-failures" class="subsection-anchor"><h3>三个必须分开的失败</h3><p>下面三件事在图上、在几何上、在状态上看起来都很像“过不去”，但失败发生在不同层，修法完全不同。先选层，再核对。</p></div>
+      <div id="day1-failures" class="demo">
+        <div class="demo-head"><span class="demo-title">先预测：这次失败在哪一层？</span><span class="demo-tag">3 题 · 选完再核对</span></div>
+        <div class="table-scroll"><table class="audit"><thead><tr><th>变更</th><th>你判断先失败在哪层</th><th>核对</th></tr></thead><tbody>
+          <tr><td>门宽从 0.9 m 改成 0.45 m，机器人宽 0.6 m，图边保留</td><td><select id="d1-fail-1" aria-label="门宽变窄时哪一层先失败"><option value="">— 选一层 —</option><option value="1">① 拓扑</option><option value="2">② 几何</option><option value="3">③ 状态</option><option value="4">④ 能力</option><option value="5">⑤ 执行</option></select></td><td><span id="d1-fail-1-out" class="flag"></span></td></tr>
+          <tr><td>房间 B 移到 <code>[5,0,9,4]</code>，A–B 的图边声明保留</td><td><select id="d1-fail-2" aria-label="房间移开后哪一层先失败"><option value="">— 选一层 —</option><option value="1">① 拓扑</option><option value="2">② 几何</option><option value="3">③ 状态</option><option value="4">④ 能力</option><option value="5">⑤ 执行</option></select></td><td><span id="d1-fail-2-out" class="flag"></span></td></tr>
+          <tr><td>几何与净宽都合法，但门处于 locked 且手里没有钥匙</td><td><select id="d1-fail-3" aria-label="门锁定时哪一层先失败"><option value="">— 选一层 —</option><option value="1">① 拓扑</option><option value="2">② 几何</option><option value="3">③ 状态</option><option value="4">④ 能力</option><option value="5">⑤ 执行</option></select></td><td><span id="d1-fail-3-out" class="flag"></span></td></tr>
+        </tbody></table></div>
+        <div class="note-actions"><button type="button" class="btn" id="d1-fail-check">核对我的判断</button><span>选错也没关系，重点是能说出“为什么不是另外四层”。</span></div>
+        <p class="demo-note" id="d1-fail-note"></p>
+      </div>
+      <details class="self-check"><summary>停一下：为什么“Contact Witness 证明接面”仍然不够？</summary><p>它只能证明两个盒子在某个瞬间有一条接触边或接触面，属于几何层的局部证据。它不说明接面上是否开了门洞、门洞净宽够不够、门的锁定状态如何，更不能证明整条路径上机器人的每一个位姿都不碰撞。<strong>局部几何证据不能替代全程路径验证。</strong></p></details>
+    </section>
+
     <section id="practice" class="lesson-section" data-nav>
-      <div class="section-kicker"><span>08</span> 把观察变成自己的解释</div>
+      <div class="section-kicker"><span>09</span> 把观察变成自己的解释</div>
       <h2>先留下一次预测，<br class="desktop-break">再动手验证。</h2>
       <p>不用因为读到了页尾就把自己标成“已掌握”。先选一个最不确定的问题，写下预测，再去对应的演示里改变参数。下面的练习也可以直接在纸上做。</p>
       <ol class="practice-list"><li><h3>画两个坐标系</h3><p>在同一张图上标 world、camera 的原点和三根轴。解释 <code>T_world_camera</code> 的输入与输出。</p><a href="#transforms">返回变换演示 ↑</a></li><li><h3>自己算一次，再反算一次</h3><p>相机绕 z 转 90°，相机原点在世界 <code>(2, 1, 0)</code>，相机系点是 <code>(1, 0, 0)</code>。先写旋转后的偏移，再加平移，最后用逆变换检验。</p><details><summary>已经尝试，查看核对提示</summary><p>旋转后的偏移是 <code>(0, 1, 0)</code>，世界点是 <code>(2, 2, 0)</code>。先减 <code>(2, 1, 0)</code>，再乘逆旋转，应恢复 <code>(1, 0, 0)</code>。别只记结果，要能解释每一步相对谁。</p></details></li><li><h3>制造三个不同的失败</h3><p>保持图边、缩小门；保留图边、移开房间；保持几何、锁上门。分别写“改了什么 → 哪层失败 → 需要哪种证据”。</p><a href="#room-validation">返回房间演示 ↑</a></li></ol>
+      <div id="exam" class="subsection-anchor"><h3>核心例题：六栏答卷</h3><p>题目：房间 A = <code>(0,0)-(4,4)</code>，B = <code>(4,0)-(8,4)</code>，门宽 0.45 m，机器人宽 0.6 m，A–B 的图边存在。机器人能否按当前规则取到 B 中的杯子？原计划要求按六栏提交——只写“能 / 不能”不算完成。</p></div>
+      <div id="day1-exam" class="demo">
+        <div class="demo-head"><span class="demo-title">六栏答卷（可勾选留痕）</span><span class="demo-tag">本地保存</span></div>
+        <div class="table-scroll"><table class="audit"><thead><tr><th>栏</th><th>这一栏要写什么</th><th>已写</th></tr></thead><tbody>
+          <tr><td>① 输入与单位</td><td>四个数字、单位、坐标原点；明确“门宽”指净宽还是洞口宽。</td><td><input type="checkbox" id="d1-ex-1" aria-label="已完成输入与单位"></td></tr>
+          <tr><td>② 条件与假设</td><td>机器人如何表示为足迹、是否允许侧身、门锁状态是否已知。</td><td><input type="checkbox" id="d1-ex-2" aria-label="已完成条件与假设"></td></tr>
+          <tr><td>③ 自己的推理</td><td>图连通 → 净宽不足 → 能力是否满足，逐层写出结论。</td><td><input type="checkbox" id="d1-ex-3" aria-label="已完成推理"></td></tr>
+          <tr><td>④ 预测</td><td>先写结论（比如“不可通行，几何层失败”），不要边算边改。</td><td><input type="checkbox" id="d1-ex-4" aria-label="已完成预测"></td></tr>
+          <tr><td>⑤ 真实运行结果</td><td>MiniLab 的 status / reason 原文；没运行就写“未运行”，不能写“实测通过”。</td><td><input type="checkbox" id="d1-ex-5" aria-label="已记录真实运行结果"></td></tr>
+          <tr><td>⑥ 局限与下一步</td><td>这个检查器不验证机械臂抓取、不验证真实路径；下一步要补什么证据。</td><td><input type="checkbox" id="d1-ex-6" aria-label="已写局限与下一步"></td></tr>
+        </tbody></table></div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>六栏完成度</span><strong id="d1-ex-count">0 / 6</strong></div>
+          <div class="kpi-block"><span>证据等级</span><strong id="d1-ex-level">未开始</strong></div>
+        </div>
+        <p class="demo-note" id="d1-ex-note"></p>
+      </div>
+      <div id="day1-score" class="demo">
+        <div class="demo-head"><span class="demo-title">五维首次自评（0–4 分）</span><span class="demo-tag">概念 → 因果 → 接口 → 验证 → 真实性</span></div>
+        <div class="score-grid">
+          <div class="score-row"><strong>概念</strong><input id="d1-sc-1" type="range" min="0" max="4" step="1" value="2" aria-label="概念得分"><output id="d1-sc-1-out">2</output></div>
+          <div class="score-row"><strong>因果</strong><input id="d1-sc-2" type="range" min="0" max="4" step="1" value="2" aria-label="因果得分"><output id="d1-sc-2-out">2</output></div>
+          <div class="score-row"><strong>接口</strong><input id="d1-sc-3" type="range" min="0" max="4" step="1" value="1" aria-label="接口得分"><output id="d1-sc-3-out">1</output></div>
+          <div class="score-row"><strong>验证</strong><input id="d1-sc-4" type="range" min="0" max="4" step="1" value="1" aria-label="验证得分"><output id="d1-sc-4-out">1</output></div>
+          <div class="score-row"><strong>真实贡献</strong><input id="d1-sc-5" type="range" min="0" max="4" step="1" value="2" aria-label="真实贡献得分"><output id="d1-sc-5-out">2</output></div>
+        </div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>总分</span><strong id="d1-sc-total">8 / 20</strong></div>
+          <div class="kpi-block"><span>建议</span><strong id="d1-sc-tip">先补验证</strong></div>
+        </div>
+        <p><strong>分数不是目的。</strong>第一次答完先记下总分，隔一天再答一次并对比；如果只有“概念”涨了而“验证”没涨，说明你记住了词，但还没有能复查的证据。</p>
+      </div>
       <div class="personal-note"><div class="note-heading"><div><span class="eyebrow">我的理解</span><h3>写给下次复习的自己</h3></div><span id="note-status" class="note-status" aria-live="polite">记录保存在此浏览器</span></div><label class="form-label" for="learning-note">我原先怎么想？改了哪个参数？现在能怎样解释？还有什么没懂？</label><textarea class="form-control" id="learning-note" rows="8" placeholder="例如：我一开始把‘换坐标’理解成了物体移动。把角度改到 90° 后，我观察到……"></textarea><div class="note-actions"><button type="button" class="btn" id="export-note">导出我的笔记 .md</button><span>浏览器自动保存；导出后可自行放入仓库，不会自动上传。</span></div></div>
       <p>原计划的 MiniLab 实验、首次答案和真实运行记录，仍在 <a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-01.md" target="_blank" rel="noopener noreferrer">Day 1 操作手册</a> 中继续。网页演示用于帮助理解，不能代替你的亲自运行记录。</p>
     </section>

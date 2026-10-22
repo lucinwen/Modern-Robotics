@@ -18,6 +18,7 @@
   <script src="assets/day3-page.js" defer></script>
   <script src="assets/day3-records.js" defer></script>
   <script src="assets/lesson-kit.js" defer></script>
+  <script src="assets/day3-compare.js" defer></script>
 </head>
 <body data-lesson-key="day-03" data-lesson-title="Day 03 · 我的任务规划学习笔记" data-lesson-topic="状态、PDDL、任务与运动规划 TAMP">
 <a class="skip-link" href="#main">跳到教程正文</a>
@@ -39,8 +40,9 @@
       <a href="#fsm"><span>06</span> FSM 与规划怎样配合</a>
       <a href="#motion"><span>07</span> 身体能不能做到</a>
       <a href="#tamp"><span>08</span> 失败怎样返回上层</a>
-      <a href="#experiments"><span>09</span> 真实计划与规则实验</a>
-      <a href="#practice"><span>10</span> 自己解释与阶段练习</a>
+      <a href="#compare"><span>09</span> 三种方法与责任回灌</a>
+      <a href="#experiments"><span>10</span> 真实计划与规则实验</a>
+      <a href="#practice"><span>11</span> 自己解释与阶段练习</a>
       <a href="#sources"><span>↗</span> 原课程与阅读指引</a>
     </nav>
     <div class="sidebar-note"><span class="small-label">卡住时问这三句</span><p>现在什么是真的？<br>这个动作需要什么？<br>做完会改变什么？</p><a href="https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/DAILY/day-03.md" target="_blank" rel="noopener noreferrer">原 Day 3 学习计划 ↗</a></div>
@@ -204,6 +206,64 @@
       <p>这个分工是我们的系统设计选择，不是说“Z3 天生只能处理几何”或“PDDL 一个布尔量就能替代全部碰撞计算”。规划也可以编码成 SAT／SMT；几何检查也可以把带上下文的结果交回任务层。关键是接口中的每个字段究竟承诺了什么。</p>
       <details class="self-check"><summary>先自己说：为什么“重新规划”与“把门加宽”不能写成同一类修复？</summary><p>重新规划通常是在既定世界、能力和目标下重新选择动作及其参数；把门加宽直接改变环境几何。若允许环境编辑，它也可以被明确定义为一个带成本、约束和验证的动作，但不能在原模型没有该动作时偷偷修改输入并声称原任务已解决。</p></details>
       <p class="source-note">TAMP 的离散与连续耦合依据 <a href="#source-tamp">Garrett 等人的 TAMP 综述</a>与 <a href="#source-mit">MIT 课程</a>。反馈字段与门杯修订流程为本教程的具体化示例。</p>
+    </section>
+
+    <section id="compare" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>09</span> 对应 14plan Day 3 · 三种规划方法与责任回灌</div>
+      <h2>FSM、PDDL、TAMP<br class="desktop-break">不是三个难度档位。</h2>
+      <p>它们是三种<strong>不同的建模选择</strong>。选错不是“实现得不够好”，而是你承诺了模型根本给不出的保证。下面这张表是今天最该背下来的部分：每一种方法<strong>保证什么、不保证什么</strong>。</p>
+      <div class="table-scroll"><table class="audit audit--wide"><thead><tr><th>方法</th><th>输入</th><th>输出</th><th>保证什么</th><th>不保证什么</th><th>什么时候用它</th></tr></thead><tbody>
+        <tr><td><strong>FSM</strong><br>有限状态机</td><td>状态集合、转移条件、事件</td><td>一条确定的转移序列</td><td>状态合法、转移条件满足</td><td>不搜索、不替代规划；<strong>分支多时状态爆炸</strong></td><td>流程固定、异常可枚举的任务（开门→通过→抓取）</td></tr>
+        <tr><td><strong>PDDL</strong><br>符号规划</td><td>谓词、动作的 precondition / effect、初态、目标</td><td>动作序列（计划）</td><td>存在一条符号上合法的动作序列</td><td>不保证几何可行、不保证运动学可达、不保证动力学可执行</td><td>任务层：先问“有没有解”，再交给下层验证</td></tr>
+        <tr><td><strong>TAMP</strong><br>任务与运动规划</td><td>符号层 + 连续层（位姿、碰撞、可达性）</td><td>带连续参数的可行计划</td><td>符号与连续<strong>同时</strong>可行（在给定模型内）</td><td>不保证真机成功；不保证模型本身正确</td><td>操作类任务：抓取姿态会影响后续通行</td></tr>
+      </tbody></table></div>
+      <div class="key-idea"><strong>一句话分辨</strong><p>PDDL 回答“<em>顺序对不对</em>”，运动规划回答“<em>身体做不做得到</em>”，TAMP 回答“<em>在什么参数下两者同时成立</em>”。FSM 回答的是“<em>现在该走哪条转移</em>”，它连“有没有解”都不问。</p></div>
+
+      <div id="three-paths" class="subsection-anchor"><h3>同一个目标，三条路径</h3><p>对象：<code>robot, roomA, roomB, doorD, keyK, cupC</code>。初态：<code>at(robot,roomA)</code>、<code>has(robot,keyK)</code>、<code>locked(doorD)</code>、<code>at(cupC,roomB)</code>。目标：<code>holding(robot,cupC)</code>。下面三条路径的<strong>目标完全相同</strong>，差别只在哪一个条件先不成立。</p></div>
+      <div id="day3-paths" class="demo">
+        <div class="demo-head"><span class="demo-title">三条路径推演</span><span class="demo-tag">选一条，看它停在哪一层</span></div>
+        <div class="tabs" role="group" aria-label="选择路径">
+          <button type="button" id="d3-path-ok" aria-pressed="true">① 成功候选</button>
+          <button type="button" id="d3-path-sym" aria-pressed="false">② 符号失败（缺钥匙）</button>
+          <button type="button" id="d3-path-mot" aria-pressed="false">③ 运动失败（把手过高）</button>
+        </div>
+        <div class="step-chain" id="d3-path-chain"></div>
+        <div class="card-grid" id="d3-path-cards"></div>
+        <p class="demo-note" id="d3-path-note"></p>
+      </div>
+      <p><strong>第二种失败最重要。</strong>没有钥匙时，正确的行为是“无合法 unlock 动作”，而不是让求解器把 <code>locked(doorD)</code> 悄悄当成假。许多看起来“规划器很聪明”的 demo，其实是在初态里偷带了隐含前提——这类错误在面试追问下撑不过两轮。</p>
+
+      <h3>失败之后，责任回灌到哪里</h3>
+      <p>“重新规划”和“改环境”是两条完全不同的修复路径。把它们混为一谈，就会出现“我把门加宽了，所以原任务解决了”这种不成立的结论。</p>
+      <div class="step-chain">
+        <span class="node">连续层失败<br><small>reach(handle) 无解</small></span><span class="arrow">→</span>
+        <span class="node is-active">归因<br><small>动作 / 对象 / 条件 / 证据</small></span><span class="arrow">→</span>
+        <span class="node">重新规划<br><small>换站位、换抓取、换顺序</small></span><span class="arrow">/</span>
+        <span class="node">环境或任务修订<br><small>改把手高度、改门宽、承认不可行</small></span>
+      </div>
+      <div class="table-scroll"><table class="audit"><thead><tr><th>失败证据</th><th>可以回灌到</th><th>不能声称</th></tr></thead><tbody>
+        <tr><td>把手高 1.30 m，机械臂可达上限 1.05 m</td><td>换抓取策略 / 换站位 / 加踏台（若允许）</td><td>“计划已成功”——符号解存在不等于可执行</td></tr>
+        <tr><td>门净宽 0.50 m，机器人宽 0.60 m</td><td>换路线；或修订环境（明确记为改动）</td><td>“原世界可行”——改门宽换了输入</td></tr>
+        <tr><td>缺钥匙且无开锁技能</td><td>补动作或补技能；否则判为不可行</td><td>“求解器会自己想办法”</td></tr>
+        <tr><td>未找到解</td><td>调整搜索或放宽约束后重试</td><td>“已证明无解”（未穷举就不成立）</td></tr>
+      </tbody></table></div>
+
+      <div id="checkpoint-a" class="subsection-anchor"><h3>Checkpoint A：四个冲突各答一次</h3><p>原计划要求用至少 35 分钟，独立回答“图、状态、技能、几何冲突”四类问题，并把首次答案与看过参考答案后的修订<strong>分开保存</strong>。下面这张表用来留痕。</p></div>
+      <div id="day3-checkpoint-a" class="demo">
+        <div class="demo-head"><span class="demo-title">Checkpoint A 留痕表</span><span class="demo-tag">首次 / 修订分别记录</span></div>
+        <div class="table-scroll"><table class="audit"><thead><tr><th>冲突</th><th>要回答的问题</th><th>首次已答</th><th>修订已答</th></tr></thead><tbody>
+          <tr><td>图</td><td>A 与 B 图上相邻，是否等于可通行？缺哪条几何证据？</td><td><input type="checkbox" id="d3-cpa-1a" aria-label="图冲突首次已答"></td><td><input type="checkbox" id="d3-cpa-1b" aria-label="图冲突修订已答"></td></tr>
+          <tr><td>状态</td><td>门 locked 且无钥匙时，符号层应该报什么，而不是做什么？</td><td><input type="checkbox" id="d3-cpa-2a" aria-label="状态冲突首次已答"></td><td><input type="checkbox" id="d3-cpa-2b" aria-label="状态冲突修订已答"></td></tr>
+          <tr><td>技能</td><td>机器人能走过去但不会开门，失败属于哪一层？该补什么？</td><td><input type="checkbox" id="d3-cpa-3a" aria-label="技能冲突首次已答"></td><td><input type="checkbox" id="d3-cpa-3b" aria-label="技能冲突修订已答"></td></tr>
+          <tr><td>几何冲突</td><td>符号计划有解但把手过高，返回到上层时需要带哪五个字段？</td><td><input type="checkbox" id="d3-cpa-4a" aria-label="几何冲突首次已答"></td><td><input type="checkbox" id="d3-cpa-4b" aria-label="几何冲突修订已答"></td></tr>
+        </tbody></table></div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>首次完成</span><strong id="d3-cpa-first">0 / 4</strong></div>
+          <div class="kpi-block"><span>修订完成</span><strong id="d3-cpa-rev">0 / 4</strong></div>
+        </div>
+        <p class="demo-note" id="d3-cpa-note"></p>
+      </div>
+      <details class="self-check"><summary>停一下：如果 PDDL 计划里写了 open(D)，为什么还要单独检查门宽？</summary><p>因为 <code>open(D)</code> 只是符号层的一个事实，它承诺“门处于打开状态”，不承诺“门洞净宽大于机器人宽度”。符号层可以把“门开着”和“机器人能通过”写成两条独立谓词，但这两条谓词之间的几何关系必须由连续层或显式规则去验证。<strong>谓词命名相似，不代表语义相同。</strong></p></details>
     </section>
 
     <section id="experiments" class="lesson-section" data-nav>
