@@ -66,7 +66,7 @@
       <div class="eyebrow">MODERN ROBOTICS / 第四天</div>
       <h1>机械臂够得到门把手，<br><span>为什么还是开不了门？</span></h1>
       <p class="hero-lead">Day 3 让任务层说“去开门”。今天要回答的是身体这一侧的问题：末端能不能到、到得了的角度合不合法、到的时候还转不转得动。</p>
-      <div class="lesson-meta"><span>2026.10.22</span><span>平面二连杆 · 手推 + 数值核对</span><span>8 个交互演示</span><span>参考 70–85 分钟</span></div>
+      <div class="lesson-meta"><span>2026.10.22</span><span>平面二连杆 · 手推 + 数值核对</span><span>6 个交互演示</span><span>参考 70–85 分钟</span></div>
       <a class="start-link" href="#spaces">从最容易混的三个词开始 <span aria-hidden="true">↓</span></a>
       <div class="opening-question"><span class="small-label">贯穿今天的一个问题</span><p>“去把隔壁房间桌上的杯子拿过来。”</p><span>杯子在任务空间里的哪里？机械臂的工作空间覆盖它吗？覆盖了，关节角在限位内吗？限位内，肘部会不会撞到桌沿？都没有问题，控制器跟得上吗？</span></div>
       <div class="reading-guide"><h2>今天只用两连杆，但结论不是玩具</h2><p>平面二连杆是所有机械臂里最简单的模型：两段长度 <code>l1</code>、<code>l2</code>，两个关节角 <code>q1</code>、<code>q2</code>。它已经能完整暴露 FK、IK、Jacobian、奇异位形、关节限位这五件事的全部结构。</p><p>六轴机械臂只是把这个结构重复堆叠、再加三维旋转。<strong>两连杆想不清楚，六轴只会更糊。</strong>所以今天不碰 DH 参数，不碰四元数。</p><details><summary>“角度用度还是弧度”为什么会算错？</summary><p>本页所有推导用弧度，界面显示用度。程序里 <code>sin(90)</code> 算的是 90 弧度，不是 90 度——这是运动学作业里最常见的第一个错误。拖动滑条时注意看输出：界面写 <code>90°</code>，公式里代入的是 <code>π/2 ≈ 1.5708</code>。</p></details></div>

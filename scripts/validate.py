@@ -20,7 +20,7 @@ EXPECTED = {
     'day-04.html': ['day4-fk', 'day4-workspace', 'day4-limits', 'day4-failchain', 'day4-verify', 'day4-score'],
     'day-05.html': ['day5-comm', 'day5-topology', 'day5-tf', 'day5-costmap', 'day5-action', 'day5-faults', 'day5-score'],
     'day-07.html': ['day7-stateobs', 'day7-mdp', 'day7-methods', 'day7-chunk', 'day7-pipeline', 'day7-routes', 'day7-contract', 'day7-counter', 'day7-leak', 'day7-exam', 'day7-score'],
-    'day-08.html': ['day8-names', 'day8-matrix', 'day8-counter', 'day8-evidence', 'day8-protocol', 'day8-pitch', 'day8-freeze', 'day8-exam', 'day8-score'],
+    'day-08.html': ['day8-names', 'day8-matrix', 'day8-counter', 'day8-evidence', 'day8-protocol', 'day8-chain', 'day8-async', 'day8-pitch', 'day8-freeze', 'day8-exam', 'day8-score'],
     'day-09.html': ['day9-chain', 'day9-latency', 'day9-states', 'day9-timeline', 'day9-races', 'day9-epoch', 'day9-companion', 'day9-verify', 'day9-exam', 'day9-score'],
     'day-10.html': ['day10-reps', 'day10-matrix', 'day10-gs', 'day10-params', 'day10-timing', 'day10-failures', 'day10-scope', 'day10-exam', 'day10-score'],
     'day-14.html': ['day14-intro', 'day14-claims', 'day14-check', 'day14-pack', 'day14-line', 'day14-timebox', 'day14-drill', 'day14-cards', 'day14-exam', 'day14-score'],

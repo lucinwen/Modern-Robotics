@@ -455,3 +455,248 @@
     boot();
   }
 })();
+
+/* ---------- 06 从一句话到可编辑资产 / 07 多模型异步一致性 ---------- */
+(function () {
+  'use strict';
+  function $(id) { return document.getElementById(id); }
+
+  /* ===== 06 四道关 ===== */
+  var CAND = [
+    {
+      k: 'a',
+      input: '输入：“一间 4 × 3 米的卧室，门通向走廊。” ｜ A 的输出：{"room":[4,3],"door":{"width":0.9}}',
+      cells: [
+        ['房间尺寸有、门宽有，但 <code>door.wall</code> 缺失，长度没有单位声明', 'bad'],
+        ['未检查（第 1 关就拦下了）', 'skip'],
+        ['未检查', 'skip'],
+        ['未检查', 'skip']
+      ],
+      title: '关 1 拦下：缺字段',
+      why: '门没有所属的墙，几何阶段无法判断它开在哪。单位不写，"4" 到底是米还是格子，下游只能猜。这种输出看起来最像"能跑"，其实只是把问题推给了下一层。'
+    },
+    {
+      k: 'b',
+      input: '输入：“一间 4 × 3 米的卧室，门通向走廊。” ｜ B 的输出：{"w_mm":4000,"h_mm":3000,"unit":"m","door":{"wall":"shared","width":900}}',
+      title: '关 1 拦下：单位自相矛盾',
+      cells: [
+        ['字段名说毫米（<code>w_mm</code>），顶层 <code>unit</code> 又写 m，门宽 900 无单位', 'bad'],
+        ['未检查', 'skip'],
+        ['未检查', 'skip'],
+        ['未检查', 'skip']
+      ],
+      why: '这种错误最危险的地方是：它<strong>能算出一个结果</strong>。4000 被当成米，得到一间 4 公里长的卧室，求解器照样 sat。单位错误不会让程序崩，只会让结论错。'
+    },
+    {
+      k: 'c',
+      input: '输入：“一间 4 × 3 米的卧室，门通向走廊。” ｜ C 的输出：字段齐全、单位 m、门开在共享墙、房间 4 × 3 —— 但地块外框只有 3 × 3。',
+      cells: [
+        ['字段齐、类型对、单位 m', 'ok'],
+        ['<code>unsat</code>：房间必须在地块内，4 &gt; 3', 'bad'],
+        ['未检查', 'skip'],
+        ['未检查', 'skip']
+      ],
+      title: '关 2 拦下：约束互相矛盾',
+      why: 'unsat 不是"运气不好"，是<strong>你写下的要求之间真的没有交集</strong>。正确的下一步是找出哪两条要求冲突（Day 2 的 unsat core），而不是换个种子重跑。'
+    },
+    {
+      k: 'd',
+      input: '输入：“一间 4 × 3 米的卧室，门通向走廊。” ｜ D 的输出：全部 <code>sat</code>、几何后验通过、门宽 0.8 m —— 而机器人宽 0.9 m。',
+      cells: [
+        ['字段齐、类型对、单位 m', 'ok'],
+        ['<code>sat</code>，给出一组坐标', 'ok'],
+        ['不重叠、门在共享墙上、净宽 0.8 m 自洽', 'ok'],
+        ['门宽 0.8 m &lt; 机身 0.9 m：进不去', 'bad']
+      ],
+      title: '关 4 拦下：几何合法，任务不可执行',
+      why: '这是四关里最容易被跳过的一关，也是面试官最爱问的一关。<strong>前两关只管"这间屋子成不成立"，第四关才管"这台机器人能不能用"</strong>——两者之间没有任何自动推导关系。'
+    },
+    {
+      k: 'e',
+      input: '输入：“一间 4 × 3 米的卧室，门通向走廊。” ｜ E 的输出：字段齐、单位 m、<code>sat</code>、几何后验通过、门宽 1.2 m 且开在共享墙上、无锁。',
+      cells: [
+        ['字段齐、类型对、单位 m', 'ok'],
+        ['<code>sat</code>，给出一组坐标', 'ok'],
+        ['不重叠、门在共享墙上、净宽 1.2 m', 'ok'],
+        ['门宽 1.2 m &gt; 机身 0.9 m，无锁、无门槛：可通行', 'ok']
+      ],
+      title: '四关全过：这一份可以用',
+      why: '注意这一份通过了，也只说明<strong>它能被拿去当候选</strong>。要不要提交、提交后机器人真的能不能走过去，仍然要由下一层（Day 6 的仿真、Day 7 的策略）来回答。'
+    }
+  ];
+
+  function chainPaint(key) {
+    var body = $('d8-ch-gates');
+    if (!body) return;
+    var c = null;
+    CAND.forEach(function (x) { if (x.k === key) c = x; });
+    if (!c) return;
+    body.textContent = '';
+    c.cells.forEach(function (cell, i) {
+      var tr = document.createElement('tr');
+      var th = document.createElement('th');
+      th.textContent = (i + 1) + ' · ' + ['结构', '可解', '几何后验', '任务前提'][i];
+      var td1 = document.createElement('td');
+      td1.innerHTML = cell[0];
+      var td2 = document.createElement('td');
+      var sp = document.createElement('span');
+      sp.className = 'flag ' + (cell[1] === 'ok' ? 'ok' : cell[1] === 'bad' ? 'bad' : 'warn');
+      sp.textContent = cell[1] === 'ok' ? '通过' : cell[1] === 'bad' ? '不通过' : '未检查';
+      td2.appendChild(sp);
+      tr.appendChild(th); tr.appendChild(td1); tr.appendChild(td2);
+      body.appendChild(tr);
+    });
+    var inp = $('d8-ch-input');
+    if (inp) inp.textContent = c.input;
+    var log = $('d8-ch-log');
+    if (log) {
+      log.textContent = '';
+      var p1 = document.createElement('p');
+      p1.className = c.k === 'e' ? 'is-good' : 'is-bad';
+      p1.textContent = c.title;
+      var p2 = document.createElement('p');
+      p2.innerHTML = c.why;
+      log.appendChild(p1); log.appendChild(p2);
+    }
+    ['a', 'b', 'c', 'd', 'e'].forEach(function (k) {
+      var b = $('d8-ch-' + k);
+      if (b) b.setAttribute('aria-pressed', k === key ? 'true' : 'false');
+    });
+  }
+
+  ['a', 'b', 'c', 'd', 'e'].forEach(function (k) {
+    var b = $('d8-ch-' + k);
+    if (b) b.addEventListener('click', function () { chainPaint(k); });
+  });
+  if ($('d8-ch-gates')) chainPaint('a');
+
+  /* ===== 07 乱序回填 ===== */
+  var LAB = { table: '桌子', chair: '椅子', lamp: '灯', rug: '地毯' };
+  var SLOTS = ['table', 'chair', 'lamp', 'rug'];
+  var EV = [
+    { t: '00:01', n: '桌子（taskId=T，v1）生成成功', task: 'table', ver: 1, ok: true },
+    { t: '00:02', n: '椅子（taskId=C，v1）生成成功', task: 'chair', ver: 1, ok: true },
+    { t: '00:04', n: '灯（taskId=L，v1）超时失败', task: 'lamp', ver: 1, ok: false },
+    { t: '00:05', n: '桌子（taskId=T，v1）的重试副本成功', task: 'table', ver: 1, ok: true },
+    { t: '00:07', n: '桌子（taskId=T，v0）一小时前的旧结果晚到', task: 'table', ver: 0, ok: true },
+    { t: '00:09', n: '地毯（taskId=R，v1）生成成功', task: 'rug', ver: 1, ok: true }
+  ];
+
+  function asyncRun() {
+    var body = $('d8-a-events');
+    if (!body) return;
+    var T = $('d8-a-task').checked;
+    var I = $('d8-a-idem').checked;
+    var V = $('d8-a-ver').checked;
+    var A = $('d8-a-atomic').checked;
+
+    var scene = {};
+    var arr = 0;
+    var failed = false;
+    var bad = { mis: false, dup: false, stale: false, fake: false };
+    var rows = [];
+
+    EV.forEach(function (ev) {
+      if (!ev.ok) {
+        failed = true;
+        rows.push([ev.t, ev.n, '标为失败，不写入场景']);
+        return;
+      }
+      var slot;
+      var action = '';
+      if (T) {
+        slot = ev.task;
+      } else {
+        arr += 1;
+        if (arr > 4) {
+          bad.mis = true;
+          rows.push([ev.t, ev.n, '四个槽位已满，直接丢弃']);
+          return;
+        }
+        slot = SLOTS[arr - 1];
+        if (slot !== ev.task) bad.mis = true;
+        action = '按第 ' + arr + ' 个返回，落进「' + LAB[slot] + '」槽';
+      }
+      var cur = scene[slot];
+      if (T && I && cur && cur.task === ev.task && cur.ver === ev.ver) {
+        rows.push([ev.t, ev.n, '幂等丢弃：同一 taskId + version 已提交过']);
+        return;
+      }
+      if (T && V && cur && cur.task === ev.task && ev.ver < cur.ver) {
+        rows.push([ev.t, ev.n, '陈旧丢弃：v' + ev.ver + ' 比已提交的 v' + cur.ver + ' 旧']);
+        return;
+      }
+      if (T && !V && cur && cur.task === ev.task && ev.ver < cur.ver) {
+        bad.stale = true;
+        action = (action ? action + '；' : '') + '旧结果覆盖了新的 v' + cur.ver;
+      }
+      if (T && !I && cur && cur.task === ev.task && cur.ver === ev.ver) {
+        bad.dup = true;
+        action = (action ? action + '；' : '') + '重复提交同一版本';
+      }
+      scene[slot] = { task: ev.task, ver: ev.ver };
+      rows.push([ev.t, ev.n, action || ('写入「' + LAB[slot] + '」槽')]);
+    });
+
+    if (failed && !A) bad.fake = true;
+
+    body.textContent = '';
+    rows.forEach(function (r) {
+      var tr = document.createElement('tr');
+      r.forEach(function (c, i) {
+        var el = document.createElement(i === 0 ? 'th' : 'td');
+        el.textContent = c;
+        tr.appendChild(el);
+      });
+      body.appendChild(tr);
+    });
+
+    var view;
+    if (failed && A) {
+      var before = SLOTS.map(function (s2) { return scene[s2] ? LAB[scene[s2].task] : '—'; }).join(' / ');
+      view = '整批回滚，未提交 ｜ 回滚前落位：' + before;
+    } else {
+      view = SLOTS.map(function (s) {
+        return LAB[s] + '：' + (scene[s] ? LAB[scene[s].task] + ' v' + scene[s].ver : '—');
+      }).join(' ｜ ');
+      if (failed && !A) view += ' ｜ 灯：缺（但仍提交）';
+    }
+    var sv = $('d8-a-scene');
+    if (sv) sv.textContent = view;
+
+    var issues = [];
+    if (bad.mis) issues.push('串位');
+    if (bad.dup) issues.push('重复提交');
+    if (bad.stale) issues.push('版本倒退');
+    if (bad.fake) issues.push('假成功');
+    var vd = $('d8-a-verdict');
+    if (vd) {
+      vd.textContent = issues.length ? issues.join(' + ') : (failed ? '一致（缺一盏灯，整批未提交）' : '一致');
+      vd.style.color = issues.length ? 'var(--destructive)' : '';
+    }
+
+    var log = $('d8-a-log');
+    if (log) {
+      log.textContent = '';
+      function line(txt, cls) {
+        var p = document.createElement('p');
+        if (cls) p.className = cls;
+        p.textContent = txt;
+        log.appendChild(p);
+      }
+      if (!T) line('关掉任务 ID 归属：结果只能按到达顺序落位，第四个成功结果（桌子的重试副本）被当成第四个物体，地毯因此丢失。', 'is-bad');
+      if (!T && I) line('注意：没有 taskId 时，幂等键根本无从建立——幂等依赖“任务身份”，不是依赖“结果内容”。', 'is-bad');
+      if (T && !I) line('关掉幂等：重试副本会被再提交一次。场景里可能看不出差别，账单和实例数上看得出。', 'is-bad');
+      if (T && !V) line('关掉版本比较：一小时前的 v0 覆盖了刚提交的 v1，你改好的结果被静悄悄冲掉。', 'is-bad');
+      if (!A) line('关掉原子回填：灯失败了，另外三个照样提交，最终状态却写着 success——这就是“假成功”。', 'is-bad');
+      if (!issues.length) line('四道保护都在：结果各归各位、重复被丢弃、旧的被丢弃、缺一个就整批不提交。', 'is-good');
+      if (!issues.length) line('下一步不是重跑全部，而是只重跑灯，然后重新尝试提交整批。', '');
+    }
+  }
+
+  ['d8-a-task', 'd8-a-idem', 'd8-a-ver', 'd8-a-atomic'].forEach(function (id) {
+    var el = $(id);
+    if (el) el.addEventListener('change', asyncRun);
+  });
+  if ($('d8-a-events')) asyncRun();
+})();

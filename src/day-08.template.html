@@ -30,10 +30,12 @@
       <a href="#counter"><span>03</span> 两个反例</a>
       <a href="#evidence"><span>04</span> 贡献四分类</a>
       <a href="#protocol"><span>05</span> 公平基线协议</a>
-      <a href="#pitch"><span>06</span> 90 秒科研叙事</a>
-      <a href="#freeze"><span>07</span> 材料冻结核验</a>
-      <a href="#exam"><span>08</span> 综合考题六栏答卷</a>
-      <a href="#score"><span>09</span> 五维自评</a>
+      <a href="#chain"><span>06</span> 从一句话到可编辑资产</a>
+      <a href="#async"><span>07</span> 多模型异步任务一致性</a>
+      <a href="#pitch"><span>08</span> 90 秒科研叙事</a>
+      <a href="#freeze"><span>09</span> 材料冻结核验</a>
+      <a href="#exam"><span>10</span> 综合考题六栏答卷</a>
+      <a href="#score"><span>11</span> 五维自评</a>
       <a href="#sources"><span>↗</span> 来源与边界</a>
     </nav>
     <div class="sidebar-note"><span class="small-label">这一页怎么用</span><p>每写一句“它做了 X”，<br>都要能指出在哪一节读到。<br>指不出，就写“待查”。</p><a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-08.md" target="_blank" rel="noopener noreferrer">查看原 Day 8 任务手册 ↗</a></div>
@@ -43,7 +45,7 @@
       <div class="eyebrow">MODERN ROBOTICS / 第八天</div>
       <h1>评委问：“你的 SceneWeaver<br><span>和 MANSION 不是做一样的事吗？”</span></h1>
       <p class="hero-lead">这一问的难点不在技术，在于<strong>你必须有证据说话</strong>。今天不写代码，只做一件事：把“我知道的”和“我需要从原论文核实的”分开，然后设计一个能被公平比较的实验。</p>
-      <div class="lesson-meta"><span>2026.10.22</span><span>文献对照 · 证据分界 · 不复制论文数字</span><span>9 个交互演示</span><span>参考 65–80 分钟</span></div>
+      <div class="lesson-meta"><span>2026.10.22</span><span>文献对照 · 证据分界 · 语言→资产链 · 异步一致性</span><span>11 个交互演示</span><span>参考 80–95 分钟</span></div>
       <a class="start-link" href="#names">先分清三个名字 <span aria-hidden="true">↓</span></a>
       <div class="opening-question"><span class="small-label">贯穿今天的一个问题</span><p>“你这个和那篇论文有什么区别？”</p><span>如果回答是“我们的效果更好”，评委追问一句“在什么任务上、同一预算吗、成功率多少”，就答不上来了。可如果回答是“相似在我们都做多房间生成，不同在我的输出目标是可交互环境，但这一点我还没有端到端证据”——这句话没人能驳倒，因为它诚实。</span></div>
       <div class="reading-guide"><h2>今天最重要的产出不是结论，是“证据等级”</h2><p>四个等级要一直挂在嘴边：<strong>论文已展示</strong>（原文写了，我能指到章节）、<strong>个人已验证</strong>（我自己跑过、有截图/日志）、<strong>纸面设计</strong>（我设计了但没实现）、<strong>待查</strong>（我还没读到）。</p><p>混用这四级，是面试里最致命的错误——比“不知道”严重得多，因为“不知道”可以补，说错过的经历补不回来。</p><details><summary>为什么本页不复述论文的具体指标数字？</summary><p>因为数字脱离任务设定就没有意义：同一篇论文在不同数据划分、不同机器人尺寸下结论会变。本页只记录<strong>方法的结构性问题</strong>（输入是什么、表示是什么、能不能处理动态状态、有没有公平基线），具体数值留给你回原文核对。凡是我没有把握的地方，页面上会写“待查”，而不是编一个听起来合理的答案。</p></details></div>
@@ -201,8 +203,113 @@
       <div class="key-idea"><strong>最常见的学术不诚实（往往是无意的）：</strong>用几何合法率代替成功率，然后说“生成质量提升”。这两列在同一个系统上可能相差几十个百分点。</div>
     </section>
 
+    <section id="chain" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>06</span> 对应 14plan Day 8 · 技术链与 LLM 约束</div>
+      <h2>一句话变成一间屋子，<br class="desktop-break">中间隔着四道关。</h2>
+      <p>这类系统在 14plan 里被写成一条五段的链：<strong>语言目标 → 结构化约束 → 白盒场景 → 可编辑资产 → 引擎反馈</strong>。最容易讲错的地方只有一个——把第一段说成“AI 直接生成了场景”。它真正的产物是一组<strong>候选约束</strong>；能不能用，由后面四道关决定。</p>
+      <div class="step-chain">
+        <span class="node">① 语言目标</span><span class="arrow">→</span>
+        <span class="node">② 结构化约束</span><span class="arrow">→</span>
+        <span class="node">③ 白盒场景</span><span class="arrow">→</span>
+        <span class="node">④ 可编辑资产</span><span class="arrow">→</span>
+        <span class="node">⑤ 引擎反馈</span>
+      </div>
+      <p>“白盒”是关键词：场景不是一坨烘好的贴图，而是一组能被单独检查、单独修改的参数——墙在哪、门开在哪面墙、楼梯几级、净空多少。只有白盒，失败反馈才能落回<strong>正确的那一个参数</strong>上；否则你只知道“图不对”，不知道该改哪里。</p>
+
+      <h3>四道关，顺序不能换</h3>
+      <div class="table-scroll"><table class="audit"><thead><tr><th>关</th><th>检查什么</th><th>不过说明什么</th></tr></thead><tbody>
+        <tr><td>1 · 结构</td><td>字段齐吗、类型对吗、单位写了吗</td><td>缺一个字段，后面全是白算</td></tr>
+        <tr><td>2 · 可解</td><td>这组约束有解吗（sat / unsat / unknown）</td><td>要求互相矛盾，不是“再跑一次试试”</td></tr>
+        <tr><td>3 · 几何后验</td><td>解出来的盒子真不重叠？门真在共享墙上？</td><td>求解器只保证你写下来的条件</td></tr>
+        <tr><td>4 · 任务前提</td><td>给定这台机器人，任务做得成吗</td><td>几何合法，但任务仍然不可执行</td></tr>
+      </tbody></table></div>
+
+      <div id="day8-chain" class="demo">
+        <div class="demo-head"><span class="demo-title">同一句话，五种输出</span><span class="demo-tag">点一个，看它被哪一关拦下</span></div>
+        <p class="demo-note" id="d8-ch-input">输入：“一间 4 × 3 米的卧室，门通向走廊。”</p>
+        <div class="tabs" role="group" aria-label="选择候选输出">
+          <button type="button" id="d8-ch-a" aria-pressed="true">A 缺字段</button>
+          <button type="button" id="d8-ch-b" aria-pressed="false">B 单位矛盾</button>
+          <button type="button" id="d8-ch-c" aria-pressed="false">C 无解</button>
+          <button type="button" id="d8-ch-d" aria-pressed="false">D 门太窄</button>
+          <button type="button" id="d8-ch-e" aria-pressed="false">E 全对</button>
+        </div>
+        <div class="table-scroll"><table class="audit"><thead><tr><th>关</th><th>这一份输出的情况</th><th>结论</th></tr></thead><tbody id="d8-ch-gates"></tbody></table></div>
+        <div class="ledger" id="d8-ch-log"></div>
+        <p class="demo-note" id="d8-ch-note">关 1 不过，后面三关根本不用看——这不是严格，是省时间。真实的链路里，绝大多数“AI 生成的场景不对”都死在第 1 关和第 3 关，只有少数死在第 2 关。</p>
+      </div>
+
+      <h3>为什么关 2 过了还不够</h3>
+      <p>Z3 返回 <code>sat</code>，只说明存在一组数满足你<strong>写下来</strong>的那些不等式。你没写的——门要开在共享墙上、柜门要能打开、机器人要能转弯——它一律不管。这是 Day 2 那句话的工程版本：<strong>求解器不会替你补条件，它只会替你检查条件。</strong></p>
+      <p>反过来，关 3 过了也还不够。门宽 1.2 米、几何全对，但门是锁着的、机器人没有开锁技能——这就是 Day 3 那张连通图要说的同一件事。<strong>四道关是一条流水线，只有最后一道才是“机器人真的能做到”。</strong></p>
+
+      <details class="fold">
+        <summary>如果模型输出的是自然语言，不是 JSON，怎么办？</summary>
+        <div>
+          <p>先<strong>编译</strong>成 schema，不要边解析边用。四步：</p>
+          <ol>
+            <li><strong>抽字段</strong>：把“门通向走廊”落成 <code>door.wall = shared_wall(room, corridor)</code>，而不是留一句自然语言在数据里。</li>
+            <li><strong>补默认值要显式</strong>：没说层高就用 2.8 米，但要在数据里记 <code>assumed: true</code>，否则后面没人知道这是猜的。</li>
+            <li><strong>编译失败要能指位置</strong>：说出“第 2 句缺 <code>door.width</code>”，把这条反例喂回去做<strong>局部修订</strong>。</li>
+            <li><strong>不要整段重新生成</strong>：重生成会顺手改掉已经对的部分，你无法解释改了什么，也就无法复核。</li>
+          </ol>
+          <p>这四步的产物本身就是实验记录：输入句子、编译结果、四关结论、最终改了什么。面试时能拿出这张表，比说“我用 LLM 做了场景生成”有力得多。</p>
+        </div>
+      </details>
+
+      <div class="key-idea"><strong>面试里最稳的一句：</strong>“LLM 产出的是候选约束，能不能用由求解器与几何检查决定；我做的事是让失败可定位、可局部修订。”这句话同时回答了“你用了什么 AI”和“你怎么保证它靠谱”两问。</div>
+
+      <h3>还有一个名字容易被误算成生成器：BEHAVIOR-1K</h3>
+      <p>比较“环境生成”时，很容易把 BEHAVIOR-1K 也列进生成器那一栏。它不是——它是一个<strong>任务基准</strong>：1000 项家庭活动、固定的初始状态与目标谓词、统一的物理仿真环境。它的价值是给你一把尺子，而不是给你一间屋子。</p>
+      <p>所以“我的方法和 BEHAVIOR-1K 比”这句话是错的。正确说法是：“我用 BEHAVIOR-1K 的任务定义与成功判据作为对照基准，检验我生成的环境能不能承载这些任务。”——前者把尺子当成对手，后者把尺子当成尺子。</p>
+    </section>
+
+    <section id="async" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>07</span> 对应 14plan Day 8 · 多模型异步任务</div>
+      <h2>四个模型同时开工，<br class="desktop-break">谁先回来谁就写进场景？</h2>
+      <p>一次生成往往不是一个模型，而是四五个并行任务：椅子、桌子、灯、地毯。它们<strong>不会按你发出的顺序回来</strong>。如果不处理，你会在四个地方出错——而且四个都不报错，只会让最后那张图不对，或者账单不对。</p>
+      <div class="table-scroll"><table class="audit"><thead><tr><th>要回答的问题</th><th>错了会怎样</th><th>用什么判据</th></tr></thead><tbody>
+        <tr><td>这个结果属于哪个任务</td><td>椅子的结果填进桌子的位置（串位）</td><td><code>taskId</code>，不是“第几个返回”</td></tr>
+        <tr><td>同一次生成会不会提交两遍</td><td>两张桌子、两次计费、两个实例</td><td>幂等键（<code>taskId</code> + <code>version</code>）</td></tr>
+        <tr><td>晚到的旧结果会不会覆盖新的</td><td>你改好的版本被一小时前的结果冲掉</td><td>版本号或时间戳单调前进</td></tr>
+        <tr><td>四个里坏一个，剩下三个提交吗</td><td>场景缺一盏灯，状态却写着 success</td><td>原子回填，或显式标“部分成功”</td></tr>
+      </tbody></table></div>
+
+      <div id="day8-async" class="demo">
+        <div class="demo-head"><span class="demo-title">乱序回填检查器</span><span class="demo-tag">六个事件，固定顺序</span></div>
+        <p class="demo-note">下面六个事件按真实时间到达，顺序不变。你可以关掉四道保护，看场景会变成什么样。</p>
+        <div class="gate">
+          <label><input type="checkbox" id="d8-a-task" checked> <span>任务 ID 归属（结果回到自己的槽位，不按到达顺序落位）</span></label>
+          <label><input type="checkbox" id="d8-a-idem" checked> <span>幂等键（同一 taskId + version 只提交一次）</span></label>
+          <label><input type="checkbox" id="d8-a-ver" checked> <span>版本比较（只允许新版本覆盖旧版本）</span></label>
+          <label><input type="checkbox" id="d8-a-atomic" checked> <span>原子回填（任一任务失败则整批不提交）</span></label>
+        </div>
+        <div class="table-scroll"><table class="audit"><thead><tr><th>时刻</th><th>到达的事件</th><th>系统怎么处理</th></tr></thead><tbody id="d8-a-events"></tbody></table></div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>场景里的四个槽位</span><strong id="d8-a-scene">—</strong></div>
+          <div class="kpi-block"><span>一致性判定</span><strong id="d8-a-verdict">—</strong></div>
+        </div>
+        <div class="ledger" id="d8-a-log"></div>
+        <p class="demo-note" id="d8-a-note">四项都打开时，结果是“整批未提交、回滚前落位都正确”——这不是失败，这是<strong>可解释的失败</strong>：你知道缺的是灯，重跑灯就行，不必重跑另外三个。</p>
+      </div>
+
+      <h3>“提交”是第五个状态，不是“成功”的同义词</h3>
+      <p>任务状态不是成功 / 失败两格。真正要管的是：<code>queued → running → (succeeded | failed | cancelled) → committed</code>。<strong>提交是单独的、可回滚的一步。</strong></p>
+      <p>把“生成成功”和“写进场景”混成一个状态，是这类系统最常见的设计错误——因为生成成功之后，还有一次可能失败的写入（磁盘、事务、下游服务）。混淆这两件事，你会在日志里看到一堆“成功”，但场景是缺的。</p>
+
+      <h3>把这件事说清楚，只需要三句</h3>
+      <div class="step-chain">
+        <span class="node">失败点不在模型质量，在任务状态</span><span class="arrow">→</span>
+        <span class="node">taskId / 幂等 / 版本 / 原子提交</span><span class="arrow">→</span>
+        <span class="node">部分失败时我选全回滚，因为可以只重跑坏的那个</span>
+      </div>
+      <p>第一句定性质，第二句给出你实际处理的四个量，第三句给出你的取舍和理由。三句话都带判据，追问就落不到“你只是调了调 API”上。</p>
+
+      <div class="key-idea"><strong>别说“异步就是加个队列”。</strong>队列解决的是“谁先执行”，不解决“结果属于谁、会不会算两次、旧的能不能覆盖新的、坏一个要不要全撤”。这四件事都不在队列里，在你的状态设计里。</div>
+    </section>
+
     <section id="pitch" class="lesson-section" data-nav>
-      <div class="section-kicker"><span>06</span> 对应 14plan Day 8 · 第 6 阶段</div>
+      <div class="section-kicker"><span>08</span> 对应 14plan Day 8 · 第 6 阶段</div>
       <h2>90 秒，说清三句话。</h2>
       <p>14plan 要求录一段 90 秒的科研定位：<strong>已做 / 正在研究 / 需训练营验证</strong>。每句都必须是可核查的。在下面写，页面会按中文语速估算时长。</p>
       <div id="day8-pitch" class="demo">
@@ -231,7 +338,7 @@
     </section>
 
     <section id="freeze" class="lesson-section" data-nav>
-      <div class="section-kicker"><span>07</span> 对应 14plan Day 8 · 第 7 阶段</div>
+      <div class="section-kicker"><span>09</span> 对应 14plan Day 8 · 第 7 阶段</div>
       <h2>10 月 27 日之前，<br class="desktop-break">每一行都要有状态。</h2>
       <p>冻结不是“写完”，是“每一行都知道自己处于哪一格”。给下面七项标状态，然后过一遍安全清单。</p>
       <div id="day8-freeze" class="demo">
@@ -252,7 +359,7 @@
     </section>
 
     <section id="exam" class="lesson-section" data-nav>
-      <div class="section-kicker"><span>08</span> 今日综合考题</div>
+      <div class="section-kicker"><span>10</span> 今日综合考题</div>
       <h2>“你的 SceneWeaver 和 MANSION<br class="desktop-break">不是做一样的事吗？”</h2>
       <p>在没有端到端证据的前提下，这道题的正确答法不是辩解，是<strong>把相似、差异、证据、缺口四件事分开说</strong>。先自己写，再对照骨架。</p>
       <h3>先关掉资料，答这三问</h3>
@@ -280,7 +387,7 @@
     </section>
 
     <section id="score" class="lesson-section" data-nav>
-      <div class="section-kicker"><span>09</span> 首次自评</div>
+      <div class="section-kicker"><span>11</span> 首次自评</div>
       <h2>先记第一次的分数。</h2>
       <div id="day8-score" class="demo">
         <div class="demo-head"><span class="demo-title">五维自评（0–4 分）</span><span class="demo-tag">首次 / 修订分开记</span></div>
