@@ -12,6 +12,8 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 EXPECTED = {
+    'start.html': ['start-paths'],
+    'glossary.html': ['glossary-filter'],
     'index.html': ['dof-rigid-body', 'dof-three-points', 'dof-cspace-explorer', 'mr-workspace', 'mr-frames-rotation', 'mr-active-passive', 'mr-homogeneous-transform', 'day1-point-cloud', 'day1-room-validation', 'day1-layers', 'day1-constraints', 'day1-failures', 'day1-exam', 'day1-score'],
     'day-02.html': ['day2-domains', 'day2-nonoverlap', 'day2-packing', 'day2-contact', 'day2-pipeline', 'day2-incremental', 'day2-core', 'day2-preferences', 'day2-results'],
     'day-03.html': ['day3-layers', 'day3-state', 'day3-actions', 'day3-domain', 'day3-search', 'day3-fsm', 'day3-clearance', 'day3-reach', 'day3-feedback', 'day3-records', 'day3-checkpoint', 'day3-paths', 'day3-checkpoint-a'],

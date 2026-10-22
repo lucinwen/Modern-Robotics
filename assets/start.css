@@ -1,0 +1,68 @@
+/* 路线总览页与术语表页共用样式 */
+.path-picker { display: flex; flex-wrap: wrap; gap: 10px; margin: 22px 0 10px; }
+.path-picker .btn { min-height: 40px; padding: 9px 16px; font-size: 13px; }
+.path-note { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; margin: 0 0 26px; font-size: 13px; color: var(--muted-foreground); line-height: 1.75; }
+.path-note strong { color: var(--foreground); }
+.path-hint { margin: 0 0 22px; padding: 13px 16px; border-left: 3px solid var(--primary); background: var(--muted); border-radius: 0 6px 6px 0; font-size: 13px; line-height: 1.8; }
+.path-hint[hidden] { display: none !important; }
+
+.roadmap { display: grid; gap: 8px; }
+.rd-stage { margin-top: 26px; padding-top: 4px; }
+.rd-stage:first-child { margin-top: 0; }
+.rd-stage h3 { margin: 0 0 4px; font-size: 17px; letter-spacing: .01em; }
+.rd-stage p { margin: 0 0 8px; font-size: 13px; color: var(--muted-foreground); line-height: 1.75; }
+.rd-row { display: grid; grid-template-columns: 58px minmax(0, 1fr); gap: 14px; padding: 15px 18px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; transition: opacity .18s ease, border-color .18s ease, box-shadow .18s ease; }
+.rd-num { font-family: Georgia, serif; font-size: 26px; line-height: 1.1; font-weight: 700; color: var(--muted-foreground); letter-spacing: -.04em; }
+.rd-body { min-width: 0; }
+.rd-body h4 { margin: 0 0 5px; font-size: 16px; font-weight: 650; line-height: 1.5; }
+.rd-body h4 a { color: var(--foreground); text-decoration: none; }
+.rd-body h4 a:hover { color: var(--primary); text-decoration: underline; }
+.rd-sum { margin: 0 0 8px; font-size: 14px; line-height: 1.8; color: var(--muted-foreground); }
+.rd-meta { display: flex; flex-wrap: wrap; gap: 5px 9px; margin: 0; font-size: 11px; line-height: 1.6; color: var(--muted-foreground); }
+.rd-meta span { border: 1px solid var(--border); border-radius: 999px; padding: 1px 9px; }
+.rd-meta .rd-pre { border-color: transparent; background: var(--muted); }
+.rd-meta .rd-lvl { letter-spacing: .1em; }
+.roadmap[data-mode="sprint"] .rd-row[data-sprint="0"] { opacity: .34; }
+.roadmap[data-mode="sprint"] .rd-row[data-sprint="1"] { border-color: var(--primary); box-shadow: inset 3px 0 0 var(--primary); }
+.roadmap[data-mode="search"] .rd-row { opacity: .55; }
+
+.math-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 24px 0 8px; }
+.math-card { padding: 16px 18px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; }
+.math-card h3 { margin: 0 0 7px; font-size: 15px; }
+.math-card p { margin: 0 0 8px; font-size: 13px; line-height: 1.8; color: var(--muted-foreground); }
+.math-card .small-label { margin-top: 6px; }
+
+.entry-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin: 26px 0; }
+.entry-card { display: block; padding: 20px 22px; background: var(--card); border: 1px solid var(--border); border-radius: 9px; text-decoration: none; color: inherit; transition: border-color .18s ease, transform .18s ease; }
+.entry-card:hover { border-color: var(--primary); transform: translateY(-2px); }
+.entry-card strong { display: block; font-size: 16px; margin-bottom: 6px; }
+.entry-card span { display: block; font-size: 13px; line-height: 1.8; color: var(--muted-foreground); }
+.entry-card em { display: block; margin-top: 10px; font-size: 12px; font-style: normal; color: var(--primary); }
+
+/* 术语表 */
+.glossary-toolbar { position: sticky; top: 80px; z-index: 5; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 12px 0; background: var(--page); border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+.glossary-toolbar .form-control { flex: 1 1 240px; max-width: 380px; }
+.glossary-count { font-size: 12px; color: var(--muted-foreground); }
+.glossary-jump { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 26px; }
+.glossary-jump a { font-size: 12px; text-decoration: none; border: 1px solid var(--border); border-radius: 999px; padding: 3px 11px; color: var(--muted-foreground); }
+.glossary-jump a:hover { border-color: var(--primary); color: var(--primary); }
+.term-group { margin: 0 0 34px; scroll-margin-top: 150px; }
+.term-group > h2 { font-size: 22px; margin: 0 0 6px; }
+.term-group > p { margin: 0 0 14px; font-size: 13px; color: var(--muted-foreground); }
+.term-list { display: grid; gap: 0; border-top: 1px solid var(--border); }
+.term { display: grid; grid-template-columns: minmax(0, 200px) minmax(0, 1fr); gap: 8px 22px; padding: 13px 2px; border-bottom: 1px solid var(--border); }
+.term[hidden] { display: none !important; }
+.term dt { font-weight: 650; font-size: 15px; line-height: 1.6; }
+.term dt small { display: block; font-weight: 400; font-size: 11px; letter-spacing: .02em; color: var(--muted-foreground); margin-top: 3px; }
+.term dd { margin: 0; font-size: 14px; line-height: 1.85; color: var(--card-foreground); }
+.term dd a { font-size: 12px; white-space: nowrap; }
+.term-empty { padding: 30px 0; color: var(--muted-foreground); font-size: 14px; }
+mark { background: var(--accent); color: var(--accent-foreground); border-radius: 3px; padding: 0 2px; }
+
+@media (max-width: 760px) {
+  .math-grid { grid-template-columns: minmax(0, 1fr); }
+  .term { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .rd-row { grid-template-columns: 44px minmax(0, 1fr); padding: 13px 14px; gap: 10px; }
+  .rd-num { font-size: 21px; }
+  .glossary-toolbar { top: 70px; }
+}

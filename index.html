@@ -50,6 +50,10 @@
     <a href="day-14.html" data-day="14"><strong>DAY 14</strong><span>模拟面试</span></a>
   </nav>
 </details>
+<div class="switcher-extra">
+  <a href="start.html">路线总览 · 14 天怎么排</a>
+  <a href="glossary.html">术语表 · 80 个词速查</a>
+</div>
     <div class="sidebar-intro"><span class="eyebrow">学习路线</span><strong>第一天，建立空间直觉。</strong></div>
     <nav class="lesson-nav" aria-label="本页目录">
       <a href="#start" class="is-current" aria-current="location"><span>00</span> 从这里开始</a>
@@ -71,11 +75,26 @@
       <div class="eyebrow">MODERN ROBOTICS / 第一天</div>
       <h1>看懂空间，<br><span>再理解运动。</span></h1>
       <p class="hero-lead">从一本书的摆放，到机器人找到隔壁房间里的杯子。把 Day 1 的抽象概念，拆成可以观察、可以操作的小问题。</p>
-      <div class="lesson-meta"><span>2026.10.20</span><span>6 个指定短片 + MIT 讲义选读</span><span>13 个交互演示</span></div>
+      <div class="lesson-meta"><span>2026.10.20</span><span>6 个指定短片 + MIT 讲义选读</span><span>13 个交互演示</span><span>参考 60–80 分钟</span></div>
+      <p class="start-hint">第一次来这个站？先花 5 分钟看 <a href="start.html">14 天路线总览</a>，再回来从这一页往下读。</p>
       <a class="start-link" href="#rigid-body">从第一幅图开始 <span aria-hidden="true">↓</span></a>
       <div class="opening-question"><span class="small-label">贯穿今天的一个问题</span><p>“机器人，去隔壁房间拿一个杯子。”</p><span>杯子在哪里？坐标相对谁？手够得到吗？门能过去吗？看见了就能抓住吗？</span></div>
       <div class="reading-guide"><h2>不需要先学完线性代数</h2><p>遇到一个新词，先看它在图里对应什么。看到公式时，先问它的<strong>输入是什么、输出是什么、坐标相对谁</strong>。一节中只改一个滑条，猜一猜结果再拖动。</p><p>本教程统一采用<strong>米、右手坐标系、列向量</strong>。像 <code>(1, 2, 0)</code> 这样的三个数，按顺序表示 x、y、z；纸面上横着写只是为了方便阅读。</p><details><summary>“点、向量、矩阵”还陌生？先看这 3 句话</summary><ul><li><strong>点的位置</strong>：从选定原点出发，沿三根轴分别走多远。</li><li><strong>向量</strong>：带方向和长度的箭头，例如“向右移动 1 米”；坐标表通常也写成一列数。</li><li><strong>矩阵</strong>：按行列排列的数字表。本页里的旋转矩阵，记录三根新坐标轴分别指向哪里。它怎样作用于一个点，会在第 3 节拆开。</li></ul></details></div>
       <p class="source-note">课程范围依据 <a href="https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/DAILY/day-01.md" target="_blank" rel="noopener noreferrer">Day 1 计划</a>。教程依据指定短片的官方转写与 MIT 在线讲义整理；来源与原视频入口见页末。</p>
+      <details class="fold term-fold">
+        <summary>本页生词 · 6 个 <span>看不懂就展开；正文第一次遇到时不再打断你</span></summary>
+        <div>
+          <dl>
+            <dt>自由度 <small>DOF</small></dt><dd>能独立改变的运动方式有几个。空间里的刚体 6 个，桌面上的书 3 个。</dd>
+            <dt>构型空间 <small>C-space</small></dt><dd>把所有可能的姿态当成一个空间里的点，碰撞问题就变成“这个点在不在禁区外”。</dd>
+            <dt>旋转矩阵 </dt><dd>把三根新坐标轴的方向分别写成三列。用它乘一个点，等于换一次坐标。</dd>
+            <dt>齐次变换 / 位姿 <small>SE(3)</small></dt><dd>把旋转和平移装进一个 4×4 矩阵，一次乘完；位姿 = 位置 + 朝向。</dd>
+            <dt>点云 </dt><dd>一堆带坐标的点，没有面、没有语义，不能直接当碰撞体用。</dd>
+            <dt>包围盒 <small>AABB</small></dt><dd>用一个长方体把物体“罩住”，代价是先忽略它的真实形状。</dd>
+          </dl>
+          <p class="term-fold__more"><a href="glossary.html">80 个词的完整术语表 →</a></p>
+        </div>
+      </details>
     </section>
 
     <section id="rigid-body" class="lesson-section" data-nav>

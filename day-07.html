@@ -40,6 +40,10 @@
     <a href="day-14.html" data-day="14"><strong>DAY 14</strong><span>模拟面试</span></a>
   </nav>
 </details>
+<div class="switcher-extra">
+  <a href="start.html">路线总览 · 14 天怎么排</a>
+  <a href="glossary.html">术语表 · 80 个词速查</a>
+</div>
     <div class="sidebar-intro"><span class="eyebrow">学习路线</span><strong>环境能生成，不等于策略会学会。</strong></div>
     <nav class="lesson-nav" aria-label="本页目录">
       <a href="#start" class="is-current" aria-current="location"><span>00</span> 今天要分清的两件事</a>
@@ -60,13 +64,28 @@
   <main id="main">
     <section id="start" class="hero lesson-section" data-nav>
       <div class="eyebrow">MODERN ROBOTICS / 第七天</div>
-      <h1>你已经会生成房间了，<br><span>那机器人是怎么“学会”开门的？</span></h1>
+      <h1>房间能生成了，<br><span>机器人怎么“学会”开门？</span></h1>
       <p class="hero-lead">Day 6 把场景变成了训练环境。今天的任务是把它接上策略：说清楚 observation 从哪里来、action 送到哪里去、中间那条链路每一环归谁管。</p>
-      <div class="lesson-meta"><span>2026.10.22</span><span>概念对照 · 纸面契约 · 无训练</span><span>11 个交互演示</span></div>
+      <div class="lesson-meta"><span>2026.10.22</span><span>概念对照 · 纸面契约 · 无训练</span><span>11 个交互演示</span><span>参考 75–90 分钟</span></div>
       <a class="start-link" href="#state-action">从最容易混的三个词开始 <span aria-hidden="true">↓</span></a>
       <div class="opening-question"><span class="small-label">贯穿今天的一个问题</span><p>“你生成了 1000 个新房间，VLA 的泛化应该变好了吧？”</p><span>这句话里至少藏了四个未被验证的假设：新房间真的属于新分布、策略真的在这些房间里训练过、评测协议没变、成功率提升确实来自环境多样性而不是数据量。今天就是把它们一个个拆开。</span></div>
       <div class="reading-guide"><h2>今天不训练任何模型</h2><p>14plan Day 7 要求的是<strong>能清楚区分“环境生成系统”与“学习型策略系统”</strong>，并定义一条 observations → actions → rollout 的可靠数据流。所以本页只做三件事：把概念分清楚、把接口写成合同、把评测设计成可证伪。</p><p>本页<strong>没有运行任何训练</strong>，也没有任何成功率数字。所有数字都是按公式实时算出来的几何/时间量，不是实验结果。凡是我没跑过的，页面上会明确写“未实测”。</p><details><summary>为什么“我有 SceneWeaver 所以我会训练 VLA”是错的？</summary><p>因为这是两条完全不同的工程链。前三天的词：环境生成负责<strong>造出可交互的世界</strong>（几何、物理、状态、任务判据）；策略学习负责<strong>在这个世界里找到从观测到动作的映射</strong>（数据、模型、训练、部署）。共享的只有中间那一层接口合同。<strong>造得好，不代表学得会；学得会，也不代表造得对。</strong></p></details></div>
       <p class="source-note">范围依据 <a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-07.md" target="_blank" rel="noopener noreferrer">Day 7 任务手册</a> 与 <a href="https://github.com/lucinwen/14plan/blob/main/DAILY/day-07.md" target="_blank" rel="noopener noreferrer">每日计划</a>；对应资源 R18 / R17 / R07 / R08 / P01–P03。</p>
+      <details class="fold term-fold">
+        <summary>本页生词 · 7 个 <span>看不懂就展开；正文第一次遇到时不再打断你</span></summary>
+        <div>
+          <dl>
+            <dt>状态与观测 <small>state / observation</small></dt><dd>世界真值 / 机器人能读到的那一块。两者混用，后面所有结论都会歪。</dd>
+            <dt>马尔可夫决策过程 <small>MDP</small></dt><dd>状态、动作、转移、奖励、折扣五个字母。每个都能写错，而且错了照样能跑。</dd>
+            <dt>行为克隆 <small>BC</small></dt><dd>拿人的示范数据，直接学“看到什么就做什么”。它学的是人，不是任务。</dd>
+            <dt>强化学习 <small>RL</small></dt><dd>靠试错和奖励信号自己学策略，需要大量交互和一个能算奖励的环境。</dd>
+            <dt>扩散策略 <small>Diffusion Policy</small></dt><dd>把动作序列当成要逐步去噪的东西来生成，擅长“好几种走法都对”的任务。</dd>
+            <dt>视觉-语言-动作模型 <small>VLA</small></dt><dd>输入图像和一句指令，直接输出动作。它要的是成对的（画面、指令、动作）数据。</dd>
+            <dt>动作块 <small>action chunk</small></dt><dd>一次预测好几步再一起执行。控制频率被悄悄降了下来，这是很多“延迟变好”的真相。</dd>
+          </dl>
+          <p class="term-fold__more"><a href="glossary.html">80 个词的完整术语表 →</a></p>
+        </div>
+      </details>
     </section>
 
     <section id="state-action" class="lesson-section" data-nav>

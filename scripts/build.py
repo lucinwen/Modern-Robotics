@@ -7,6 +7,8 @@ import re
 
 ROOT = Path(__file__).resolve().parents[1]
 PAGES = {
+    'start.html': 'start.template.html',
+    'glossary.html': 'glossary.template.html',
     'index.html': 'index.template.html',
     'day-02.html': 'day-02.template.html',
     'day-03.html': 'day-03.template.html',

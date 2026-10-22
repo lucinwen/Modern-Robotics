@@ -44,11 +44,26 @@
       <div class="eyebrow">MODERN ROBOTICS / 第十三天</div>
       <h1>“连接建立成功，<br><span>但虚拟人站到了桌子外面。”</span></h1>
       <p class="hero-lead">这是远程共处（Rove 这类系统）最典型的故障：<strong>WebRTC 的 connectionState 是 connected，手部数据也在流动，对方看到的人却偏了一米八</strong>。原因往往和网络毫无关系——<strong>通信是一条链，空间对齐是另一条链</strong>。两条链都通，人才会站在正确的位置；任何一条断了，你都会得到“能看见，但位置是错的”这个最难查的状态。</p>
-      <div class="lesson-meta"><span>2026.10.22</span><span>坐标 · 传输 · 时效 · 授权</span><span>10 个交互演示</span></div>
+      <div class="lesson-meta"><span>2026.10.22</span><span>坐标 · 传输 · 时效 · 授权</span><span>10 个交互演示</span><span>参考 80–95 分钟</span></div>
       <a class="start-link" href="#chain">先手算一次坐标链 <span aria-hidden="true">↓</span></a>
       <div class="opening-question"><span class="small-label">贯穿今天的一个问题</span><p>两台设备各自有一个“本地坐标系”，为什么<strong>仅仅把位置数值发给对方</strong>，对方也放不对？</p><span>因为一个数只有配上<strong>它在哪个坐标系里</strong>才有意义。<code>p = (0.2, 0, 0)</code> 在 A 的坐标系里是“A 右手边 20 cm”，在 B 的坐标系里可能是完全另一个地方。<strong>要跨设备使用，必须经过一串变换：先把 A 的点变到共享世界，再从共享世界变到 B 的本地</strong>——而“从 B 的本地变到共享世界”是正变换，反过来要用<strong>逆</strong>。今天第一个演示就是让你把这个逆算错一次，然后记住它。</span></div>
       <div class="reading-guide"><h2>今天的分界线：连通 / 对齐 / 安全</h2><p>这三件事在演示里都叫“Rove 跑起来了”，但它们是三种完全不同的工程状态。<strong>连通</strong>是网络层的事（信令 → SDP → ICE → PeerConnection）；<strong>对齐</strong>是几何层的事（本地帧 → 共享锚点 → 远端位姿）；<strong>安全</strong>是权限层的事（谁能触发触觉、失联时会不会继续动）。面试里说清这三层的区别，比说“我做过一个远程共处 demo”有信息量得多。</p><p>本页所有坐标、延迟、漂移都是<strong>按页面上的参数现算的数字</strong>，没有接入真实 HMD、没有真的建立 WebRTC 连接、没有驱动过任何触觉设备。<strong>所以本页不会出现“实测延迟 XX ms”或“同步误差 XX cm”。</strong></p><details><summary>那为什么还要手算这一串变换？</summary><p>因为面试官最爱在这一步追问：“你说你做过空间对齐，那 A 的手在 B 那边坐标是多少？”<strong>能当场算出 −1.8 m，并且知道它是怎么来的、错在哪一步会得到别的不对的值</strong>——这个回答无法伪造，也无法靠背概念蒙过去。</p></details></div>
       <p class="source-note">范围依据 <a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-13.md" target="_blank" rel="noopener noreferrer">Day 13 任务手册</a> 与 <a href="https://github.com/lucinwen/14plan/blob/main/DAILY/day-13.md" target="_blank" rel="noopener noreferrer">每日计划</a>；对应资源 R21（OpenXR Reference Spaces）、R15（WebRTC，<strong>只看 P1/P2/P4/P5/P6，不看完整 38 集</strong>）、R01。</p>
+      <details class="fold term-fold">
+        <summary>本页生词 · 7 个 <span>看不懂就展开；正文第一次遇到时不再打断你</span></summary>
+        <div>
+          <dl>
+            <dt>扩展现实 / 参考空间 <small>XR / OpenXR</small></dt><dd>XR 是 VR/AR/MR 的合称；参考空间规定“以什么为原点”（LOCAL / VIEW / STAGE），选错后面全错。</dd>
+            <dt>实时通信 <small>WebRTC</small></dt><dd>浏览器之间点对点传音视频和数据的协议。连上了只说明通道通，不说明数据对。</dd>
+            <dt>往返时延 / 抖动 <small>RTT / jitter</small></dt><dd>一个来回要多久，以及这个时间稳不稳定。抖比慢更难处理，因为补偿量不固定。</dd>
+            <dt>姿态年龄 <small>pose age</small></dt><dd>你手上这个位姿是多久以前的。延迟真正伤害的不是“慢”，是“位置是旧的”。</dd>
+            <dt>外推 <small>extrapolation</small></dt><dd>用旧数据猜现在。猜得越久越不准，手快速移动时误差成倍放大。</dd>
+            <dt>漂移与重对齐 <small>drift / re-anchor</small></dt><dd>参考系慢慢偏了。它不会像延迟那样自己恢复，只能重新对齐并声明对齐的那一刻。</dd>
+            <dt>触觉授权状态机 <small>haptics</small></dt><dd>谁能开力反馈、断线时必须怎样停。默认状态永远是“不授权”。</dd>
+          </dl>
+          <p class="term-fold__more"><a href="glossary.html">80 个词的完整术语表 →</a></p>
+        </div>
+      </details>
     </section>
 
     <section id="chain" class="lesson-section" data-nav>

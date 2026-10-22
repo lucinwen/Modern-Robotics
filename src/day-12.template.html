@@ -44,11 +44,25 @@
       <div class="eyebrow">MODERN ROBOTICS / 第十二天</div>
       <h1>“上午的雷达图有异常，<br><span>下午的光学图被云挡了。”</span></h1>
       <p class="hero-lead">面试官问：这是不是说明<strong>两个来源共同确认</strong>了这个异常？很多人会顺着点头——毕竟“两个来源”听起来比“一个来源”稳。但仔细看这句话：<strong>下午那次观测，什么都没看到</strong>。被云挡住不是“我看过了，那里没有”，而是<strong>“我根本没看成”</strong>。一次失败的观测，提供的是 0 条证据，不是 1 条反证，更不是 1 条旁证。</p>
-      <div class="lesson-meta"><span>2026.10.22</span><span>成像 · 几何 · 对齐 · 证据 · 独立性</span><span>10 个交互演示</span></div>
+      <div class="lesson-meta"><span>2026.10.22</span><span>成像 · 几何 · 对齐 · 证据 · 独立性</span><span>10 个交互演示</span><span>参考 80–95 分钟</span></div>
       <a class="start-link" href="#scale">先分清平台与尺度 <span aria-hidden="true">↓</span></a>
       <div class="opening-question"><span class="small-label">贯穿今天的一个问题</span><p>为什么“两个传感器都拍到了”这句话，在什么条件下才可以升级成“两个独立证据指向同一结论”？</p><span>需要同时满足四件事：<strong>① 同一时刻附近（时间容差内）；② 同一坐标（在配准误差内）；③ 同一对象（不是两个不同物体被误关联）；④ 观测条件可比（不是一边被云挡住、一边在夜里）。</strong>四个条件里只要断一个，“两个来源”就退回“一个来源 + 一段故事”。本页就是把这四件事拆开，逐个做成能拨动的开关。</span></div>
       <div class="reading-guide"><h2>今天的分界线：看得见 / 看得准 / 证明得了</h2><p>SAR 是一套<strong>主动微波成像</strong>系统：自己打光、自己收，所以能全天时全天候；但它输出的是<strong>后向散射强度 + 相位</strong>，不是"照片"。这带来三件事必须分开讲：<strong>看得见</strong>（能不能成像，取决于几何与散射机制）、<strong>看得准</strong>（几何定位与分辨率，取决于轨道、带宽、天线）、<strong>证明得了</strong>（能不能拿这张图当证据，取决于时间戳、坐标系统、处理版本、以及有没有独立复核）。</p><p>本页所有图都是<strong>浏览器里现算的示意几何与合成信号</strong>，<strong>没有一张真实 SAR 影像</strong>。所以本页不会出现任何真实分辨率、定位精度或"识别准确率"——那些数字必须来自具体型号的元数据与标定报告，不能凭印象写。</p><details><summary>那为什么还要算这些？</summary><p>因为面试里区分人的不是"我知道 SAR 很厉害"，而是你能不能当场说清：<strong>为什么方位分辨率跟距离无关、为什么天线越短反而越好、为什么楼会"倒"向雷达、为什么侧视而不是下视</strong>。这四个"为什么"都能用一张几何图和一条式子讲完，而且讲完就无法被追问倒。</p></details></div>
       <p class="source-note">范围依据 <a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-12.md" target="_blank" rel="noopener noreferrer">Day 12 任务手册</a> 与 <a href="https://github.com/lucinwen/14plan/blob/main/DAILY/day-12.md" target="_blank" rel="noopener noreferrer">每日计划</a>；对应资源 R14（南航 SAR 课程 L1/L3，只取成像与几何要点，不刷完 33 讲）。</p>
+      <details class="fold term-fold">
+        <summary>本页生词 · 6 个 <span>看不懂就展开；正文第一次遇到时不再打断你</span></summary>
+        <div>
+          <dl>
+            <dt>合成孔径雷达 <small>SAR</small></dt><dd>用一个小天线移动着收信号，合成一个很大的孔径。孔径越大，能看越细。</dd>
+            <dt>孔径 <small>aperture</small></dt><dd>观测“窗口”的尺寸。分辨率与它成反比，而它常常被物理尺寸卡死。</dd>
+            <dt>侧视与入射角 <small>side-looking</small></dt><dd>雷达斜着看地面。斜着看就会把高处的物体投到别处，于是有了下面三种几何误读。</dd>
+            <dt>叠掩 <small>layover</small></dt><dd>高处的回波被投到低处，和目标挤在一起。不是异常，是几何。</dd>
+            <dt>透视收缩 / 阴影 <small>foreshortening / shadow</small></dt><dd>斜坡在图上被压短 / 背坡没有回波，图上什么也没有。两者都不是“没有东西”。</dd>
+            <dt>独立证据 <small>independent evidence</small></dt><dd>两个来源共享同一个上游，票数就不是两张。这时候“两个来源确认”只是错觉。</dd>
+          </dl>
+          <p class="term-fold__more"><a href="glossary.html">80 个词的完整术语表 →</a></p>
+        </div>
+      </details>
     </section>
 
     <section id="scale" class="lesson-section" data-nav>

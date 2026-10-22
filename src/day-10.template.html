@@ -43,11 +43,25 @@
       <div class="eyebrow">MODERN ROBOTICS / 第十天</div>
       <h1>“我有一个高质量 3DGS 数字人。”<br><span>——所以能做实时可触摸的情感交互吗？</span></h1>
       <p class="hero-lead">不能。这句话中间的跳跃，跨过了<strong>四道完全不同的关卡</strong>：外观重建 → 结构（骨骼/关节）→ 驱动（表情与口型）→ 同步（音画与话轮）→ 最后才是安全（可触摸的物理交互）。<strong>每一关都要单独的证据</strong>，前一关做得再好也不能替后一关作证。</p>
-      <div class="lesson-meta"><span>2026.10.22</span><span>表征 · 驱动 · 同步 · 贡献归属</span><span>9 个交互演示</span></div>
+      <div class="lesson-meta"><span>2026.10.22</span><span>表征 · 驱动 · 同步 · 贡献归属</span><span>9 个交互演示</span><span>参考 70–85 分钟</span></div>
       <a class="start-link" href="#reps">先分清六种表征 <span aria-hidden="true">↓</span></a>
       <div class="opening-question"><span class="small-label">贯穿今天的一个问题</span><p>为什么“视觉上极其写实”的重建，不自动等于“能动、能说话、能碰”？</p><span>因为它们是<strong>不同的数据结构</strong>。3DGS 存的是空间高斯的位置、协方差、颜色与不透明度——它没有关节，没有骨骼层级，没有“下颌张开 0.3”这个自由度。你从它身上渲染出的每一帧都很像，但你找不到一个参数可以拉动。要能动，必须<a href="#reps">换成参数化表示</a>，或者手动给它绑一套骨架——那是另一项工作。</span></div>
       <div class="reading-guide"><h2>今天的分界线：表征 / 驱动 / 渲染 / 同步</h2><p>这四层经常被一句“我做过数字人”糊在一起。真实项目里它们由不同的模块负责，失败时也表现完全不同：<strong>表征错了 → 怎么调都不像；驱动错了 → 像但表情不对；渲染错了 → 对但画面崩；同步错了 → 全都对但时间错位</strong>。今天按这四层拆开看。</p><p>本页所有示意图都是<strong>手写的二维示意</strong>，不是真实的 3DGS 训练结果，也不是真实的 FLAME / SMPL-X 前向计算。滑条背后的公式写在每个演示的说明里——你能自己复现，才算真懂。</p><details><summary>为什么不用真模型跑一遍？</summary><p>因为这一天的目标是<strong>分清职责边界</strong>，不是复现论文指标。真实 FLAME 需要 5023 顶点的模板网格、关节回归器与 blendshape 基；真实 3DGS 需要多视角图像与几十分钟优化。这些都能跑，但跑通之后你得到的数字（PSNR、LPIPS）回答不了“它能不能被驱动”这个问题。<strong>本页选择把结构讲透，把数字留白</strong>。</p></details></div>
       <p class="source-note">范围依据 <a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-10.md" target="_blank" rel="noopener noreferrer">Day 10 任务手册</a> 与 <a href="https://github.com/lucinwen/14plan/blob/main/DAILY/day-10.md" target="_blank" rel="noopener noreferrer">每日计划</a>；对应资源 R11（3DGS）与 R12（FLAME / SMPL-X / VRM）。</p>
+      <details class="fold term-fold">
+        <summary>本页生词 · 6 个 <span>看不懂就展开；正文第一次遇到时不再打断你</span></summary>
+        <div>
+          <dl>
+            <dt>三维高斯泼溅 <small>3DGS</small></dt><dd>把场景表示成几百万个带颜色和形状的“小团”，渲染就是把这些团投影叠加。像，但没有骨架。</dd>
+            <dt>参数化人脸 / 人形 <small>FLAME / SMPL-X</small></dt><dd>用一组数字描述形状、姿态、表情。数值可调，但“数值对”不等于“看起来真”。</dd>
+            <dt>表征 <small>representation</small></dt><dd>用什么形式存储和表达这个人体：网格、点、高斯、还是参数。</dd>
+            <dt>驱动 <small>driving</small></dt><dd>把姿态、表情参数喂进模型让它动。它和渲染是两条独立的线。</dd>
+            <dt>音画同步 <small>A/V sync</small></dt><dd>两条独立的时间线必须对准。对的是时间戳，不是“感觉差不多”。</dd>
+            <dt>归属 <small>attribution</small></dt><dd>哪些是开源底座、哪些是二次开发、哪些还只是设想。三者不能混着讲。</dd>
+          </dl>
+          <p class="term-fold__more"><a href="glossary.html">80 个词的完整术语表 →</a></p>
+        </div>
+      </details>
     </section>
 
     <section id="reps" class="lesson-section" data-nav>

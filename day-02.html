@@ -45,6 +45,10 @@
     <a href="day-14.html" data-day="14"><strong>DAY 14</strong><span>模拟面试</span></a>
   </nav>
 </details>
+<div class="switcher-extra">
+  <a href="start.html">路线总览 · 14 天怎么排</a>
+  <a href="glossary.html">术语表 · 80 个词速查</a>
+</div>
     <div class="sidebar-intro"><span class="eyebrow">从几何走向规则</span><strong>第二天，把要求说清楚。</strong></div>
     <nav class="lesson-nav" aria-label="本页目录">
       <a href="#start" class="is-current" aria-current="location"><span>00</span> 从这里开始</a>
@@ -67,7 +71,7 @@
       <div class="eyebrow">DAY 02 / Z3 · SMT · 空间约束</div>
       <h1>把摆放的要求，<br><span>变成可以求解的规则。</span></h1>
       <p class="hero-lead">昨天用坐标描述“物体在哪里”；今天继续问：有没有一种摆法，能把所有要求同时满足？从两个房间开始，逐步看懂公式、解和冲突。</p>
-      <div class="lesson-meta"><span>计划日 2026.10.21</span><span>R03 官方文档 · 约 105 分钟选读</span><span>9 个可视化 · 6 例 Z3 运行记录</span></div>
+      <div class="lesson-meta"><span>计划日 2026.10.21</span><span>R03 官方文档 · 约 105 分钟选读</span><span>9 个可视化 · 6 例 Z3 运行记录</span><span>参考 70–85 分钟</span></div>
       <a class="start-link" href="#variables">从一根数轴开始 <span aria-hidden="true">↓</span></a>
       <div class="opening-question"><span class="small-label">贯穿今天的一个问题</span><p>“放下两个房间，还要让机器人能过门。”</p><span>放得下吗？哪些条件必须同时成立？哪里发生了冲突？求解成功以后，还缺什么检查？</span></div>
       <div class="reading-guide">
@@ -77,6 +81,20 @@
       </div>
       <div class="d2-learning-route" aria-label="今天的三段学习路线"><div><span>先建立直觉</span><strong>变量 → 几何约束</strong><p>第 01–04 节：看懂允许的摆法。</p></div><div><span>再解释结果</span><strong>求解 → 冲突 → 偏好</strong><p>第 05–08 节：看懂程序能回答什么。</p></div><div><span>最后留下证据</span><strong>预测 → 运行 → 复核</strong><p>第 09–10 节：自己改一项并解释。</p></div></div>
       <p class="source-note">范围依据 <a href="https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/STUDY_GUIDES/R03.md" target="_blank" rel="noopener noreferrer">R03 子教程</a>与 <a href="https://github.com/lucinwen/14plan/blob/de6fd9cb352370863e94d64d775c4f5236ed38fc/TASK_GUIDES/day-02.md" target="_blank" rel="noopener noreferrer">Day 2 任务手册</a>。制作日期为 2026-10-20，计划日不代表已经完成个人学习。</p>
+      <details class="fold term-fold">
+        <summary>本页生词 · 6 个 <span>看不懂就展开；正文第一次遇到时不再打断你</span></summary>
+        <div>
+          <dl>
+            <dt>约束 <small>constraint</small></dt><dd>一条能判真假的式子，例如“两个盒子在任何一根轴上的投影都不重叠”。</dd>
+            <dt>Z3 </dt><dd>一个求解器：你把条件写给它，它回答“有解（并给出取值）”或“无解”。</dd>
+            <dt>可满足 / 不可满足 <small>SAT / UNSAT</small></dt><dd>存在一组取值让所有条件同时成立 / 不存在这样的取值。</dd>
+            <dt>冲突核心 <small>unsat core</small></dt><dd>无解时，足以导致冲突的最小一组条件——这才是你能动手改的地方。</dd>
+            <dt>偏好优化 </dt><dd>先满足所有“必须”，再在可行解里挑更合意的；顺序反了会得到“最优但不可行”。</dd>
+            <dt>求解状态 </dt><dd>sat / unsat / unknown 三种回答，对应的后续工作完全不同。</dd>
+          </dl>
+          <p class="term-fold__more"><a href="glossary.html">80 个词的完整术语表 →</a></p>
+        </div>
+      </details>
     </section>
 
     <section id="variables" class="lesson-section" data-nav>

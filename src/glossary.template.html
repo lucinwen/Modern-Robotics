@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f8f7">
+  <meta name="description" content="Modern Robotics 学习手记的术语表：自由度、构型空间、PDDL、TAMP、ROS2 TF、MDP、BC/RL/VLA、FMCW、SAR、3DGS、WebRTC 等 80 个词的一句话白话解释，并标注首次出现在哪一页哪一节。">
+  <title>术语表 · 一句话白话 | Modern Robotics 学习手记</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/site.css">
+  <link rel="stylesheet" href="assets/lesson-kit.css">
+  <link rel="stylesheet" href="assets/start.css">
+  <script src="assets/site.js" defer></script>
+  <script src="assets/glossary.js" defer></script>
+</head>
+<body data-lesson-key="glossary" data-lesson-title="术语表 · 一句话白话" data-lesson-topic="14 天里出现的术语速查">
+<a class="skip-link" href="#main">跳到正文</a>
+<header class="site-header">
+  <a class="brand" href="start.html" aria-label="Modern Robotics 学习手记·路线总览"><span class="brand-monogram">MR<span>.</span></span><span class="brand-name">Modern Robotics<small>可视化学习手记</small></span></a>
+  <div class="header-actions"><span class="edition">GLOSSARY / 术语表</span><a href="start.html">路线总览</a><a href="https://github.com/lucinwen/Modern-Robotics" target="_blank" rel="noopener noreferrer">GitHub 仓库 <span aria-hidden="true">↗</span></a><button class="btn theme-toggle" id="theme-toggle" type="button" aria-label="切换明暗主题">切换主题</button></div>
+</header>
+<div class="page-shell">
+  <aside class="sidebar" aria-label="学习导航">
+    {{component:course-switcher}}
+    <div class="sidebar-intro"><span class="eyebrow">速查</span><strong>读到一半遇到生词，从这里跳回去。</strong></div>
+    <nav class="lesson-nav" aria-label="本页目录">
+      <a href="#g-space" class="is-current" aria-current="location"><span>01</span> 空间与运动</a>
+      <a href="#g-plan"><span>02</span> 约束与规划</a>
+      <a href="#g-system"><span>03</span> 系统与接口</a>
+      <a href="#g-learn"><span>04</span> 训练与学习</a>
+      <a href="#g-sense"><span>05</span> 感知与成像</a>
+      <a href="#g-link"><span>06</span> 交互与传输</a>
+      <a href="#g-evidence"><span>07</span> 证据与表达</a>
+    </nav>
+    <div class="sidebar-note"><span class="small-label">怎么用</span><p>每个词先看一句话，<br>再看它第一次出现在哪一页。<br>解释都尽量短——<br>长定义会让人以为懂了。</p></div>
+  </aside>
+  <main id="main">
+    <section id="start" class="hero lesson-section" data-nav>
+      <div class="eyebrow">GLOSSARY / 术语表</div>
+      <h1>一个词，<br><span>一句话，一个出处。</span></h1>
+      <p class="hero-lead">这里不写教科书定义。每个词只给两样东西：一句能立刻用上的白话，和它第一次出现在哪一页哪一节。看不懂就跳回去看图和演示，比读定义有效。</p>
+      <div class="lesson-meta"><span>80 个词</span><span>7 组</span><span>每条带原文锚点</span><span>可搜索</span></div>
+      <div class="opening-question"><span class="small-label">先提醒一件事</span><p>术语是最容易“背会了但没用”的东西。</p><span>所以每条解释都写成“它能帮你判断什么”，而不是“它属于哪一类”。背下来不算学会，能在具体故障里用上才算。</span></div>
+    </section>
+
+    <section id="glossary" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>00</span> 搜索与跳转</div>
+      <h2>输入中文、英文或缩写都行。</h2>
+      <p>例如搜“坐标”“TF”“Jacobian”“雅可比”“3DGS”都能命中。搜不到说明这个词还没进表——可以直接在对应页里找，或者把它当作一个信号：你可能需要先读那一页的前一节。</p>
+      <div class="glossary-toolbar">
+        <label class="small-label" for="glossary-filter" style="margin:0">搜索术语</label>
+        <input class="form-control" id="glossary-filter" type="search" placeholder="如：构型空间 / TF / Jacobian / SAR" autocomplete="off" aria-describedby="glossary-count">
+        <span class="glossary-count" id="glossary-count" aria-live="polite">共 80 个词</span>
+        <button class="btn" id="glossary-clear" type="button">清空</button>
+      </div>
+      <div class="glossary-jump">
+        <a href="#g-space">01 空间与运动</a>
+        <a href="#g-plan">02 约束与规划</a>
+        <a href="#g-system">03 系统与接口</a>
+        <a href="#g-learn">04 训练与学习</a>
+        <a href="#g-sense">05 感知与成像</a>
+        <a href="#g-link">06 交互与传输</a>
+        <a href="#g-evidence">07 证据与表达</a>
+      </div>
+      <p class="term-empty" id="glossary-empty" hidden>没有匹配的词。试试更短的词，或换英文缩写（如 TF、SAR、VLA）。</p>
+
+      <section class="term-group" id="g-space" data-nav>
+        <h2>01 · 空间与运动</h2>
+        <p>Day 1 与 Day 4 的词。核心只有一个问题：这些数字<strong>相对谁</strong>。</p>
+        <dl class="term-list">
+          <div class="term"><dt>自由度 <small>DOF · Degrees of Freedom</small></dt><dd>一个物体能独立改变的运动方式有几个。平面上的书 3 个，空间里的刚体 6 个。<a href="index.html#rigid-body">Day 1 §01</a></dd></div>
+          <div class="term"><dt>刚体 <small>rigid body</small></dt><dd>内部任意两点距离都不变的物体。有了这条，才只需要 6 个数描述它的位置和朝向。<a href="index.html#rigid-body">Day 1 §01</a></dd></div>
+          <div class="term"><dt>构型空间 <small>C-space · configuration space</small></dt><dd>把所有可能的姿态当成一个空间里的点。“机器人会不会撞”就变成“这个点在不在禁区里”。<a href="index.html#configuration-space">Day 1 §02</a></dd></div>
+          <div class="term"><dt>工作空间 <small>workspace</small></dt><dd>末端<strong>实际能到达</strong>的位置集合。它有边界，而且常常是个环而不是圆。<a href="day-04.html#workspace">Day 4 §03</a></dd></div>
+          <div class="term"><dt>任务空间 <small>task space</small></dt><dd>用任务的语言描述目标，比如“门把手的位置和朝向”，而不是“三个关节各转多少度”。<a href="day-04.html#spaces">Day 4 §02</a></dd></div>
+          <div class="term"><dt>坐标系 <small>frame</small></dt><dd>一个原点加三根轴。任何数字离开“相对哪个坐标系”就没有意义——这是全站最常重复的一句。<a href="index.html#frames">Day 1 §03</a></dd></div>
+          <div class="term"><dt>旋转矩阵 <small>SO(3) · rotation matrix</small></dt><dd>把三根新轴的方向分别写成三列。用它乘一个点，等于把这个点换到另一套坐标里。<a href="index.html#frames">Day 1 §03</a></dd></div>
+          <div class="term"><dt>齐次变换 / 位姿 <small>SE(3) · pose</small></dt><dd>把旋转和平移装进一个 4×4 矩阵，一次乘完。位姿 = 位置 + 朝向，缺一个都不算。<a href="index.html#transforms">Day 1 §05</a></dd></div>
+          <div class="term"><dt>点云 <small>point cloud</small></dt><dd>一堆带坐标的点。没有面、没有语义，也不能直接当碰撞体用。<a href="index.html#perception">Day 1 §06</a></dd></div>
+          <div class="term"><dt>正运动学 <small>FK · forward kinematics</small></dt><dd>给关节角，算出末端在哪。方向唯一，算一次就一个答案。<a href="day-04.html#fk">Day 4 §03</a></dd></div>
+          <div class="term"><dt>逆运动学 <small>IK · inverse kinematics</small></dt><dd>给末端目标，反推关节角。可能无解，可能两组解，选哪组是策略问题。<a href="day-04.html#ik">Day 4 §05</a></dd></div>
+          <div class="term"><dt>雅可比 <small>Jacobian</small></dt><dd>一张换算表：关节转一点点，末端在各个方向上动多少。<a href="day-04.html#jacobian">Day 4 §06</a></dd></div>
+          <div class="term"><dt>奇异位形 <small>singularity</small></dt><dd>某个方向上末端忽然动不了（手臂完全伸直的那一刻），此时逆解会爆掉。<a href="day-04.html#singular">Day 4 §07</a></dd></div>
+          <div class="term"><dt>关节限位 <small>joint limit</small></dt><dd>数学上有解，机械结构不允许。很多“解不出来”其实是“转不过去”。<a href="day-04.html#limits">Day 4 §04</a></dd></div>
+        </dl>
+      </section>
+
+      <section class="term-group" id="g-plan" data-nav>
+        <h2>02 · 约束与规划</h2>
+        <p>Day 2 与 Day 3 的词。核心是：把“要求”写成程序能判真假的东西。</p>
+        <dl class="term-list">
+          <div class="term"><dt>约束 <small>constraint</small></dt><dd>一条能判真假的式子，比如“两个盒子在任何一根轴上的投影都不重叠”。<a href="day-02.html#variables">Day 2 §02</a></dd></div>
+          <div class="term"><dt>SAT / SMT <small>satisfiability</small></dt><dd>问“存不存在一组取值，让所有条件同时成立”。答“存在”会给你一组具体取值。<a href="day-02.html#solver-status">Day 2 §06</a></dd></div>
+          <div class="term"><dt>UNSAT 与冲突核心 <small>unsat core</small></dt><dd>无解时，求解器能给出“足以导致冲突的最小一组条件”。这才是能改的东西。<a href="day-02.html#unsat-core">Day 2 §08</a></dd></div>
+          <div class="term"><dt>偏好优化 <small>preference / optimization</small></dt><dd>先满足所有必须的，再在可行的方案里挑更合意的。顺序错了会得到“最优但不可行”。<a href="day-02.html#preferences">Day 2 §09</a></dd></div>
+          <div class="term"><dt>PDDL</dt><dd>一种写“状态 + 动作 + 目标”的文本格式，规划器能直接读。写成自然语言它读不懂。<a href="day-03.html#pddl">Day 3 §04</a></dd></div>
+          <div class="term"><dt>谓词 / 原子事实 <small>predicate</small></dt><dd>一条能判真假的事实，比如“门是开的”。规划就是排列这些事实的组合。<a href="day-03.html#states">Day 3 §02</a></dd></div>
+          <div class="term"><dt>动作的前提与效果 <small>precondition / effect</small></dt><dd>同时回答两件事：现在能不能做，做完世界变成什么样。少写一个就会规划出做不了的动作。<a href="day-03.html#actions">Day 3 §03</a></dd></div>
+          <div class="term"><dt>搜索 <small>search</small></dt><dd>从初始状态一步步展开合法动作，直到命中目标。规划不是“想出来”的，是展开出来的。<a href="day-03.html#search">Day 3 §05</a></dd></div>
+          <div class="term"><dt>有限状态机 <small>FSM</small></dt><dd>规定“现在允许走哪一步”的图。它管过程，不管位置，也不管动作怎么执行。<a href="day-03.html#fsm">Day 3 §06</a></dd></div>
+          <div class="term"><dt>任务与运动规划 <small>TAMP</small></dt><dd>高层说“开门”，低层必须带回“门真的开了、在哪一帧开的”这种可执行证据。<a href="day-03.html#tamp">Day 3 §08</a></dd></div>
+        </dl>
+      </section>
+
+      <section class="term-group" id="g-system" data-nav>
+        <h2>03 · 系统与接口</h2>
+        <p>Day 5、Day 9、Day 13 的词。核心是：接口写全了，故障才查得动。</p>
+        <dl class="term-list">
+          <div class="term"><dt>ROS2</dt><dd>机器人软件里负责“谁跟谁说话、怎么说话”的那一层。它不负责控制，也不负责算法。<a href="day-05.html#comm">Day 5 §02</a></dd></div>
+          <div class="term"><dt>话题 / 服务 / 动作 <small>topic / service / action</small></dt><dd>持续广播 / 一问一答 / 长任务（可反馈、可取消）。选错就要自己补语义。<a href="day-05.html#comm">Day 5 §02</a></dd></div>
+          <div class="term"><dt>TF / 变换树 <small>transform tree</small></dt><dd>不是“一个位置”，而是一组<strong>带时间戳</strong>的换算关系。问“杯子在哪”，必须先说“在哪个时刻、相对哪个坐标系”。<a href="day-05.html#tf">Day 5 §04</a></dd></div>
+          <div class="term"><dt>URDF</dt><dd>描述机器人身体结构的文件：几节连杆、几个关节、限位多少。它不知道自己在哪。<a href="day-05.html#urdf">Day 5 §05</a></dd></div>
+          <div class="term"><dt>代价地图 <small>costmap</small></dt><dd>把环境切成格子，每格标上“走过去多贵”。堵住往往不是路窄，是代价算错了。<a href="day-05.html#costmap">Day 5 §06</a></dd></div>
+          <div class="term"><dt>膨胀 <small>inflation</small></dt><dd>把障碍往外扩一个机器人半径，这样就能把一个有体积的机器人当成一个点来规划。<a href="day-05.html#costmap">Day 5 §06</a></dd></div>
+          <div class="term"><dt>消息 schema</dt><dd>一条消息必须有哪些字段、什么单位、谁填、缺了算谁的错。没有它的“能跑”是运气。<a href="day-13.html#schema">Day 13 §06</a></dd></div>
+          <div class="term"><dt>版本号 / epoch <small>epoch / turn id</small></dt><dd>给每一轮请求编号。判断“这个结果是不是旧的”，靠编号，不靠时间感觉。<a href="day-09.html#epoch">Day 9 §06</a></dd></div>
+          <div class="term"><dt>竞态 <small>race condition</small></dt><dd>两个异步流程的先后顺序不同，结果就不同。打断、重连、重播几乎都在这里出错。<a href="day-09.html#races">Day 9 §05</a></dd></div>
+        </dl>
+      </section>
+
+      <section class="term-group" id="g-learn" data-nav>
+        <h2>04 · 训练与学习</h2>
+        <p>Day 6、Day 7 的词。核心是：状态、观测、动作、奖励，每一个都能写错。</p>
+        <dl class="term-list">
+          <div class="term"><dt>仿真 / 实机 / 迁移 <small>sim / real / sim2real</small></dt><dd>在仿真里跑通，只是拿到了“可以再看下一步”的资格。迁移指的是把同一套接口搬到真机上还成立。<a href="day-06.html#migration">Day 6 §11</a></dd></div>
+          <div class="term"><dt>渲染几何 / 碰撞几何</dt><dd>看得见的漂亮外壳，可能根本没有碰撞体。这是“场景能显示但不能训练”的第一个原因。<a href="day-06.html#render-geometry">Day 6 §03</a></dd></div>
+          <div class="term"><dt>关节链 <small>articulation</small></dt><dd>把门、抽屉做成“会转的关节”。只做一段动画的话，推它没有任何物理反应。<a href="day-06.html#articulation">Day 6 §05</a></dd></div>
+          <div class="term"><dt>观测 <small>observation</small></dt><dd>机器人实际能读到的那一小块，不是世界的真值。混淆这两者，是这个领域最常见的错。<a href="day-07.html#state-action">Day 7 §02</a></dd></div>
+          <div class="term"><dt>动作 <small>action</small></dt><dd>一份接口合同：范围、单位、频率、哪一帧生效、超出范围怎么办。不是一个数。<a href="day-06.html#action">Day 6 §08</a></dd></div>
+          <div class="term"><dt>奖励 <small>reward</small></dt><dd>一个标量，能被刷。奖励很高但任务没完成，是设计问题，不是训练不够。<a href="day-06.html#reward">Day 6 §09</a></dd></div>
+          <div class="term"><dt>回合 <small>episode</small></dt><dd>一次从复位到结束的完整尝试。复位要恢复的是所有动态状态，不只是位置。<a href="day-06.html#episode">Day 6 §15</a></dd></div>
+          <div class="term"><dt>随机种子 <small>seed</small></dt><dd>决定这一局的随机性。训练和测试用同一个种子，结果会虚高。<a href="day-06.html#seed">Day 6 §10</a></dd></div>
+          <div class="term"><dt>马尔可夫决策过程 <small>MDP</small></dt><dd>状态、动作、转移、奖励、折扣五个字母。每个都能写错，而且错了照样能跑。<a href="day-07.html#mdp">Day 7 §03</a></dd></div>
+          <div class="term"><dt>行为克隆 <small>BC · behavior cloning</small></dt><dd>拿人的示范数据，直接学“看到什么就做什么”。它学的是人，不是任务。<a href="day-07.html#methods">Day 7 §04</a></dd></div>
+          <div class="term"><dt>强化学习 <small>RL</small></dt><dd>靠试错和奖励信号自己学。需要大量交互，也需要一个能算奖励的环境。<a href="day-07.html#methods">Day 7 §04</a></dd></div>
+          <div class="term"><dt>扩散策略 <small>Diffusion Policy</small></dt><dd>把动作序列当成一张“要逐步去噪的图”来生成。擅长多种走法并存的任务。<a href="day-07.html#methods">Day 7 §04</a></dd></div>
+          <div class="term"><dt>视觉-语言-动作模型 <small>VLA</small></dt><dd>输入图像和一句指令，直接输出动作。它需要的是成对的（画面、指令、动作）数据。<a href="day-07.html#methods">Day 7 §04</a></dd></div>
+          <div class="term"><dt>动作块 <small>action chunk</small></dt><dd>一次预测好几步动作再一起执行。控制频率被悄悄降了下来，这是很多“延迟变好”的真相。<a href="day-07.html#chunk">Day 7 §05</a></dd></div>
+          <div class="term"><dt>泛化 <small>generalization</small></dt><dd>换房间、换物体还成不成。说“泛化提高了”，必须先说清在什么分布上提高了。<a href="day-07.html#routes">Day 7 §07</a></dd></div>
+        </dl>
+      </section>
+
+      <section class="term-group" id="g-sense" data-nav>
+        <h2>05 · 感知与成像</h2>
+        <p>Day 10–12 的词。核心是：测量值、推断状态、医疗判断，三层不能互相冒充。</p>
+        <dl class="term-list">
+          <div class="term"><dt>调频连续波 <small>FMCW</small></dt><dd>发射一个频率随时间线性上升的波，用“回波晚了多久”换距离。全站唯一需要现场推的公式就在这。<a href="day-11.html#chirp">Day 11 §03</a></dd></div>
+          <div class="term"><dt>线性调频 / chirp</dt><dd>频率从低扫到高的一段波，画出来是一条斜线。斜率越大，同样的距离差对应的频率差越大。<a href="day-11.html#chirp">Day 11 §03</a></dd></div>
+          <div class="term"><dt>拍频 <small>beat frequency</small></dt><dd>回波和“此刻的发射波”混在一起后的差值频率。它正比于距离，这就是雷达能测距的全部原因。<a href="day-11.html#chirp">Day 11 §03</a></dd></div>
+          <div class="term"><dt>FFT</dt><dd>把一段随时间变化的信号，换成“里面有哪些频率、各有多强”。在雷达里，频率轴换成距离轴就得到距离分布。<a href="day-11.html#fft">Day 11 §04</a></dd></div>
+          <div class="term"><dt>距离分辨率</dt><dd>能分开多近的两个目标，由带宽决定，约 c/2B。带宽不够，两个目标永远是一个胖峰。<a href="day-11.html#fft">Day 11 §04</a></dd></div>
+          <div class="term"><dt>多普勒 <small>Doppler</small></dt><dd>相对运动造成的频率偏移。快时间管距离，慢时间管速度——这句话能解开一半的雷达图。<a href="day-11.html#doppler">Day 11 §05</a></dd></div>
+          <div class="term"><dt>相位 <small>phase</small></dt><dd>波在一个周期里走到了哪儿。0.5 mm 的胸壁位移会变成 72° 的相位变化，这是“毫米波能看呼吸”的来源。<a href="day-11.html#phase">Day 11 §05</a></dd></div>
+          <div class="term"><dt>相位缠绕 <small>phase wrapping</small></dt><dd>超过一圈就绕回去，读数突然跳。位移超过 λ/4 时一定会遇到。<a href="day-11.html#phase">Day 11 §05</a></dd></div>
+          <div class="term"><dt>距离-多普勒图</dt><dd>横轴距离、纵轴速度的一张热图。人坐着、走动、一群人，在这张图上是三种不同的形状。<a href="day-11.html#doppler">Day 11 §05</a></dd></div>
+          <div class="term"><dt>合成孔径雷达 <small>SAR</small></dt><dd>用一个小天线移动着收信号，合成一个很大的孔径。孔径越大，能看越细。<a href="day-12.html#aperture">Day 12 §03</a></dd></div>
+          <div class="term"><dt>孔径 <small>aperture</small></dt><dd>观测“窗口”的尺寸。分辨率与它成反比，而它常常被物理尺寸卡死。<a href="day-12.html#aperture">Day 12 §03</a></dd></div>
+          <div class="term"><dt>侧视 / 入射角 <small>side-looking / incidence</small></dt><dd>雷达斜着看地面。斜着看就会把高处的物体投到别处，于是有了下面三种几何误读。<a href="day-12.html#side">Day 12 §04</a></dd></div>
+          <div class="term"><dt>叠掩 / 透视收缩 / 阴影 <small>layover / foreshortening / shadow</small></dt><dd>斜视造成的三种假象：高处挤到低处、斜坡被压短、背坡什么也没有。它们不是异常，是几何。<a href="day-12.html#side">Day 12 §04</a></dd></div>
+          <div class="term"><dt>三维高斯泼溅 <small>3DGS · 3D Gaussian Splatting</small></dt><dd>把场景表示成几百万个带颜色和形状的“小团”，渲染就是把这些团投到屏幕上叠加。像，但没有骨架。<a href="day-10.html#gs">Day 10 §04</a></dd></div>
+          <div class="term"><dt>参数化人脸与人形 <small>FLAME / SMPL-X</small></dt><dd>用一组数字描述形状、姿态、表情。数值可调，但“数值对”不等于“看起来真”。<a href="day-10.html#params">Day 10 §05</a></dd></div>
+          <div class="term"><dt>表征 / 驱动 / 渲染 / 同步</dt><dd>数字人的四条独立线。任何一条做好了，都不自动保证另外三条。<a href="day-10.html#reps">Day 10 §02</a></dd></div>
+        </dl>
+      </section>
+
+      <section class="term-group" id="g-link" data-nav>
+        <h2>06 · 交互与传输</h2>
+        <p>Day 13 的词。核心是：连通不等于对齐，对齐不等于安全。</p>
+        <dl class="term-list">
+          <div class="term"><dt>扩展现实 <small>XR · VR/AR/MR 统称</small></dt><dd>虚拟、增强、混合现实的合称。本页只讨论其中的坐标与传输问题。<a href="day-13.html#spaces">Day 13 §03</a></dd></div>
+          <div class="term"><dt>参考空间 <small>OpenXR reference space</small></dt><dd>“以什么为原点”的约定：LOCAL 以启动位置、VIEW 以头显、STAGE 以地面中心。选错，后面全错。<a href="day-13.html#spaces">Day 13 §03</a></dd></div>
+          <div class="term"><dt>WebRTC</dt><dd>浏览器之间点对点传音视频和数据的协议。连上了只说明通道通，不说明数据对。<a href="day-13.html#comms">Day 13 §04</a></dd></div>
+          <div class="term"><dt>往返时延与抖动 <small>RTT / jitter</small></dt><dd>一个来回要多久，以及这个时间稳不稳定。抖比慢更难处理，因为没法用一个固定的补偿量。<a href="day-13.html#latency">Day 13 §05</a></dd></div>
+          <div class="term"><dt>姿态年龄 <small>pose age</small></dt><dd>你手上这个位姿是多久以前的。延迟真正伤害的不是“慢”，是“位置是旧的”。<a href="day-13.html#latency">Day 13 §05</a></dd></div>
+          <div class="term"><dt>外推 <small>extrapolation</small></dt><dd>用旧数据猜现在。猜得越久越不准，而且误差在手快速移动时成倍放大。<a href="day-13.html#latency">Day 13 §05</a></dd></div>
+          <div class="term"><dt>漂移与重对齐 <small>drift / re-anchor</small></dt><dd>参考系慢慢偏了。它不会像延迟那样自己恢复，只能重新对齐并声明对齐的那一刻。<a href="day-13.html#drift">Day 13 §06</a></dd></div>
+          <div class="term"><dt>触觉 <small>haptics</small></dt><dd>力反馈。它是最不能“先跑起来再说”的部分：错一次可能是物理伤害。<a href="day-13.html#haptics">Day 13 §08</a></dd></div>
+          <div class="term"><dt>触觉授权状态机</dt><dd>规定谁在什么条件下能开启力反馈、断线时必须怎样停。默认状态永远是“不授权”。<a href="day-13.html#haptics">Day 13 §08</a></dd></div>
+        </dl>
+      </section>
+
+      <section class="term-group" id="g-evidence" data-nav>
+        <h2>07 · 证据与表达</h2>
+        <p>Day 8、Day 11、Day 14 的词。核心是：哪些是你做的，哪些只是发生过。</p>
+        <dl class="term-list">
+          <div class="term"><dt>证据等级</dt><dd>本人实做 / 团队成果 / 开源复用 / 未来计划 / 待核实。四类混写，是最容易被一句追问击穿的地方。<a href="day-08.html#evidence">Day 8 §05</a></dd></div>
+          <div class="term"><dt>可证伪 <small>falsifiable</small></dt><dd>能说出“什么情况下这句话是错的”。说不出来，就不是结论，是口号。<a href="day-07.html#counter">Day 7 §08</a></dd></div>
+          <div class="term"><dt>基线 <small>baseline</small></dt><dd>比较之前必须先固定的那几个量。不固定，两个数字放一起没有意义。<a href="day-08.html#protocol">Day 8 §06</a></dd></div>
+          <div class="term"><dt>归属 <small>attribution</small></dt><dd>这件事里哪一部分是你亲手做的，哪一部分是别人做的。写清它不会让你变弱，只会让你经得起追问。<a href="day-14.html#cards">Day 14 §02</a></dd></div>
+          <div class="term"><dt>时间盒 <small>timebox</small></dt><dd>给每个段落一个固定时长。超时的部分从后面扣，而不是让整场变长。<a href="day-14.html#timebox">Day 14 §05</a></dd></div>
+          <div class="term"><dt>追问链</dt><dd>同一个问题被追四层：你做了什么 → 怎么做的 → 怎么证明有效 → 边界在哪。<a href="day-14.html#drill">Day 14 §07</a></dd></div>
+          <div class="term"><dt>测量 / 推断 / 医疗判断</dt><dd>三层边界：传感器给你数字；算法把数字解释成“可能有人”；“是否跌倒、是否呼吸异常”属于医疗判断，需要资质与临床验证。<a href="day-11.html#chain">Day 11 §02</a></dd></div>
+        </dl>
+      </section>
+    </section>
+    <div class="next-lesson"><span class="small-label">不确定先读哪一天</span><a href="start.html">路线总览 · 14 天从这里开始 →</a></div>
+    <footer class="site-footer"><div><strong>Modern Robotics 学习手记</strong><p>先看见变化，再说清原因。</p></div><a href="#start">回到顶部 ↑</a></footer>
+  </main>
+</div>
+<noscript><div class="noscript-note">全部术语都可以正常阅读。搜索过滤需要在浏览器中启用 JavaScript。</div></noscript>
+</body>
+</html>

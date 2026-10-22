@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f8f7">
+  <meta name="description" content="Modern Robotics 可视化学习手记的路线总览：14 天在讲什么、前置关系、参考时长、三种读法、最低数学要求，以及这个站点不提供什么。">
+  <title>路线总览 · 14 天从这里开始 | Modern Robotics 学习手记</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/site.css">
+  <link rel="stylesheet" href="assets/lesson-kit.css">
+  <link rel="stylesheet" href="assets/start.css">
+  <script src="assets/site.js" defer></script>
+  <script src="assets/start.js" defer></script>
+</head>
+<body data-lesson-key="start" data-lesson-title="路线总览 · 14 天从这里开始" data-lesson-topic="学习路线、前置关系、时长与读法">
+<a class="skip-link" href="#main">跳到正文</a>
+<header class="site-header">
+  <a class="brand" href="start.html" aria-label="Modern Robotics 学习手记·路线总览"><span class="brand-monogram">MR<span>.</span></span><span class="brand-name">Modern Robotics<small>可视化学习手记</small></span></a>
+  <div class="header-actions"><span class="edition">START / 路线总览</span><a href="glossary.html">术语表</a><a href="https://github.com/lucinwen/Modern-Robotics" target="_blank" rel="noopener noreferrer">GitHub 仓库 <span aria-hidden="true">↗</span></a><button class="btn theme-toggle" id="theme-toggle" type="button" aria-label="切换明暗主题">切换主题</button></div>
+</header>
+<div class="page-shell">
+  <aside class="sidebar" aria-label="学习导航">
+    {{component:course-switcher}}
+    <div class="sidebar-intro"><span class="eyebrow">开始之前</span><strong>先花五分钟，看清这 14 天是什么。</strong></div>
+    <nav class="lesson-nav" aria-label="本页目录">
+      <a href="#start" class="is-current" aria-current="location"><span>00</span> 这里是什么</a>
+      <a href="#ways"><span>01</span> 三种读法</a>
+      <a href="#roadmap"><span>02</span> 14 天路线</a>
+      <a href="#math"><span>03</span> 数学底线</a>
+      <a href="#stuck"><span>04</span> 卡住了怎么办</a>
+      <a href="#boundary"><span>05</span> 这里没有什么</a>
+      <a href="#sources"><span>↗</span> 来源</a>
+    </nav>
+    <div class="sidebar-note"><span class="small-label">不确定从哪进？</span><p>完全零基础：从 Day 1 顺序读。<br>只有两天：看 01 节的四天方案。<br>只想查词：直接开<a href="glossary.html">术语表</a>。</p></div>
+  </aside>
+  <main id="main">
+    <section id="start" class="hero lesson-section" data-nav>
+      <div class="eyebrow">MODERN ROBOTICS / 路线总览</div>
+      <h1>14 天，<br><span>把“怎么做到的”<br>讲清楚。</span></h1>
+      <p class="hero-lead">这不是百科，也不是术语手册。每天只回答一个问题，配 9–11 个可以拖着玩的演示，最后用一张答卷检查自己。可以从 Day 1 顺序读，也可以在面试前只挑四天。</p>
+      <div class="lesson-meta"><span>14 个学习日</span><span>144 个交互区</span><span>每天 60–100 分钟</span><span>不装任何环境</span></div>
+      <a class="start-link" href="#ways">先选一条路线 <span aria-hidden="true">↓</span></a>
+      <div class="opening-question"><span class="small-label">这个站要训练你回答的问题</span><p>“你用毫米波测了呼吸？”——那你能当场推出距离和拍频的关系，并说清哪些结论你其实没有证据吗？</p><span>每个学习日都以这类追问开头，因为真正的难点不是名词，而是名词之间的因果，和你能不能诚实划出边界。</span></div>
+      <div class="reading-guide"><h2>先说清这个站是什么</h2><p>它是一份<strong>个人学习手记的公开版</strong>：把 14plan 里 14 份逐日任务手册，做成可以在浏览器里观察、操作、自测的页面。每个学习日都从一个具体的故障或追问开始，而不是从定义开始——因为定义背下来也不会用，见到“机器人停在门口”才会真的想弄懂 TF 是什么。</p><p><strong>没有前置要求。</strong>会看 x、y、z，知道“米”和“秒”，就能从 Day 1 开始。数学只出现在真正用到它的那一节，并且每一处都给了“不会就先跳过、先看输入输出和相对谁”的走法。</p><p><strong>所有演示都是浏览器里现算的模型。</strong>没有连接真实机器人、雷达或 XR 设备，没有训练任何模型，页面上不出现任何实测性能数字。这句话每天页末都会再写一次，它是这个站的可信度来源，不是免责声明。</p></div>
+      <p class="source-note">路线依据 <a href="https://github.com/lucinwen/14plan" target="_blank" rel="noopener noreferrer">14plan</a> 的 14 份 TASK_GUIDES；整理日期 2026.10.20–10.22。原手册里的实验、运行记录和简历材料，仍然要由你自己完成。</p>
+    </section>
+
+    <section id="ways" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>01</span> 三种读法</div>
+      <h2>同一个站，三种用法。先选一种。</h2>
+      <p>14 天全读完约 17 小时（含把每个演示拖一遍）。但多数人不是这个场景，所以先给三种走法，再进下面的路线表。</p>
+      <div class="entry-cards">
+        <div class="entry-card"><strong>A · 从零系统学</strong><span>按 Day 1 → 14 顺序读，每天一到两小时。适合想把这整条链真正建起来、并且准备面试或做项目的人。</span><em>顺序不要乱：Day 4 的位姿是 Day 5 变换树的输入；Day 6 的观测/动作合同是 Day 7 的前提。</em></div>
+        <div class="entry-card"><strong>B · 48 小时冲刺</strong><span>只读四天：Day 1（空间与变换）→ Day 6（环境合同）→ Day 11（测量/推断/医疗边界）→ Day 14（怎么被追问）。</span><em>选这四天的理由：面试官最常追的三件事是“坐标系对不对”“接口写没写全”“你敢不敢说边界”。</em></div>
+        <div class="entry-card"><strong>C · 只查一个词</strong><span>打开<a href="glossary.html">术语表</a>，输入缩写或中文名，每条都带“第一次出现在哪一页哪一节”的链接。</span><em>读完一节想回查时用这个，不要在 14 页里 Ctrl+F 乱找。</em></div>
+      </div>
+      <p><strong>不建议的读法：</strong>直接跳到 Day 11 看公式。毫米波那页的每个数字都依赖“测量值 / 推断状态 / 医疗诊断”这条分界线，而这条线是 Day 8、Day 9 建立的。公式能抄，判断抄不走。</p>
+    </section>
+
+    <section id="roadmap" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>02</span> 14 天路线</div>
+      <h2>每天一个故障，一个分界线，一次自查。</h2>
+      <p>下面每一天都标了三件事：<strong>读完能做到什么</strong>、<strong>它需要前面哪一天的什么</strong>、<strong>大概多久</strong>。概念密度用 ★ 表示，只说明新名词的多少，不代表重要程度——Day 6 只有 ★★，却是最实用的一天。</p>
+      <p>每天最后都有一张自查表：除了 Day 2、Day 3 收在「实验记录 + Checkpoint」，其余各天都是「六栏答卷 + 五维自评」；Day 14 还多一层「追问链」。名字不同，作用相同——让你发现自己哪里其实没懂。</p>
+      <div class="demo" id="start-paths">
+        <div class="demo-head"><span class="demo-title">选一条路线，看哪几天该读</span><span class="demo-tag">只改显示，不改内容</span></div>
+        <div class="path-picker" role="group" aria-label="选择学习路线">
+          <button class="btn is-selected" id="start-path-core" type="button" data-mode="core" aria-pressed="true">A · 从零系统学（14 天）</button>
+          <button class="btn" id="start-path-sprint" type="button" data-mode="sprint" aria-pressed="false">B · 48 小时冲刺（4 天）</button>
+          <button class="btn" id="start-path-search" type="button" data-mode="search" aria-pressed="false">C · 我只想查东西</button>
+        </div>
+        <p class="path-note" id="start-path-note"><strong>14 天全读。</strong><span>参考总时长约 17 小时，建议每天一段，不要连读两天以上。</span></p>
+        <p class="path-hint" id="start-path-hint" hidden></p>
+      </div>
+      <div class="roadmap" id="start-roadmap" data-mode="core">
+          <div class="rd-stage"><h3>阶段一 · 空间与身体（Day 1–4）</h3><p>先能在纸上把一个动作写清楚：东西在哪、相对谁、够不够得到、够到了会不会撞。</p></div>
+          <article class="rd-row" data-sprint="1">
+            <span class="rd-num">01</span>
+            <div class="rd-body"><h4><a href="index.html">看懂空间，再理解运动</a></h4><p class="rd-sum">刚体自由度、构型空间/工作空间/任务空间的区别、旋转矩阵与齐次变换、相机点云、机器人能不能过门。</p><p class="rd-meta"><span class="rd-pre">前置：无</span><span>60–80 分钟</span><span class="rd-lvl">★★</span><span>13 个演示</span></p></div>
+          </article>
+          <article class="rd-row" data-sprint="0">
+            <span class="rd-num">02</span>
+            <div class="rd-body"><h4><a href="day-02.html">把摆放要求变成能求解的规则</a></h4><p class="rd-sum">约束怎么写、为什么“面积够”仍放不下、SAT/UNSAT 三种回答、冲突核心、先满足必须再比较偏好。</p><p class="rd-meta"><span class="rd-pre">前置：Day 1 的坐标系与包围盒</span><span>70–85 分钟</span><span class="rd-lvl">★★★</span><span>6 例 Z3 运行记录</span></p></div>
+          </article>
+          <article class="rd-row" data-sprint="0">
+            <span class="rd-num">03</span>
+            <div class="rd-body"><h4><a href="day-03.html">“去拿那个杯子”该怎样一步步做</a></h4><p class="rd-sum">状态与动作的写法、PDDL 两份文件、搜索怎么展开、FSM 管过程、任务规划与运动规划之间的证据往返。</p><p class="rd-meta"><span class="rd-pre">前置：Day 2 的“条件 → 求解”</span><span>75–90 分钟</span><span class="rd-lvl">★★★</span><span>10 组交互</span></p></div>
+          </article>
+          <article class="rd-row" data-sprint="0">
+            <span class="rd-num">04</span>
+            <div class="rd-body"><h4><a href="day-04.html">够得到门把手，为什么还是开不了门</a></h4><p class="rd-sum">平面二连杆的正解与逆解、可行域是一个环、关节限位、雅可比、伸直时的奇异位形、从“够得到”到“抓得着”的四道关。</p><p class="rd-meta"><span class="rd-pre">前置：Day 1 的位姿 + 初中三角</span><span>70–85 分钟</span><span class="rd-lvl">★★★★</span><span>8 个演示</span></p></div>
+          </article>
+
+          <div class="rd-stage"><h3>阶段二 · 系统与训练（Day 5–7）</h3><p>把场景交给机器人，靠的不是模型，是一份写得全、对得上时间的接口合同。</p></div>
+          <article class="rd-row" data-sprint="0">
+            <span class="rd-num">05</span>
+            <div class="rd-body"><h4><a href="day-05.html">目标发出去了，机器人在门口停住</a></h4><p class="rd-sum">话题/服务/动作三种语义、TF 是带时间戳的换算、URDF 只描述身体、代价地图为什么会堵、取消与三种故障的“第一眼”。</p><p class="rd-meta"><span class="rd-pre">前置：Day 4 的变换链</span><span>65–80 分钟</span><span class="rd-lvl">★★★</span><span>8 个演示</span></p></div>
+          </article>
+          <article class="rd-row" data-sprint="1">
+            <span class="rd-num">06</span>
+            <div class="rd-body"><h4><a href="day-06.html">场景能显示，为什么还不能训练</a></h4><p class="rd-sum">渲染几何 vs 碰撞几何、质量与摩擦与步长、门为什么会推不动、观测/动作/奖励/复位/随机种子各自的合同、从仿真迁移到实机缺什么。</p><p class="rd-meta"><span class="rd-pre">前置：不需要 UE5；只要 Day 5 的“接口”意识</span><span>85–100 分钟</span><span class="rd-lvl">★★</span><span>16 个交互区</span></p></div>
+          </article>
+          <article class="rd-row" data-sprint="0">
+            <span class="rd-num">07</span>
+            <div class="rd-body"><h4><a href="day-07.html">机器人是怎么“学会”开门的</a></h4><p class="rd-sum">state 与 observation 的差别、MDP 五个字母各能错在哪、BC/RL/Diffusion Policy/VLA 要的东西根本不同、动作块、单条示范数据必须有哪些字段。</p><p class="rd-meta"><span class="rd-pre">前置：Day 6 的观测与动作合同</span><span>75–90 分钟</span><span class="rd-lvl">★★★★</span><span>11 个演示</span></p></div>
+          </article>
+
+          <div class="rd-stage"><h3>阶段三 · 证据与表达（Day 8）</h3><p>同样一件事，怎么讲才不算吹。这一天排在前面，是因为后面每一天都在用它给的四个词。</p></div>
+          <article class="rd-row" data-sprint="0">
+            <span class="rd-num">08</span>
+            <div class="rd-body"><h4><a href="day-08.html">“我们和那篇论文不是做一样的事吗”</a></h4><p class="rd-sum">同名工作怎么辨析、五个对照维度、四类证据等级、对比要固定哪五个量、90 秒说清三句话、提交前每一行都要有状态。</p><p class="rd-meta"><span class="rd-pre">前置：Day 7 的四类方法差别</span><span>65–80 分钟</span><span class="rd-lvl">★★★</span><span>9 个演示</span></p></div>
+          </article>
+
+          <div class="rd-stage"><h3>阶段四 · 感知与交互（Day 9–13）</h3><p>语音、数字人、毫米波、遥感、XR。每一条链都有自己的断点，而且往往断在“看起来最不像问题”的地方。</p></div>
+          <article class="rd-row" data-sprint="0">
+            <span class="rd-num">09</span>
+            <div class="rd-body"><h4><a href="day-09.html">“先停一下”，旧回答 400 ms 后才回来</a></h4><p class="rd-sum">六节点语音链、可打断的六个状态、把打断摊成 t0–t4、三条竞态、四个闸门过滤过期结果、陪伴机器人的两条业务流。</p><p class="rd-meta"><span class="rd-pre">前置：Day 5 的消息与取消</span><span>70–85 分钟</span><span class="rd-lvl">★★★</span><span>9 个演示</span></p></div>
+          </article>
+          <article class="rd-row" data-sprint="0">
+            <span class="rd-num">10</span>
+            <div class="rd-body"><h4><a href="day-10.html">“我有高质量 3DGS 数字人”，所以呢</a></h4><p class="rd-sum">表征/驱动/渲染/同步四条线、六种人体表征各自不能自动保证什么、3DGS 到底是什么、参数化模型、音画两条时间线怎么对。</p><p class="rd-meta"><span class="rd-pre">前置：Day 9 的时序</span><span>70–85 分钟</span><span class="rd-lvl">★★★★</span><span>9 个演示</span></p></div>
+          </article>
+          <article class="rd-row" data-sprint="1">
+            <span class="rd-num">11</span>
+            <div class="rd-body"><h4><a href="day-11.html">“我用毫米波测了呼吸”，那能测心率吗</a></h4><p class="rd-sum">FMCW 从一条斜线到一个距离、拍频公式现场推、FFT 把频率轴换成距离轴、0.5 mm 位移是 72° 相位、快时间与慢时间、三种污染、质量门与医疗边界。</p><p class="rd-meta"><span class="rd-pre">前置：初中物理的“波” + Day 10 的时序</span><span>85–100 分钟</span><span class="rd-lvl">★★★★★</span><span>10 个演示</span></p></div>
+          </article>
+          <article class="rd-row" data-sprint="0">
+            <span class="rd-num">12</span>
+            <div class="rd-body"><h4><a href="day-12.html">两个来源看到了，就等于确认了吗</a></h4><p class="rd-sum">SAR 的分辨率与孔径、为什么是斜着看、叠掩/透视收缩/阴影三种几何误读、四字段证据、四个出口而不是一个是非、共享上游导致“伪独立票”。</p><p class="rd-meta"><span class="rd-pre">前置：Day 11 的“测量 vs 推断”</span><span>80–95 分钟</span><span class="rd-lvl">★★★★★</span><span>10 个演示</span></p></div>
+          </article>
+          <article class="rd-row" data-sprint="0">
+            <span class="rd-num">13</span>
+            <div class="rd-body"><h4><a href="day-13.html">连接建立成功，但人站到了桌子外面</a></h4><p class="rd-sum">局部/视野/舞台三段坐标链、参考空间选错全盘错、通信链与空间链互不知道对方、延迟是“位置是旧的”、漂移不会自己好、姿态消息要能自证过期、触觉授权状态机。</p><p class="rd-meta"><span class="rd-pre">前置：Day 5 的 TF + Day 11 的延迟</span><span>80–95 分钟</span><span class="rd-lvl">★★★★</span><span>10 个演示</span></p></div>
+          </article>
+
+          <div class="rd-stage"><h3>阶段五 · 收尾（Day 14）</h3><p>把前 13 天压成 45 分钟里讲得完的一条主线，并且知道被追到第三层时自己还剩什么。</p></div>
+          <article class="rd-row" data-sprint="1">
+            <span class="rd-num">14</span>
+            <div class="rd-body"><h4><a href="day-14.html">“这些哪些是你亲手做的”</a></h4><p class="rd-sum">十个字段逼出真实贡献、同一件事三种写法的风险、90 秒自介、45 分钟时间盒、一条主线、四层追问链、四页材料包、面试前一晚的八件事。</p><p class="rd-meta"><span class="rd-pre">前置：Day 8 的证据等级 + 你前面的产出</span><span>75–90 分钟</span><span class="rd-lvl">★★★</span><span>10 个演示</span></p></div>
+          </article>
+      </div>
+      <p><strong>关于时长：</strong>上面的分钟数按“读一遍 + 把演示拖一遍 + 写下自己的解释”估算，不包含原手册要求的实验与运行记录。如果你只有 30 分钟，只读当天页末那张自查表对应的几节，答不上再回头补。</p>
+    </section>
+
+    <section id="math" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>03</span> 数学底线</div>
+      <h2>真的需要多少数学？四件，而且都能用画的。</h2>
+      <p>不需要先学完线性代数，也不需要会解微分方程。整站反复用到的只有下面四件事；每一件都给了“不会时怎么绕过去”的做法。</p>
+      <div class="math-grid">
+        <div class="math-card"><h3>① 三角</h3><p>sin 和 cos 只是“把一根斜杆投影到两个方向上的长度比例”。角度换成弧度时乘 π/180。</p><span class="small-label">用在 Day 4、Day 11、Day 12</span></div>
+        <div class="math-card"><h3>② 向量</h3><p>两个点相减得到“从哪到哪”；点积得到“这两个方向有多一致”。</p><span class="small-label">用在 Day 1、Day 4、Day 12</span></div>
+        <div class="math-card"><h3>③ 矩阵</h3><p>旋转矩阵就是“把三根新轴分别写成三列”。乘一个点，等于一次换坐标。</p><span class="small-label">用在 Day 1、Day 5、Day 13</span></div>
+        <div class="math-card"><h3>④ 单位</h3><p>米、秒、弧度。界面上用度，公式里用弧度；所有式子先做量纲检查。</p><span class="small-label">每一天</span></div>
+      </div>
+      <details class="fold"><summary>三道自测题：会不会，试完就知道 <span>答案在下面，先自己写</span></summary><div>
+        <dl>
+          <dt>1. 一根 2 米长的杆，与地面夹角 30°。它的顶端离地多高？</dt><dd>2 × sin 30° = 1 米。这里 sin 就是“竖直方向的投影比例”。</dd>
+          <dt>2. 点 A 在 (3, 1)，点 B 在 (0, 1)。从 A 指向 B 的向量是什么？长度多少？</dt><dd>B − A = (−3, 0)，长度 3 米。向量减法“终点减起点”，这一步在 Day 1 的坐标系那节会反复用。</dd>
+          <dt>3. 机器人转了 90°，程序里要写 90 还是 1.5708？</dt><dd>写 1.5708（π/2）。程序里的 sin 收的是弧度，写 90 会算成 90 弧度——这是运动学里最常见的第一个错误。</dd>
+        </dl>
+        <p style="margin-top:14px">三道都能自己写出来，就够读完这个站。写不出来也不影响开始：Day 1 的演示都是先看图、再对数字，公式是最后一步。</p>
+      </div></details>
+    </section>
+
+    <section id="stuck" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>04</span> 卡住了怎么办</div>
+      <h2>四种卡住，四种不同的处理。</h2>
+      <p>新手在长教程里最常放弃的瞬间，往往不是“太难”，而是“不知道现在该看哪里”。把下面四条贴在旁边，按情况选一条。</p>
+      <ul>
+        <li><strong>公式看不懂。</strong>先不看公式，只问三件事：输入是什么？输出是什么？<strong>相对谁</strong>？——坐标系问题里有九成的困惑是第三个没答上来。</li>
+        <li><strong>演示看不懂。</strong>一次只改一个滑条，改之前先猜结果。猜错的地方就是你没懂的地方，比读三遍正文有效。</li>
+        <li><strong>缩写看不懂。</strong>打开<a href="glossary.html">术语表</a>。每条都写了“一句话白话”和“第一次出现在哪一页哪一节”，看完能直接跳回去。</li>
+        <li><strong>一天读不完。</strong>直接翻到当天最后那张自查表，看哪几个格答不上来，只回去读那几节。整页读完不是目标，答得上来才是。</li>
+      </ul>
+      <p>还有一个更隐蔽的卡住：<strong>“我好像都懂了，但说不出来”</strong>。这不是错觉，是学习正常的一步。解决办法是把演示里的数字换成自己的话，写进当天页末的笔记框——写不出来就说明还没懂，回去再拖一次滑条。</p>
+    </section>
+
+    <section id="boundary" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>05</span> 诚实边界</div>
+      <h2>这个站不提供什么。</h2>
+      <p>把“没有什么”写在最前面，比写在页末更可信。以下五条对全部 14 页有效。</p>
+      <ul>
+        <li><strong>没有硬件。</strong>没有连接真实机器人、毫米波雷达、XR 头显或触觉设备。所有波形、图像、热图都是浏览器里按页面上写着的参数现算的合成数据。</li>
+        <li><strong>没有真实训练与实测。</strong>不训练任何模型，不给出准确率、延迟分位数、成功率这类只有跑过才有的数字。</li>
+        <li><strong>不是 14plan 的替代品。</strong>原手册里的实验、运行记录、代码提交，仍然要你自己做；网页负责让你看懂“为什么”，不替你产生证据。</li>
+        <li><strong>不替你做材料。</strong>Day 8 和 Day 14 教你判断自己的成果属于哪一档、该怎么写才不越界，但不代写简历，也不承诺面试结果。</li>
+        <li><strong>合成数据不是证据。</strong>页面里的示例能说明原理，不能当成实验结论引用；两者混用，是这个领域最常见的失信方式。</li>
+      </ul>
+      <p>反过来说，这个站确实提供的是一件事：<strong>把每条链路讲到你能自己复述、能自己算、能自己指出它在什么条件下会断。</strong></p>
+    </section>
+
+    <section id="sources" class="lesson-section sources-section" data-nav>
+      <div class="section-kicker"><span>↗</span> 来源与整理方式</div>
+      <h2>这份路线是怎么来的</h2>
+      <p>14 个学习日的内容依据 <a href="https://github.com/lucinwen/14plan" target="_blank" rel="noopener noreferrer">14plan</a> 的逐日任务手册（<code>TASK_GUIDES/day-01…14.md</code>）；Day 1 的课程清单另依据 <a href="https://github.com/lucinwen/14plan/blob/main/STUDY_GUIDES/R01.md" target="_blank" rel="noopener noreferrer">R01</a>、<a href="https://github.com/lucinwen/14plan/blob/main/STUDY_GUIDES/R16.md" target="_blank" rel="noopener noreferrer">R16</a> 与 MIT 在线讲义整理。</p><p>每天页面末尾都单独列出该页用到的原始材料与视频入口，并写清哪些内容是概念解释、哪些是纸面设计、哪些是真实运行记录。整理日期 2026.10.20–10.22。</p>
+      <div class="source-method"><h3>怎么读“参考时长”和“概念密度”</h3><p>参考时长按“读一遍 + 把演示拖一遍 + 写下自己的解释”估算，不含原手册的实验时间。★ 的数量只表示当天新名词的密度：★★★★★ 的地方（Day 11、Day 12）需要慢读，但不需要额外先修课。</p><p>如果某一天的 ★ 和你实际感受不符，以你的感受为准——这份标注是给“排时间”用的，不是给“下判断”用的。</p></div>
+    </section>
+    <div class="next-lesson"><span class="small-label">准备好了就从第一天开始</span><a href="index.html">Day 01 · 看懂空间，再理解运动 →</a></div>
+    <footer class="site-footer"><div><strong>Modern Robotics 学习手记</strong><p>先看见变化，再说清原因。</p></div><a href="#start">回到顶部 ↑</a></footer>
+  </main>
+</div>
+<noscript><div class="noscript-note">文字部分可以正常阅读。路线筛选需要在浏览器中启用 JavaScript。</div></noscript>
+</body>
+</html>

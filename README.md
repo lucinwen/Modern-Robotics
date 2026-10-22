@@ -2,10 +2,11 @@
 
 面向初学者的中文学习笔记。先通过交互观察空间变化，再解释概念、公式与适用条件。
 
-目前包含 **Day 1–14** 十四篇连续教程，全部对齐 `14plan` 对应日的任务手册。基础链为 Day 1 空间与五层合法性 → Day 2 约束与 Z3 → Day 3 任务规划与 TAMP；身体与系统链为 **Day 4 运动学（FK/IK/Jacobian）** → **Day 5 ROS2 / TF / Nav2 接口** → **Day 6 UE → Isaac Sim / Isaac Lab 训练环境**；策略与文献链为 **Day 7 BC / RL / Diffusion Policy / VLA** → **Day 8 MANSION / SceneWeaver / Holodeck 方法对照**；交互与感知链为 **Day 9 可打断语音会话** → **Day 10 3DGS / FLAME / SMPL-X 数字人**；传感与部署链为 **Day 11 FMCW 毫米波与微动感知** → **Day 12 SAR 与多源融合** → **Day 13 OpenXR / WebRTC / 触觉安全**；最后一篇 **Day 14 模拟面试与证据核验** 把前 13 天收成一套可被追问的答法。
+目前包含 **Day 1–14** 十四篇连续教程，全部对齐 `14plan` 对应日的任务手册；另有独立的 [路线总览](start.html)（14 天怎么排、前置关系、参考时长）和 [术语表](glossary.html)（80 个词的一句话解释，可搜索）。基础链为 Day 1 空间与五层合法性 → Day 2 约束与 Z3 → Day 3 任务规划与 TAMP；身体与系统链为 **Day 4 运动学（FK/IK/Jacobian）** → **Day 5 ROS2 / TF / Nav2 接口** → **Day 6 UE → Isaac Sim / Isaac Lab 训练环境**；策略与文献链为 **Day 7 BC / RL / Diffusion Policy / VLA** → **Day 8 MANSION / SceneWeaver / Holodeck 方法对照**；交互与感知链为 **Day 9 可打断语音会话** → **Day 10 3DGS / FLAME / SMPL-X 数字人**；传感与部署链为 **Day 11 FMCW 毫米波与微动感知** → **Day 12 SAR 与多源融合** → **Day 13 OpenXR / WebRTC / 触觉安全**；最后一篇 **Day 14 模拟面试与证据核验** 把前 13 天收成一套可被追问的答法。
 
 ## 打开教程
 
+- **先看路线**：[路线总览 start.html](start.html)（14 天地图、三种读法、数学底线）· [术语表 glossary.html](glossary.html)（80 个词速查）。
 - **Day 1**：[index.html](index.html) · **Day 2**：[day-02.html](day-02.html) · **Day 3**：[day-03.html](day-03.html) · **Day 4**：[day-04.html](day-04.html) · **Day 5**：[day-05.html](day-05.html) · **Day 6**：[day-06.html](day-06.html) · **Day 7**：[day-07.html](day-07.html) · **Day 8**：[day-08.html](day-08.html) · **Day 9**：[day-09.html](day-09.html) · **Day 10**：[day-10.html](day-10.html) · **Day 11**：[day-11.html](day-11.html) · **Day 12**：[day-12.html](day-12.html) · **Day 13**：[day-13.html](day-13.html) · **Day 14**：[day-14.html](day-14.html)。下载并解压完整仓库后，直接用浏览器打开对应文件；网页交互无须安装依赖。GitHub 文件页显示源码，要操作可视化请打开本地网页，或启用下述 Pages。
 - **在线地址（GitHub Pages，已发布）**：<https://lucinwen.github.io/Modern-Robotics/>。推送到 `main` 后会自动重新发布，不需要再改设置。
 - 本地预览（推荐，交互最稳）：在仓库根目录执行 `python -m http.server 8000`，浏览器打开 <http://localhost:8000>。

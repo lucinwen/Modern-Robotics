@@ -47,6 +47,10 @@
     <a href="day-14.html" data-day="14"><strong>DAY 14</strong><span>模拟面试</span></a>
   </nav>
 </details>
+<div class="switcher-extra">
+  <a href="start.html">路线总览 · 14 天怎么排</a>
+  <a href="glossary.html">术语表 · 80 个词速查</a>
+</div>
     <div class="sidebar-intro"><span class="eyebrow">从“摆得下”到“接下来做什么”</span><strong>第三天，给动作讲道理。</strong></div>
     <nav class="lesson-nav" aria-label="本页目录">
       <a href="#start" class="is-current" aria-current="location"><span>00</span> 先认识今天的小世界</a>
@@ -70,13 +74,27 @@
       <div class="eyebrow">DAY 03 / PDDL · 状态 · TAMP</div>
       <h1>“去拿那个杯子”，<br><span>机器人该怎样一步步做？</span></h1>
       <p class="hero-lead">你在 A 房间，杯子在 B 房间，中间的门锁着。对人来说很自然的一句话，对机器人意味着：先把世界说清楚，再找动作顺序，最后检查身体能否完成每一步。</p>
-      <div class="lesson-meta"><span>计划日 2026.10.22</span><span>10 组交互演示</span><span>真实 PDDL 实验 · 35 分钟阶段练习</span></div>
+      <div class="lesson-meta"><span>计划日 2026.10.22</span><span>10 组交互演示</span><span>真实 PDDL 实验 · 35 分钟阶段练习</span><span>参考 75–90 分钟</span></div>
       <a class="start-link" href="#world-layers">先看这个小场景 <span aria-hidden="true">↓</span></a>
       <div class="opening-question"><span class="small-label">贯穿整篇的任务</span><p>从 A 房间出发，让杯子最后在机器人手里。</p><span>今天只用两个房间、一扇门、一把钥匙、一个杯子和一个机器人。新术语都回到这个例子解释。</span></div>
       <div class="reading-guide"><h2>先读中文意思，再认识符号</h2><p>Day 1 帮你描述“在哪里、怎样转”；Day 2 帮你判断“这些空间要求能否同时满足”；今天再加上<strong>先后顺序与状态变化</strong>。门可以位置正确、宽度足够，却因为上锁而暂时不能通过。</p><p>你已有 Python 和 UE 基础，这里不重讲编程语法。遇到新词，会先用场景说明，再给最小符号、操作和核对提示。机器人学里的公式放在对应的图后面；第一次读可以先做操作，再回来读细节。</p></div>
       <div class="d3-route"><div><span>第一段 · 第 01–04 节</span><strong>世界 → 事实 → 动作</strong><p>先能说清一句话和一个符号分别指什么。</p></div><div><span>第二段 · 第 05–08 节</span><strong>找顺序 → 查运动 → 改计划</strong><p>看懂为什么逻辑上合理，身体仍可能做不到。</p></div><div><span>第三段 · 第 09–10 节</span><strong>预测 → 实跑 → 自己解释</strong><p>保留第一版推理，再与实际输出核对。</p></div></div>
       <details><summary>今天学到什么程度，就可以进入下一天？</summary><p>你能自己列出初态与目标，解释 unlock／open／move／pickup 的前置与效果，手推一条合法动作序列，并区分缺钥匙、缺技能、门太窄和运动搜索没找到解。今天不要求推导完整运动学，也不要求搭起真实机械臂。</p></details>
       <p class="source-note">内容对应 <a href="#source-plan">Day 3、R04、R16</a>；R20 为选读。计划日用于课程排期，制作日期为 2026-10-20，不代表已经完成个人学习。</p>
+      <details class="fold term-fold">
+        <summary>本页生词 · 6 个 <span>看不懂就展开；正文第一次遇到时不再打断你</span></summary>
+        <div>
+          <dl>
+            <dt>状态 <small>state</small></dt><dd>此刻哪些事实成立。规划从“初始状态”出发，到“满足目标的状态”结束。</dd>
+            <dt>谓词 <small>predicate</small></dt><dd>一条能判真假的事实，例如“门是开的”。规划就是在排列这些事实的组合。</dd>
+            <dt>动作的前提与效果 <small>precondition / effect</small></dt><dd>现在能不能做 / 做完世界变成什么样。少写一个，就会规划出做不了的动作。</dd>
+            <dt>PDDL </dt><dd>一种写“状态 + 动作 + 目标”的文本格式，规划器能直接读；自然语言它读不懂。</dd>
+            <dt>搜索 <small>search</small></dt><dd>从初始状态一步步展开合法动作，直到命中目标。计划不是想出来的，是展开出来的。</dd>
+            <dt>有限状态机 / 任务与运动规划 <small>FSM / TAMP</small></dt><dd>FSM 管“现在允许走哪一步”；TAMP 要求高层喊“开门”时低层带回可执行证据。</dd>
+          </dl>
+          <p class="term-fold__more"><a href="glossary.html">80 个词的完整术语表 →</a></p>
+        </div>
+      </details>
     </section>
 
     <section id="world-layers" class="lesson-section" data-nav>

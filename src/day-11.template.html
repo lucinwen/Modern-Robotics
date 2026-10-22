@@ -44,11 +44,25 @@
       <div class="eyebrow">MODERN ROBOTICS / 第十一天</div>
       <h1>“我用毫米波测了呼吸。”<br><span>——那你能测心率吗？能测 CO₂ 吗？</span></h1>
       <p class="hero-lead">第一个问题的答案通常是“能”。后两个问题，绝大多数人答不上来，而且答错的方式很典型：把<strong>“很灵敏”</strong>当成了<strong>“什么都能测”</strong>。毫米波测的是一个<strong>几何量</strong>——回波走了多远、路程变了多少；而 CO₂ 浓度是一个<strong>分子数密度</strong>。这两个量之间没有换算关系，灵敏度再高也补不上。</p>
-      <div class="lesson-meta"><span>2026.10.22</span><span>信号 · 相位 · 污染 · 风险处置</span><span>10 个交互演示</span></div>
+      <div class="lesson-meta"><span>2026.10.22</span><span>信号 · 相位 · 污染 · 风险处置</span><span>10 个交互演示</span><span>参考 85–100 分钟</span></div>
       <a class="start-link" href="#chain">先分清三条链路 <span aria-hidden="true">↓</span></a>
       <div class="opening-question"><span class="small-label">贯穿今天的一个问题</span><p>为什么 5 mm 的波长能感知 0.5 mm 的胸壁位移，却完全看不见房间里的二氧化碳？</p><span>因为雷达测的是<strong>电磁波往返的时延与相位</strong>，它对“路程变化”极度敏感；而 CO₂ 是线性对称分子，没有永久电偶极矩，在毫米波段几乎没有可用的吸收线——它的指纹在 4.26 µm 和 15 µm 的红外区。60 GHz 的光子能量约 0.25 meV，比振动能级间隔小三个数量级，压根拨不动这根弦。<strong>要测 CO₂，就换一个物理机制，换一个传感器，并且分开记录来源。</strong></span></div>
       <div class="reading-guide"><h2>今天的分界线：测量值 / 推断状态 / 医疗诊断</h2><p>这三层在创业路演里最容易被糊成一句“我们能监测老人的健康状况”。真实的边界是：<strong>雷达给你一串数字（测量值）；算法和你一起把它解释成“可能有人、可能久坐未动”（推断状态）；“是否发生跌倒、是否呼吸异常”属于医疗判断，需要资质、对照仪器和临床验证（医疗诊断）</strong>。第一层是工程，第二层是产品，第三层不是你能单方面承诺的。</p><p>本页所有波形都是<strong>浏览器里现算的合成信号</strong>，参数在页面上写着。<strong>没有一台真实的毫米波雷达参与</strong>——所以本页不会出现任何“实测准确率”。这不是谦虚，是证据纪律：没有硬件、没有对照仪器、没有日志，就不能有性能陈述。</p><details><summary>那为什么还要算这么多数字？</summary><p>因为面试里最能区分人的，是你能不能在现场把 <code>f_b ≈ 2SR/c</code> 推出来、把量纲对上、把 0.5 mm 换算成 72° 相位，然后指出这条链路在什么条件下会断。<strong>算得出来的是原理，测不出来的才是性能</strong>——两者都要说清，但不能互相冒充。</p></details></div>
       <p class="source-note">范围依据 <a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-11.md" target="_blank" rel="noopener noreferrer">Day 11 任务手册</a> 与 <a href="https://github.com/lucinwen/14plan/blob/main/DAILY/day-11.md" target="_blank" rel="noopener noreferrer">每日计划</a>；对应资源 R13（TI FMCW 培训前三讲）与 R22（呼吸微动演示，选修）。</p>
+      <details class="fold term-fold">
+        <summary>本页生词 · 6 个 <span>看不懂就展开；正文第一次遇到时不再打断你</span></summary>
+        <div>
+          <dl>
+            <dt>调频连续波 <small>FMCW</small></dt><dd>发射一个频率随时间线性上升的波，用“回波晚了多久”换距离。本页唯一必须现场推的公式在这。</dd>
+            <dt>线性调频 <small>chirp</small></dt><dd>频率从低扫到高的一段波，画出来是一条斜线。斜率越大，同样的距离差对应的频率差越大。</dd>
+            <dt>拍频 <small>beat frequency</small></dt><dd>回波和“此刻的发射波”混频后的差值频率。它正比于距离，这就是雷达能测距的全部原因。</dd>
+            <dt>快速傅里叶变换 <small>FFT</small></dt><dd>把一段时域信号换成“里面有哪些频率、各有多强”。在雷达里，频率轴换成距离轴就得到距离分布。</dd>
+            <dt>相位与缠绕 <small>phase</small></dt><dd>相位是波在一个周期里走到了哪儿；超过一圈会绕回去，读数突然跳，这叫缠绕。</dd>
+            <dt>多普勒 / 快时间与慢时间 <small>Doppler</small></dt><dd>相对运动造成频率偏移。一个 chirp 内的时间管距离，跨 chirp 的时间管速度。</dd>
+          </dl>
+          <p class="term-fold__more"><a href="glossary.html">80 个词的完整术语表 →</a></p>
+        </div>
+      </details>
     </section>
 
     <section id="chain" class="lesson-section" data-nav>

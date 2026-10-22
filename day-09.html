@@ -40,6 +40,10 @@
     <a href="day-14.html" data-day="14"><strong>DAY 14</strong><span>模拟面试</span></a>
   </nav>
 </details>
+<div class="switcher-extra">
+  <a href="start.html">路线总览 · 14 天怎么排</a>
+  <a href="glossary.html">术语表 · 80 个词速查</a>
+</div>
     <div class="sidebar-intro"><span class="eyebrow">学习路线</span><strong>取消的是版本，不是声音。</strong></div>
     <nav class="lesson-nav" aria-label="本页目录">
       <a href="#start" class="is-current" aria-current="location"><span>00</span> 只关扬声器够吗</a>
@@ -61,11 +65,25 @@
       <div class="eyebrow">MODERN ROBOTICS / 第九天</div>
       <h1>用户说“先停一下”，<br><span>旧回答 400 ms 后才回来。</span></h1>
       <p class="hero-lead">数字人当场安静了，用户很满意。半秒后，一个不是这一轮的声音又响起来——<strong>因为“让扬声器停下来”和“让这次回答作废”是两件完全不同的事</strong>。今天只解决这一件事：把“取消”从声学层抬到状态层。</p>
-      <div class="lesson-meta"><span>2026.10.22</span><span>异步状态 · 时序 · 可验证证据</span><span>9 个交互演示</span></div>
+      <div class="lesson-meta"><span>2026.10.22</span><span>异步状态 · 时序 · 可验证证据</span><span>9 个交互演示</span><span>参考 70–85 分钟</span></div>
       <a class="start-link" href="#chain">先画出六节点链 <span aria-hidden="true">↓</span></a>
       <div class="opening-question"><span class="small-label">贯穿今天的一个问题</span><p>用户打断正在说话的数字人，旧 LLM 回答在新回答之后才返回。只暂停扬声器，足够吗？</p><span>不够。暂停扬声器只是把<strong>已经到达音频设备的样本</strong>停掉。它拦不住三样东西：LLM 流里还没吐完的 token、TTS 已经合成好但不一定已经送进设备的音频块、以及这些产物在下一个话轮里被重新送进播放队列。真正的答案是一个版本条件：<strong>旧版本产生的任何结果，一律丢弃</strong>。</span></div>
       <div class="reading-guide"><h2>今天要分清的四件事</h2><p>14plan 反复要求把材料分成四类，这一页每一块都按这个纪律标：<strong>概念解释</strong>（原理说得通）、<strong>纸面设计</strong>（我设计了但没实现）、<strong>实际运行</strong>（我跑过并有日志）、<strong>历史成果</strong>（过去项目里真实发生过的）。</p><p>本页所有内容属于<strong>概念解释 + 纸面设计</strong>。我没有运行任何 ASR / TTS / LLM 推理服务，也没有任何陪伴机器人的实机部署记录。这句话不是免责声明，是这一页的可信度来源——把边界说死，剩下的部分才站得住。</p><details><summary>为什么“打断”比“不打断”难这么多？</summary><p>不打断的系统是单向流水线：说完 → 识别 → 生成 → 播放，每一步只依赖上一步，天然串行。一旦允许打断，整条链变成<strong>并发的、可撤销的</strong>：用户的新输入要和正在生成的旧回答竞争，而旧回答的每一段产物可能在任何时刻、在任意一层（token 流、TTS 合成队列、音频设备缓冲）里冒出来。并发 + 撤销 = 需要版本号。这是本页唯一的核心结论。</p></details></div>
       <p class="source-note">范围依据 <a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-09.md" target="_blank" rel="noopener noreferrer">Day 9 任务手册</a> 与 <a href="https://github.com/lucinwen/14plan/blob/main/DAILY/day-09.md" target="_blank" rel="noopener noreferrer">每日计划</a>；对应资源 R09（aha-voice 语音流水线）与 R10。</p>
+      <details class="fold term-fold">
+        <summary>本页生词 · 6 个 <span>看不懂就展开；正文第一次遇到时不再打断你</span></summary>
+        <div>
+          <dl>
+            <dt>语音链六节点 <small>VAD / ASR / TTS</small></dt><dd>语音活动检测 / 语音转文字 / 文字转语音。加上 Mic、LLM、Speaker 就是最小链路。</dd>
+            <dt>竞态 <small>race condition</small></dt><dd>两个异步流程的先后顺序不同，结果就不同。打断、重连、重播几乎都在这里出错。</dd>
+            <dt>状态机 <small>FSM</small></dt><dd>规定“现在允许走哪一步”的图。它管过程，不管延迟，也不管内容对不对。</dd>
+            <dt>版本号 <small>epoch / turn_id</small></dt><dd>给每一轮请求编号。判断“这个结果是不是旧的”，靠编号，不靠时间感觉。</dd>
+            <dt>过期结果过滤 </dt><dd>旧版本产生的任何结果一律丢弃，而不是“先暂停一下播放”。</dd>
+            <dt>最小链路 <small>pipeline</small></dt><dd>把系统画成节点和边。每一条边都是一次“消息还在路上”，也就是打断时必须处理的位置。</dd>
+          </dl>
+          <p class="term-fold__more"><a href="glossary.html">80 个词的完整术语表 →</a></p>
+        </div>
+      </details>
     </section>
 
     <section id="chain" class="lesson-section" data-nav>

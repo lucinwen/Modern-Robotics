@@ -50,10 +50,24 @@
       <div class="eyebrow">MODERN ROBOTICS / 第六天</div>
       <h1>场景能显示，<br><span>为什么还不能训练机器人？</span></h1>
       <p class="hero-lead">一个 UE 场景能播放、门有动画，离“可训练的机器人任务”还差一整套可被物理求解、可被策略读取、可被评测复现的合同。今天我们逐层把缺口补齐。</p>
-      <div class="lesson-meta"><span>2026.10.25</span><span>Isaac Sim + Isaac Lab · 官方文档</span><span>16 个交互区</span></div>
+      <div class="lesson-meta"><span>2026.10.25</span><span>Isaac Sim + Isaac Lab · 官方文档</span><span>16 个交互区</span><span>参考 85–100 分钟</span></div>
       <a class="start-link" href="#render-geometry">从第一处缺口开始 <span aria-hidden="true">↓</span></a>
       <div class="opening-question"><span class="small-label">贯穿今天的一个问题</span><p>“这个场景看起来能跑，能不能直接拿去训练机器人？”</p><span>能看见 ≠ 能碰撞；能碰撞 ≠ 有物理；有物理 ≠ 有任务；训练成功 ≠ 实机成功。</span></div>
-      <div class="reading-guide"><h2>今天只练一件事：把“看起来”拆成“可验证”</h2><p>每个演示都对应一个真实系统里必须写清的字段。你已经具备 UE5 和 PCG 基础，所以这里不教安装，而是问：<strong>这个字段谁生产、单位是什么、谁消费、缺失会怎样</strong>。</p><p>本页统一采用<strong>米、秒、弧度 / 米每秒、右手系</strong>。文中“仿真”指物理引擎中的刚体求解；“实机”指真实硬件；两者都没有在本页运行，凡是教学计算都会标出来。</p></div>
+      <div class="reading-guide"><h2>今天只练一件事：把“看起来”拆成“可验证”</h2><p>每个演示都对应一个真实系统里必须写清的字段。<strong>如果你有 UE5 和 PCG 基础</strong>，这里不重复安装步骤；<strong>如果没有，也不影响阅读</strong>——本页不依赖任何菜单或按钮位置，所有演示都只用字段和数字说话。两种情况要问的是同一个问题：<strong>这个字段谁生产、单位是什么、谁消费、缺失会怎样</strong>。</p><p>本页统一采用<strong>米、秒、弧度 / 米每秒、右手系</strong>。文中“仿真”指物理引擎中的刚体求解；“实机”指真实硬件；两者都没有在本页运行，凡是教学计算都会标出来。</p></div>
+      <details class="fold term-fold">
+        <summary>本页生词 · 6 个 <span>看不懂就展开；正文第一次遇到时不再打断你</span></summary>
+        <div>
+          <dl>
+            <dt>渲染几何 / 碰撞几何 </dt><dd>看得见的漂亮外壳，可能根本没有碰撞体。这是“能显示但不能训练”的第一个原因。</dd>
+            <dt>关节链 <small>articulation</small></dt><dd>把门、抽屉做成“会转的关节”。只做一段动画的话，推它没有任何物理反应。</dd>
+            <dt>观测 <small>observation</small></dt><dd>机器人实际能读到的那一小块，不是世界真值。混淆这两者是这一行最常见的错。</dd>
+            <dt>动作 <small>action</small></dt><dd>一份接口合同：范围、单位、频率、哪一帧生效、超范围怎么办。不是一个数。</dd>
+            <dt>奖励 / 随机种子 <small>reward / seed</small></dt><dd>奖励是可被刷的标量；种子决定这一局的随机性，训练和测试同种子会让结果虚高。</dd>
+            <dt>回合 <small>episode</small></dt><dd>一次从复位到结束的完整尝试。复位要恢复的是所有动态状态，不只是位置。</dd>
+          </dl>
+          <p class="term-fold__more"><a href="glossary.html">80 个词的完整术语表 →</a></p>
+        </div>
+      </details>
     </section>
 
     <section id="roles" class="lesson-section" data-nav>

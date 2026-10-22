@@ -40,6 +40,10 @@
     <a href="day-14.html" data-day="14"><strong>DAY 14</strong><span>模拟面试</span></a>
   </nav>
 </details>
+<div class="switcher-extra">
+  <a href="start.html">路线总览 · 14 天怎么排</a>
+  <a href="glossary.html">术语表 · 80 个词速查</a>
+</div>
     <div class="sidebar-intro"><span class="eyebrow">学习路线</span><strong>没读到，就写“待查”。</strong></div>
     <nav class="lesson-nav" aria-label="本页目录">
       <a href="#start" class="is-current" aria-current="location"><span>00</span> 三个名字，三种东西</a>
@@ -61,11 +65,25 @@
       <div class="eyebrow">MODERN ROBOTICS / 第八天</div>
       <h1>评委问：“你的 SceneWeaver<br><span>和 MANSION 不是做一样的事吗？”</span></h1>
       <p class="hero-lead">这一问的难点不在技术，在于<strong>你必须有证据说话</strong>。今天不写代码，只做一件事：把“我知道的”和“我需要从原论文核实的”分开，然后设计一个能被公平比较的实验。</p>
-      <div class="lesson-meta"><span>2026.10.22</span><span>文献对照 · 证据分界 · 不复制论文数字</span><span>9 个交互演示</span></div>
+      <div class="lesson-meta"><span>2026.10.22</span><span>文献对照 · 证据分界 · 不复制论文数字</span><span>9 个交互演示</span><span>参考 65–80 分钟</span></div>
       <a class="start-link" href="#names">先分清三个名字 <span aria-hidden="true">↓</span></a>
       <div class="opening-question"><span class="small-label">贯穿今天的一个问题</span><p>“你这个和那篇论文有什么区别？”</p><span>如果回答是“我们的效果更好”，评委追问一句“在什么任务上、同一预算吗、成功率多少”，就答不上来了。可如果回答是“相似在我们都做多房间生成，不同在我的输出目标是可交互环境，但这一点我还没有端到端证据”——这句话没人能驳倒，因为它诚实。</span></div>
       <div class="reading-guide"><h2>今天最重要的产出不是结论，是“证据等级”</h2><p>四个等级要一直挂在嘴边：<strong>论文已展示</strong>（原文写了，我能指到章节）、<strong>个人已验证</strong>（我自己跑过、有截图/日志）、<strong>纸面设计</strong>（我设计了但没实现）、<strong>待查</strong>（我还没读到）。</p><p>混用这四级，是面试里最致命的错误——比“不知道”严重得多，因为“不知道”可以补，说错过的经历补不回来。</p><details><summary>为什么本页不复述论文的具体指标数字？</summary><p>因为数字脱离任务设定就没有意义：同一篇论文在不同数据划分、不同机器人尺寸下结论会变。本页只记录<strong>方法的结构性问题</strong>（输入是什么、表示是什么、能不能处理动态状态、有没有公平基线），具体数值留给你回原文核对。凡是我没有把握的地方，页面上会写“待查”，而不是编一个听起来合理的答案。</p></details></div>
       <p class="source-note">范围依据 <a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-08.md" target="_blank" rel="noopener noreferrer">Day 8 任务手册</a> 与 <a href="https://github.com/lucinwen/14plan/blob/main/DAILY/day-08.md" target="_blank" rel="noopener noreferrer">每日计划</a>；对应资源 P06 / P07 / P08 / P09 / R20 / P04 / P05。</p>
+      <details class="fold term-fold">
+        <summary>本页生词 · 6 个 <span>看不懂就展开；正文第一次遇到时不再打断你</span></summary>
+        <div>
+          <dl>
+            <dt>断言 <small>claim</small></dt><dd>一句可以被追问的话。说不清它对应哪个字段、哪次运行，就还不是断言。</dd>
+            <dt>证据等级 </dt><dd>本人实做 / 团队成果 / 开源复用 / 未来计划 / 待核实。四类混写，是一句追问就穿透的地方。</dd>
+            <dt>基线 <small>baseline</small></dt><dd>比较之前必须先固定的那几个量。不固定，两个数字放一起没有意义。</dd>
+            <dt>对照协议 <small>protocol</small></dt><dd>先说清固定了什么、变的是什么、量的是哪几个数，再说结论。</dd>
+            <dt>复现 <small>reproduction</small></dt><dd>别人按你写下的方法，能不能得到同一个结果。做不到，就只能说“我观察到”。</dd>
+            <dt>维度 <small>dimension</small></dt><dd>把“谁更好”拆成可以分开打分的几条，例如能力、数据、成本、证据强度。</dd>
+          </dl>
+          <p class="term-fold__more"><a href="glossary.html">80 个词的完整术语表 →</a></p>
+        </div>
+      </details>
     </section>
 
     <section id="names" class="lesson-section" data-nav>
