@@ -44,6 +44,9 @@
 .step-chain { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 12px 0; }
 .step-chain .node { font-size: 12px; padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--background); color: var(--foreground); }
 .step-chain .node.is-active { border-color: var(--primary); background: var(--accent); color: var(--accent-foreground); font-weight: 650; }
+.step-chain .node.is-fail { border-color: var(--destructive); background: var(--background); color: var(--destructive); font-weight: 650; border-style: dashed; }
+.formula-line { margin: 10px 0; padding: 10px 14px; border-left: 3px solid var(--border); background: var(--muted); border-radius: 0 8px 8px 0; font-size: 13px; line-height: 1.9; overflow-x: auto; }
+.formula-line code { font-size: 13px; }
 .step-chain .arrow { color: var(--muted-foreground); font-size: 12px; }
 
 .legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--muted-foreground); margin-top: 10px; }
@@ -120,3 +123,25 @@ button.chip.is-on { color: var(--accent-foreground); }
 .kv { display: grid; grid-template-columns: 86px 1fr; gap: 7px 14px; margin: 0; align-items: baseline; }
 .kv dt { font-size: 11px; letter-spacing: .02em; color: var(--muted-foreground); }
 .kv dd { margin: 0; font-size: 13px; line-height: 1.6; color: var(--foreground); }
+
+.code-block { margin: 10px 0 0; padding: 12px 14px; background: var(--muted); border: 1px solid var(--border); border-radius: 8px; overflow-x: auto; font-family: Consolas, "SFMono-Regular", monospace; font-size: 12px; line-height: 1.7; color: var(--foreground); white-space: pre; }
+.code-block code { background: none; padding: 0; color: inherit; font-size: inherit; }
+.ledger { display: grid; gap: 5px; margin-top: 10px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--muted); max-height: 230px; overflow-y: auto; }
+.ledger p { margin: 0; font-size: 12px; line-height: 1.6; color: var(--muted-foreground); font-family: Consolas, "SFMono-Regular", monospace; }
+.ledger p.is-good { color: var(--viz-series-1); }
+.ledger p.is-bad { color: var(--destructive); }
+.mono { font-family: Consolas, "SFMono-Regular", monospace; font-variant-numeric: tabular-nums; }
+
+/* 空账本不占位：避免出现一条灰色的空条 */
+.ledger:empty { display: none; }
+/* 追问链头部：链在左、重置在右 */
+.drill-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.drill-head .step-chain { margin: 12px 0; }
+.btn-ghost { background: transparent; border-color: var(--border); color: var(--muted-foreground); font-weight: 500; }
+.btn-ghost:hover { color: var(--foreground); border-color: var(--foreground); }
+
+/* 可信度计量条：一条横向刻度，低分变红 */
+.cred-meter { position: relative; height: 8px; margin: 12px 0 2px; border-radius: 999px; background: var(--muted); overflow: hidden; }
+.cred-meter span { display: block; height: 100%; border-radius: 999px; background: var(--viz-series-1); transition: width .25s ease, background .25s ease; }
+.cred-meter.is-warn span { background: var(--viz-series-2); }
+.cred-meter.is-bad span { background: var(--destructive); }

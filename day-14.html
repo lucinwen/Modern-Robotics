@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f8f7">
+  <meta name="description" content="Day 14 全简历面试：真实性卡片的十个字段、简历断言的表述强度审计、90 秒自我介绍的结构、两轮 45 分钟时间盒、三层技术主线、追问链演练、四页展示包的来源分层与面试前检查清单。">
+  <title>Day 14 · 哪些是你亲手做的：模拟面试、证据核验与临场修复 | Modern Robotics 学习手记</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/site.css">
+  <link rel="stylesheet" href="assets/lesson-kit.css">
+  <script src="assets/site.js" defer></script>
+  <script src="assets/lesson-kit.js" defer></script>
+  <script src="assets/day14.js" defer></script>
+</head>
+<body data-lesson-key="day-14" data-lesson-title="Day 14 · 模拟面试与证据核验" data-lesson-topic="真实性卡片 / 表述强度 / 90 秒结构 / 45 分钟时间盒 / 三层主线 / 追问链 / 四页展示包 / 面试前检查">
+<a class="skip-link" href="#main">跳到教程正文</a>
+<header class="site-header">
+  <a class="brand" href="#start" aria-label="Modern Robotics 学习手记首页"><span class="brand-monogram">MR<span>.</span></span><span class="brand-name">Modern Robotics<small>可视化学习手记</small></span></a>
+  <div class="header-actions"><span class="edition">DAY 14 / 面试</span><a href="https://github.com/lucinwen/Modern-Robotics" target="_blank" rel="noopener noreferrer">GitHub 仓库 <span aria-hidden="true">↗</span></a><button class="btn theme-toggle" id="theme-toggle" type="button" aria-label="切换明暗主题">切换主题</button></div>
+</header>
+<div class="page-shell">
+  <aside class="sidebar" aria-label="学习导航">
+    <details class="day-switcher">
+  <summary><span class="eyebrow">学习日导航 · 14 天路线</span><strong id="day-switcher-current">选择学习日</strong><span class="day-switcher__hint">展开全部 14 天 ▾</span></summary>
+  <nav class="course-switcher" aria-label="选择学习日">
+    <a href="index.html" data-day="01"><strong>DAY 01</strong><span>空间与运动</span></a>
+    <a href="day-02.html" data-day="02"><strong>DAY 02</strong><span>约束与求解</span></a>
+    <a href="day-03.html" data-day="03"><strong>DAY 03</strong><span>状态与计划</span></a>
+    <a href="day-04.html" data-day="04"><strong>DAY 04</strong><span>运动学 FK/IK</span></a>
+    <a href="day-05.html" data-day="05"><strong>DAY 05</strong><span>ROS2 与导航</span></a>
+    <a href="day-06.html" data-day="06"><strong>DAY 06</strong><span>训练环境</span></a>
+    <a href="day-07.html" data-day="07"><strong>DAY 07</strong><span>策略与数据</span></a>
+    <a href="day-08.html" data-day="08"><strong>DAY 08</strong><span>场景基线</span></a>
+    <a href="day-09.html" data-day="09"><strong>DAY 09</strong><span>语音会话</span></a>
+    <a href="day-10.html" data-day="10"><strong>DAY 10</strong><span>数字人</span></a>
+    <a href="day-11.html" data-day="11"><strong>DAY 11</strong><span>毫米波感知</span></a>
+    <a href="day-12.html" data-day="12"><strong>DAY 12</strong><span>多源融合</span></a>
+    <a href="day-13.html" data-day="13"><strong>DAY 13</strong><span>XR 与传输</span></a>
+    <a href="day-14.html" data-day="14"><strong>DAY 14</strong><span>模拟面试</span></a>
+  </nav>
+</details>
+    <div class="sidebar-intro"><span class="eyebrow">学习路线</span><strong>面试考的不是知道多少，<br>是能不能被追问。</strong></div>
+    <nav class="lesson-nav" aria-label="本页目录">
+      <a href="#start" class="is-current" aria-current="location"><span>00</span> “哪些是你<br>亲手做的？”</a>
+      <a href="#cards"><span>01</span> 真实性卡片的<br>十个字段</a>
+      <a href="#claims"><span>02</span> 断言的表述强度</a>
+      <a href="#intro"><span>03</span> 90 秒的结构</a>
+      <a href="#timebox"><span>04</span> 两轮 45 分钟时间盒</a>
+      <a href="#line"><span>05</span> 三层技术主线</a>
+      <a href="#drill"><span>06</span> 追问链演练</a>
+      <a href="#pack"><span>07</span> 四页展示包</a>
+      <a href="#check"><span>08</span> 面试前检查</a>
+      <a href="#exam"><span>09</span> 综合考题六栏答卷</a>
+      <a href="#score"><span>10</span> 五维自评</a>
+      <a href="#sources"><span>↗</span> 来源与边界</a>
+    </nav>
+    <div class="sidebar-note"><span class="small-label">这一页怎么用</span><p>凡是说不清“谁做的”<br>的成绩，<br>都先降一级再写。</p><a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-14.md" target="_blank" rel="noopener noreferrer">查看原 Day 14 任务手册 ↗</a></div>
+  </aside>
+  <main id="main">
+    <section id="start" class="hero lesson-section" data-nav>
+      <div class="eyebrow">MODERN ROBOTICS / 第十四天</div>
+      <h1>“你简历里这些，<br><span>哪些是你亲手做的？”</span></h1>
+      <p class="hero-lead">这是整场面试里唯一一个<strong>无论如何都躲不过</strong>的问题。它的杀伤力不在于你做过多少，而在于<strong>你的表述和你的事实之间有没有一道缝</strong>。有缝的人，会在第 3 层追问时开始含糊；没缝的人，可以说“这部分是团队做的，我负责的是这一小块，验收标准是这个”——然后<strong>可信度反而更高</strong>。</p>
+      <div class="lesson-meta"><span>2026.10.22</span><span>事实 · 表述 · 结构 · 追问 · 边界</span><span>10 个交互演示</span></div>
+      <a class="start-link" href="#cards">先做一张真实性卡片 <span aria-hidden="true">↓</span></a>
+      <div class="opening-question"><span class="small-label">贯穿今天的一个问题</span><p>为什么“承认自己只做了一小块”的人，<strong>反而比“全都做过”的人更容易被录取</strong>？</p><span>因为面试官在评估的不是<strong>工作量</strong>，而是<strong>可预测性</strong>。一个人能准确说出自己的边界，说明他<strong>知道系统里还有哪些自己不懂的东西</strong>——这种人进组后不会在关键时刻悄悄失控。反之，“全都做过”的表述会让面试官立刻进入验证模式：<strong>他必须用追问来确认你到底懂到哪一层</strong>，而只要你有一处答不上来，前面所有的可信度都会一起打折。</span></div>
+      <div class="reading-guide"><h2>今天的分界线：会解释 / 做验证过 / 能被追问</h2><p>这三层在准备材料时经常被混成一句“我熟悉 XX”。但它们的证据完全不同：<strong>会解释</strong>靠读书和复述；<strong>做验证过</strong>靠日志、对照、失败记录；<strong>能被追问</strong>靠你亲手算过、亲手错过、亲手改过。14plan 把 Day 14 定为“全简历面试”，本质上就是在练第三层。</p><p>这一页不含任何“面试话术模板”。<strong>话术只能骗过没经验的人，骗不过追问。</strong>这里给的是<strong>结构</strong>（该说什么、按什么顺序）、<strong>判据</strong>（什么能写、什么必须降级）和<strong>演练</strong>（被追到第三层会怎样）。</p><details><summary>为什么这一页几乎没有“正确答案”？</summary><p>因为答案取决于<strong>你的事实</strong>，而事实只有你有。本页能做的，是把“事实→表述”这道转换做成可检验的规则：<strong>每个断言必须能落到一个可指认的证据</strong>；落不到，就降级措辞，而不是硬撑。<strong>这条规则本身，就是最值钱的东西。</strong></p></details></div>
+      <p class="source-note">范围依据 <a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-14.md" target="_blank" rel="noopener noreferrer">Day 14 任务手册</a> 与 <a href="https://github.com/lucinwen/14plan/blob/main/DAILY/day-14.md" target="_blank" rel="noopener noreferrer">每日计划</a>；对应资源 P09、R03、R16，以及任务手册「实际任务补强」五节（两轮模拟的硬要求、真实性卡片、90 秒结构、评分复盘、最低结果）。</p>
+    </section>
+
+    <section id="cards" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>01</span> 对应 14plan Day 14 · 第 1–2 阶段</div>
+      <h2>十个字段，<br class="desktop-break">逼出“我到底做了什么”。</h2>
+      <p>14plan 给了一张十字段的真实性卡片。它的作用不是写简历，而是<strong>把一段经历拆到无法含糊</strong>：一旦你必须填“我的职责（只写亲自做过/决策过）”和“团队公开成果（不揽为个人独立成果）”这两个格子，模糊地带就藏不住了。</p>
+      <div id="day14-cards" class="demo">
+        <div class="demo-head"><span class="demo-title">真实性卡片（字段与标签示意）</span><span class="demo-tag">点标签切换归属</span></div>
+        <div class="tabs" id="d14-cd-tabs" role="group" aria-label="选择项目"></div>
+        <div class="table-scroll"><table class="audit"><thead><tr><th>字段</th><th>该写什么（提示）</th><th>归属标签</th></tr></thead><tbody id="d14-cd-body"></tbody></table></div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>已明确归属</span><strong id="d14-cd-count">0 / 10</strong></div>
+          <div class="kpi-block"><span>面试风险</span><strong id="d14-cd-risk">高</strong></div>
+          <div class="kpi-block"><span>可讲时长</span><strong id="d14-cd-len">约 1 分钟</strong></div>
+        </div>
+        <p class="demo-note" id="d14-cd-note"></p>
+      </div>
+      <h3>四个标签的严格定义</h3>
+      <div class="table-scroll"><table class="audit"><thead><tr><th>标签</th><th>什么情况能用</th><th>面试时的正确说法</th></tr></thead><tbody>
+        <tr><td><strong>本人实做</strong></td><td>你亲手写了/画了/调了，能说出具体参数、具体那次失败</td><td>“这部分我做的，具体是 X，当时卡在 Y，后来改成 Z。”</td></tr>
+        <tr><td><strong>团队成果</strong></td><td>你在团队里，但成果是集体的</td><td>“这是团队的成果，我负责其中 A；B 是另一位同学做的，验收口径是我们一起定的。”</td></tr>
+        <tr><td><strong>开源 / 现成</strong></td><td>用了别人的框架、模型、教程</td><td>“基础是 XX 开源项目，我改的是 YY 部分，改动在这里（能指出来）。”</td></tr>
+        <tr><td><strong>未来计划</strong></td><td>还没做，只是方案</td><td>“这是拟研究的，目前只有设计和这个最小验证计划，<strong>还没跑过</strong>。”</td></tr>
+      </tbody></table></div>
+      <div class="key-idea"><strong>一个反直觉的技巧：</strong>主动标注“这部分是团队的”，<strong>不会削弱你</strong>，反而会把面试官的心理状态从“验证模式”切换到“倾听模式”。<strong>因为他在找一个诚实的人，而不是一个完人。</strong>真正致命的是“被问出来才承认”——那时性质就从“边界”变成“夸大”。</div>
+    </section>
+
+    <section id="claims" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>02</span> 对应 14plan Day 14 · 第 1 / 7 阶段</div>
+      <h2>同一件事，<br class="desktop-break">三种写法，三种风险。</h2>
+      <p>简历上的每一句话都是一个<strong>断言（claim）</strong>。断言的强度必须由<strong>证据等级</strong>决定，而不是由“我想让它听起来多厉害”决定。下面六条是这类材料里最常见的句型，试试给每条选一个证据等级。</p>
+      <div id="day14-claims" class="demo">
+        <div class="demo-head"><span class="demo-title">断言 × 证据等级 → 可以怎么写</span><span class="demo-tag">六个下拉</span></div>
+        <div class="table-scroll"><table class="audit"><thead><tr><th>断言（示例句型）</th><th>你手上有什么</th><th>结论</th></tr></thead><tbody id="d14-cl-body"></tbody></table></div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>可原样写</span><strong id="d14-cl-ok">0</strong></div>
+          <div class="kpi-block"><span>必须加限定</span><strong id="d14-cl-limit">0</strong></div>
+          <div class="kpi-block"><span>必须改写或删掉</span><strong id="d14-cl-drop">0</strong></div>
+        </div>
+        <p class="demo-note" id="d14-cl-note"></p>
+      </div>
+      <h3>三个最容易说漏的词</h3>
+      <ol class="prompt-list">
+        <li><strong>“上线 / 部署”</strong><span>它的证据是<strong>运行记录</strong>：多少台设备、跑了多久、失败率多少。<strong>只在实验室跑通一次，不叫部署</strong>；只在本地 demo 过，叫“原型验证”。</span></li>
+        <li><strong>“准确率 XX%”</strong><span>必须同时给出<strong>测试集、对照真值、指标定义、适用范围</strong>。四样缺一样，这个百分比就只是修辞——<strong>而且是最容易被当场拆掉的那种修辞</strong>。</span></li>
+        <li><strong>“负责 / 主导”</strong><span>“主导”意味着你做决策并对结果负责。<strong>如果你只是执行了别人定的方案，写“参与/实现”更安全</strong>，而且不会在第 2 层追问时崩掉（“那当时为什么选这个方案？”）。</span></li>
+      </ol>
+      <div class="callout"><strong>一条可以当场用的改写公式：</strong><br>
+        <code>【我做了什么】+【用了什么方法】+【在什么条件下】+【得到了什么可指认的结果】+【还没做什么】</code><br>
+        例：“把概念图转成 UE 场景的原型链路做了端到端联调，在<strong>合成场景</strong>上跑通，<strong>AI 推理部分接的还是 mock</strong>，所以目前不能说它解决了真实场景生成。”<strong>最后半句不是减分项，是可信度。</strong></div>
+    </section>
+
+    <section id="intro" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>03</span> 对应 14plan Day 14 · 第 1 / 8 阶段</div>
+      <h2>90 秒不是“把简历念一遍”，<br class="desktop-break">是给后面 44 分钟定调。</h2>
+      <p>14plan 的 90 秒结构很明确：<strong>不要从英语成绩或项目清单开始</strong>，而要从“空间与任务环境 → 机器人执行验证 → 多模态陪伴交互”这条技术主线说起，中间嵌<strong>两个最能核实的研发证据</strong>、<strong>一个真实需求/产品取舍</strong>、<strong>一个训练营计划</strong>。下面把 90 秒拆成四段，你可以调它们的长度，看哪一段被挤掉了。</p>
+      <div id="day14-intro" class="demo">
+        <div class="demo-head"><span class="demo-title">四段式结构：每段多少秒</span><span class="demo-tag">三档时长</span></div>
+        <div class="tabs" id="d14-in-tabs" role="group" aria-label="选择时长版本">
+          <button type="button" aria-pressed="true" data-len="90">90 秒自介</button>
+          <button type="button" aria-pressed="false" data-len="180">3 分钟技术讲述</button>
+          <button type="button" aria-pressed="false" data-len="300">5 分钟入营提案</button>
+        </div>
+        <div class="control-grid">
+          <label class="control"><span>开场：身份 + 主线 <output id="d14-in-s1-out">12 s</output></span><input id="d14-in-s1" type="range" min="1" max="200" step="1" value="12"></label>
+          <label class="control"><span>证据：两个能核实的东西 <output id="d14-in-s2-out">36 s</output></span><input id="d14-in-s2" type="range" min="1" max="200" step="1" value="36"></label>
+          <label class="control"><span>取舍：一个真实决定 <output id="d14-in-s3-out">22 s</output></span><input id="d14-in-s3" type="range" min="1" max="200" step="1" value="22"></label>
+          <label class="control"><span>计划：入营要做什么 <output id="d14-in-s4-out">20 s</output></span><input id="d14-in-s4" type="range" min="1" max="200" step="1" value="20"></label>
+        </div>
+        <div class="canvas-box"><canvas id="d14-in-canvas" aria-label="四段式自我介绍的时间分配条"></canvas></div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>合计</span><strong id="d14-in-total">90 s</strong></div>
+          <div class="kpi-block"><span>是否超时</span><strong id="d14-in-over">刚好</strong></div>
+          <div class="kpi-block"><span>被挤掉的是</span><strong id="d14-in-cut">没有</strong></div>
+        </div>
+        <p class="demo-note" id="d14-in-note"></p>
+      </div>
+      <div class="callout"><strong>三档时长的差别不是“说长一点”，而是“换一个问题回答”：</strong>90 秒回答<strong>“你是谁、为什么值得继续问”</strong>；3 分钟回答<strong>“你的技术判断力在哪”</strong>；5 分钟回答<strong>“如果给你资源，你会先做什么、怎么验证”</strong>。<strong>同一套内容硬拉长，是最常见的失分点。</strong></div>
+    </section>
+
+    <section id="timebox" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>04</span> 对应 14plan Day 14 · 第 3 / 5 阶段</div>
+      <h2>45 分钟里，<br class="desktop-break">哪一段最容易被吃掉。</h2>
+      <p>14plan 给了两轮模拟的题组配置。把它们画成时间盒之后会发现一件事：<strong>面试总是超时，而超时永远从后面吃</strong>——被吃掉的往往是“科研方法”和“真实贡献”，也就是<strong>最不能省的两段</strong>。</p>
+      <div id="day14-timebox" class="demo">
+        <div class="demo-head"><span class="demo-title">两轮 45 分钟：题组与时间盒</span><span class="demo-tag">两个开关</span></div>
+        <div class="tabs" id="d14-tb-tabs" role="group" aria-label="选择轮次">
+          <button type="button" aria-pressed="true" data-round="1">第一轮（技术）</button>
+          <button type="button" aria-pressed="false" data-round="2">第二轮（项目）</button>
+        </div>
+        <div class="control-grid">
+          <label class="control"><span>每个问题平均追问超时 <output id="d14-tb-late-out">+2 min</output></span><input id="d14-tb-late" type="range" min="0" max="8" step="1" value="2"></label>
+          <label class="control"><span>你主动控场（拉回主线）<output id="d14-tb-ctrl-out">有时</output></span><input id="d14-tb-ctrl" type="range" min="0" max="2" step="1" value="1"></label>
+        </div>
+        <div class="canvas-box"><canvas id="d14-tb-canvas" aria-label="45 分钟时间盒与超时压缩"></canvas></div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>实际会用到（预算 45）</span><strong id="d14-tb-total">45 min</strong></div>
+          <div class="kpi-block"><span>被压缩最多的块</span><strong id="d14-tb-worst">—</strong></div>
+          <div class="kpi-block"><span>风险</span><strong id="d14-tb-risk">可控</strong></div>
+        </div>
+        <p class="demo-note" id="d14-tb-note"></p>
+      </div>
+      <h3>控场的三句话（不卑不亢）</h3>
+      <ol class="prompt-list">
+        <li><strong>“这一块我可以展开，不过先给您一个 30 秒版本，需要细节我再补。”</strong><span>作用：把决定权交回给对方，同时<strong>示范你知道哪里是重点</strong>。</span></li>
+        <li><strong>“这里有个取舍我没讲，因为会跑题——要不要现在说？”</strong><span>作用：<strong>主动暴露一个“我知道自己没讲”的点</strong>，比被问出来强得多。</span></li>
+        <li><strong>“还剩下大约 8 分钟，我想留 3 分钟讲入营计划，可以吗？”</strong><span>作用：把时间变成<strong>共同资源</strong>。会管时间的人，默认会被认为会管项目。</span></li>
+      </ol>
+    </section>
+
+    <section id="line" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>05</span> 对应 14plan Day 14 · 第 1 / 8 阶段</div>
+      <h2>一条主线，<br class="desktop-break">比六个项目更有说服力。</h2>
+      <p>14plan 建议的主线是三层：<strong>空间与任务环境 → 机器人执行验证 → 多模态陪伴交互</strong>。它的价值在于：当面试官记住这条线，你的每个项目就自动变成了这条线上的<strong>一个证据</strong>，而不是六个互不相关的标签。</p>
+      <div id="day14-line" class="demo">
+        <div class="demo-head"><span class="demo-title">把项目放到三层里（点项目切换归属）</span><span class="demo-tag">六个项目</span></div>
+        <div class="chip-list" id="d14-ln-chips"></div>
+        <div class="canvas-box"><canvas id="d14-ln-canvas" aria-label="三层技术主线与落在每层的项目"></canvas></div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>主线清晰度</span><strong id="d14-ln-score">—</strong></div>
+          <div class="kpi-block"><span>最空的一层</span><strong id="d14-ln-gap">—</strong></div>
+          <div class="kpi-block"><span>建议</span><strong id="d14-ln-tip">—</strong></div>
+        </div>
+        <p class="demo-note" id="d14-ln-note"></p>
+      </div>
+      <div class="table-scroll"><table class="audit"><thead><tr><th>层</th><th>它回答什么</th><th>说话时用哪类证据</th></tr></thead><tbody>
+        <tr><td>① 空间与任务环境</td><td>“机器人要在什么样的世界里干活”</td><td>场景/环境生成、语义与空间约束、仿真与任务定义</td></tr>
+        <tr><td>② 机器人执行验证</td><td>“怎么知道它真的做成了”</td><td>任务成功率、失败模式、评测协议、可复现的日志</td></tr>
+        <tr><td>③ 多模态陪伴交互</td><td>“人怎么感知到它、怎么信任它”</td><td>传感与交互链路、感知边界、安全与授权</td></tr>
+      </tbody></table></div>
+      <div class="key-idea"><strong>这条主线的好处，是它自带“互补”叙事：</strong>你不需要说“我什么都懂”，而可以说“<strong>我能把环境这一层做扎实，所以我和做控制、做感知的同学配合时，能给出他们真正能用的任务与环境</strong>”。<strong>“互补”比“全面”更可信，因为它承认了边界。</strong></div>
+    </section>
+
+    <section id="drill" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>06</span> 对应 14plan Day 14 · 第 6 阶段</div>
+      <h2>被追到第三层，<br class="desktop-break">你还剩什么。</h2>
+      <p>面试的杀伤力来自<strong>连续追问</strong>，不是单个难题。下面这条链模拟四层：<strong>做了什么 → 为什么这么做 → 有什么替代方案 → 如果失败了呢</strong>。每一层你可以选一种应对方式，看看走到最后会发生什么。</p>
+      <div id="day14-drill" class="demo">
+        <div class="demo-head"><span class="demo-title">追问链：四种应对，四种结局</span><span class="demo-tag">四次选择</span></div>
+        <div class="drill-head">
+          <div class="step-chain" id="d14-dr-chain"></div>
+          <button type="button" class="btn btn-ghost" id="d14-dr-reset">从头开始</button>
+        </div>
+        <div class="role-lane" id="d14-dr-question"></div>
+        <div class="note-actions" id="d14-dr-actions"></div>
+        <div class="cred-meter" id="d14-dr-meter" aria-hidden="true"><span></span></div>
+        <div class="ledger" id="d14-dr-log"></div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>可信度</span><strong id="d14-dr-cred">100</strong></div>
+          <div class="kpi-block"><span>还剩几层可追</span><strong id="d14-dr-left">4</strong></div>
+          <div class="kpi-block"><span>结局</span><strong id="d14-dr-end">进行中</strong></div>
+        </div>
+        <p class="demo-note" id="d14-dr-note"></p>
+      </div>
+      <div class="callout"><strong>规则很简单，但很难做到：</strong>每往下一层，<strong>只说自己真的有的东西</strong>。没有替代方案就说“当时没比较过，这是事后我想到的两个方向”；没遇到过失败就说“这块还没跑到会失败的地方”。<strong>“我还没到那一步”是一个完整、且完全不失分的答案</strong>——它比编一个失败故事安全一百倍。</div>
+    </section>
+
+    <section id="pack" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>07</span> 对应 14plan Day 14 · 第 2 / 7 阶段</div>
+      <h2>四页材料，<br class="desktop-break">每一页都要标来源。</h2>
+      <p>14plan 要求最多四页非保密展示：<strong>能力画像、实习研发、创业产品、入营验证计划</strong>。每一页上的每一张图，都必须能回答“这张图是哪来的”。下面给每页选一个来源层级，看看系统会不会放行。</p>
+      <div id="day14-pack" class="demo">
+        <div class="demo-head"><span class="demo-title">四页展示包的来源分层</span><span class="demo-tag">四个下拉 + 八个勾选</span></div>
+        <div class="role-lane" id="d14-pk-lane"></div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>可放心展示</span><strong id="d14-pk-ok">0 / 4</strong></div>
+          <div class="kpi-block"><span>必须改标来源</span><strong id="d14-pk-warn">0</strong></div>
+          <div class="kpi-block"><span>可能泄密风险</span><strong id="d14-pk-risk">0</strong></div>
+        </div>
+        <p class="demo-note" id="d14-pk-note"></p>
+      </div>
+      <h3>来源分层与对应措辞</h3>
+      <div class="table-scroll"><table class="audit"><thead><tr><th>标为</th><th>图上该带什么</th><th>口头上怎么说</th></tr></thead><tbody>
+        <tr><td>原始公开图</td><td>出处链接 + 许可</td><td>“这张是 XX 公开发布的，用来说明概念。”</td></tr>
+        <tr><td>自绘示意</td><td>“示意图，非实测”</td><td>“这是我自己画的示意，不是实测数据。”</td></tr>
+        <tr><td>新练习 / 复现</td><td>仓库链接 + commit</td><td>“这是我这两天照教程复现的，代码在这里。”</td></tr>
+        <tr><td>真实参与且已完成</td><td>可披露的项目范围 + 你的角色</td><td>“这是团队成果，我负责 A；数据已脱敏。”</td></tr>
+      </tbody></table></div>
+      <div class="key-idea"><strong>一个必须遵守的红线：</strong>任何<strong>企业未公开信息</strong>（内部系统截图、真实用户数据、未发布项目名）都不能进公开仓库、公开链接、公开作品集。<strong>“我改一下截图”也不行</strong>——布局、命名、指标本身就可能带信息。<strong>这条线不需要讨论，只需要执行。</strong></div>
+    </section>
+
+    <section id="check" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>08</span> 对应 14plan Day 14 · 第 7–8 阶段</div>
+      <h2>面试前一晚，<br class="desktop-break">只做这八件事。</h2>
+      <p>最后阶段的清单不是“再学一点”，而是<strong>把已有的东西固定住</strong>。八项里前六项是材料，后两项是状态——<strong>状态不好，材料再好也讲不出来</strong>。</p>
+      <div id="day14-check" class="demo">
+        <div class="demo-head"><span class="demo-title">面试前检查清单</span><span class="demo-tag">八项</span></div>
+        <div class="gate" id="d14-ck-gate"></div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>完成</span><strong id="d14-ck-count">0 / 8</strong></div>
+          <div class="kpi-block"><span>状态</span><strong id="d14-ck-state">未开始</strong></div>
+        </div>
+        <p class="demo-note" id="d14-ck-note"></p>
+      </div>
+      <div class="callout"><strong>关于“报名回执”这一项，14plan 反复强调：</strong>“<strong>报名回执确已取得才能标‘已提交’</strong>”。这不是官僚，这是同一条证据纪律在你自己身上的应用。<strong>材料类的事情有时间窗，知识没有</strong>——先把有截止时间的事做完，再回来补知识。</div>
+    </section>
+
+    <section id="exam" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>09</span> 今日综合考题</div>
+      <h2>“你简历中哪些是亲自做的，哪些是团队成果，<br class="desktop-break">训练营为什么应该选你？”</h2>
+      <p>按六栏作答：<strong>背景、问题、方法、已验证证据、仍未知、拟合作下一步</strong>。这道题的特殊之处是：<strong>它没有“正确答案”，只有“可信答案”</strong>。</p>
+      <div id="day14-exam" class="demo">
+        <div class="demo-head"><span class="demo-title">六栏答卷</span><span class="demo-tag">勾选表示你已写下</span></div>
+        <div class="table-scroll"><table class="audit"><thead><tr><th>六栏</th><th>这一题该写什么</th><th style="white-space:nowrap">已写</th></tr></thead><tbody>
+          <tr><td>① 背景</td><td>你的技术主线（空间/环境 → 执行验证 → 陪伴交互），以及为什么这条线需要具身智能的训练</td><td><input type="checkbox" id="d14-ex-1" aria-label="已完成背景"></td></tr>
+          <tr><td>② 问题</td><td>“做过”与“做成了”之间隔着验证；团队成果与个人贡献必须分开；奖项与入选不等于研发能力</td><td><input type="checkbox" id="d14-ex-2" aria-label="已完成问题"></td></tr>
+          <tr><td>③ 方法</td><td>用真实性卡片逐项过：本人实做 / 团队成果 / 开源 / 未来计划；每个“本人实做”都配一个可指认的证据</td><td><input type="checkbox" id="d14-ex-3" aria-label="已完成方法"></td></tr>
+          <tr><td>④ 已验证证据</td><td>两段能现场展开的技术证据（含失败与修订）+ 一个真实的产品取舍；<strong>其余全部标注“原型/设计/未验证”</strong></td><td><input type="checkbox" id="d14-ex-4" aria-label="已完成已验证证据"></td></tr>
+          <tr><td>⑤ 仍未知</td><td>跨专业到控制/RL 的深度、真实硬件规模验证、长时稳定性；<strong>不掩饰，直接说这就是我想来学的原因</strong></td><td><input type="checkbox" id="d14-ex-5" aria-label="已完成仍未知"></td></tr>
+          <tr><td>⑥ 拟合作下一步</td><td>入营第一阶段和谁协作、验收什么、用什么指标；以及“如果做不出来”的降级方案</td><td><input type="checkbox" id="d14-ex-6" aria-label="已完成下一步"></td></tr>
+        </tbody></table></div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>六栏完成度</span><strong id="d14-ex-count">0 / 6</strong></div>
+          <div class="kpi-block"><span>证据等级</span><strong id="d14-ex-level">未开始</strong></div>
+        </div>
+        <details class="self-check"><summary>展开标准答法骨架（先自己写完再看）</summary>
+          <p><strong>不要从“我做过什么”开始，从“我的主线是什么”开始。</strong>“我的主线是<strong>给机器人造出可执行、可验证的空间与任务环境</strong>：先把场景和任务定义清楚（环境层），再用一个明确的验收指标检查执行（验证层），最后把它接到人能感知、能信任的交互上（交互层）。三段各有一个我能现场展开的例子，下面我说哪一段是团队的、哪一段是我亲手做的。”</p>
+          <p><strong>然后主动分割：</strong>“实习期的成果属于团队，我负责的是 X 模块，验收口径是 Y；开源项目我用的是 ZZ 作为基础，我改的是这里（能指出 diff）；<strong>作品集里的场景工具是我自己的项目，但它目前的 AI 推理部分是 mock，所以它证明了链路，没有证明生成质量。</strong>”<strong>这一段是整场面试最值钱的地方</strong>——它同时展示了诚实、边界感和技术判断。</p>
+          <p><strong>再说“为什么选我”。</strong>不要用形容词（“我学习能力强”“我热爱机器人”），要用<strong>互补结构</strong>：“做控制和 RL 的同学通常不缺算法，缺的是<strong>一个有语义、有约束、能批量生成任务的训练/评测环境</strong>。我这几年在做的正好是这个：把语义解析、空间约束和引擎里的资产生成连起来。<strong>我能给团队的不是另一个 RL 实现，而是一个让 RL 有东西可练、有指标可验的环境层。</strong>”</p>
+          <p><strong>最后说“我还缺什么”。</strong>“我缺的是<strong>在真实硬件规模上把系统跑稳的经验</strong>——我所做的多是仿真与单机验证，长时稳定性、多人协作的工程约束，我没真正踩过。这就是我想进训练营的原因：不是去展示我已经会什么，而是<strong>把环境层接到真实的执行链路上，看它在哪里断</strong>。”</p>
+          <p><strong>再加一句边界声明：</strong>“上面提到的所有结果，我都能指到具体的代码、日志或录音；<strong>指不到的，我会说‘这是设计’</strong>。我不想在入职后被发现有哪一句是需要解释的。”</p>
+        </details>
+      </div>
+      <h3>附：一个必须提前准备的“反问题”</h3>
+      <div class="callout"><strong>面试官常问：</strong>“如果这个项目做不出来，你怎么办？”<br><strong>不要答“一定能做出来”。</strong>合格的答法是给出<strong>降级路径 + 判定时间点</strong>：“我把它拆成三层：环境生成、任务定义、执行验证。<strong>如果 3 周内环境层还跑不通端到端，我就先去掉生成部分，用手工搭的场景把验证链路打通</strong>——这样即使生成没成，团队仍然得到一个能用的评测环境。这是我预设的止损点。”</div>
+      <div class="personal-note"><div class="note-heading"><div><span class="eyebrow">我的理解</span><h3>写给要拿这段去面试的自己</h3></div><span id="note-status" class="note-status" aria-live="polite">记录保存在此浏览器</span></div><label class="form-label" for="learning-note">用一句话写下你最容易“说过头”的那条表述，以及它的诚实版本：</label><textarea class="form-control" id="learning-note" rows="7" placeholder="例如：容易说过头的是“我独立完成了场景生成系统”；诚实版本是“我独立完成了概念图到场景的链路联调，AI 推理部分是 mock，所以它证明了接口设计，没有证明生成质量”……"></textarea><div class="note-actions"><button type="button" class="btn" id="export-note">导出我的笔记 .md</button><span>浏览器自动保存；导出后可自行放入仓库，不会自动上传。</span></div></div>
+    </section>
+
+    <section id="score" class="lesson-section" data-nav>
+      <div class="section-kicker"><span>10</span> 首次自评</div>
+      <h2>先记第一次的分数。</h2>
+      <div id="day14-score" class="demo">
+        <div class="demo-head"><span class="demo-title">五维自评（0–4 分）</span><span class="demo-tag">首次 / 修订分开记</span></div>
+        <div class="score-grid">
+          <div class="score-row"><strong>概念</strong><input id="d14-sc-1" type="range" min="0" max="4" step="1" value="3" aria-label="概念得分"><output id="d14-sc-1-out">3</output></div>
+          <div class="score-row"><strong>因果 / 原理</strong><input id="d14-sc-2" type="range" min="0" max="4" step="1" value="2" aria-label="原理得分"><output id="d14-sc-2-out">2</output></div>
+          <div class="score-row"><strong>接口</strong><input id="d14-sc-3" type="range" min="0" max="4" step="1" value="2" aria-label="接口得分"><output id="d14-sc-3-out">2</output></div>
+          <div class="score-row"><strong>实验验证</strong><input id="d14-sc-4" type="range" min="0" max="4" step="1" value="1" aria-label="验证得分"><output id="d14-sc-4-out">1</output></div>
+          <div class="score-row"><strong>经历真实性</strong><input id="d14-sc-5" type="range" min="0" max="4" step="1" value="2" aria-label="真实性得分"><output id="d14-sc-5-out">2</output></div>
+        </div>
+        <div class="kpi-row">
+          <div class="kpi-block"><span>总分</span><strong id="d14-sc-total">10 / 20</strong></div>
+          <div class="kpi-block"><span>建议</span><strong id="d14-sc-tip">先降一级措辞</strong></div>
+        </div>
+        <p class="demo-note" id="d14-sc-note">14plan 里 16+ 是<strong>自定义目标</strong>，不是官方分数线。如果你在“验证”上只能给 1 分，那说明你的材料里有<strong>“做过”但没有“做成了”的证据</strong>——这不是能力问题，是记录问题。<strong>现在还能补：把一次失败和一次修订写成两段 200 字，就是一份可讲的验证证据。</strong></p>
+      </div>
+    </section>
+
+    <section id="sources" class="lesson-section sources-section" data-nav>
+      <div class="section-kicker"><span>↗</span> 来源与边界</div>
+      <h2>这一页对应哪些原始材料</h2>
+      <p>范围来自 <a href="https://github.com/lucinwen/14plan/blob/main/TASK_GUIDES/day-14.md" target="_blank" rel="noopener noreferrer">Day 14 任务手册</a>：P09、R03、R16；任务手册「实际任务补强」五节（两轮模拟的硬要求、真实性卡片十字段、90 秒结构、评分与复盘、完成的最低结果），以及 Day 14 的面试综合场景题。</p>
+      <div class="source-method"><h3>本页做了什么、没做什么</h3><p>本页提供<strong>可检验的表述规则</strong>：断言强度 ↔ 证据等级的对应、真实性卡片的四个归属标签、90 秒/3 分钟/5 分钟的结构差异、两轮 45 分钟的时间盒、三层主线的分配、追问链的四层结构与四页材料的来源分层。</p><p><strong>本页不包含任何人的真实简历内容、面试录像、企业内部信息或未公开项目名。</strong>页面中出现的所有句型都是<strong>示例句型</strong>，用来说明“同一件事可以怎么写、风险在哪”，<strong>不是对任何具体经历的事实陈述</strong>。真实卡片必须由本人用自己的事实填写。</p><p>关于评分：14plan 的“16+ 为目标”是<strong>自定义训练目标</strong>，不是任何机构的录取标准。本页的“可信度 100 分”等数值只是<strong>用于演示追问代价的示意刻度</strong>，不对应任何真实评估体系。</p><p>最后一条与前面十三页一致：<strong>凡是没有回执、没有日志、没有对照、没有代码的成果，都不能写成“已完成”</strong>。这一条对本页尤其重要——因为面试现场唯一无法伪装的，就是“你到底亲手做过什么”。</p></div>
+    </section>
+    <div class="next-lesson"><span class="small-label">十四天走完了</span><a href="index.html">回到总览 · 十四篇全部在这里 →</a></div>
+    <footer class="site-footer"><div><strong>Modern Robotics 学习手记</strong><p>先看见变化，再说清原因。</p></div><a href="#start">回到顶部 ↑</a></footer>
+  </main>
+</div>
+<noscript><div class="noscript-note">文字教程可以正常阅读。交互演示需要在浏览器中启用 JavaScript。</div></noscript>
+</body>
+</html>

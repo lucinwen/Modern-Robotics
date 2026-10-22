@@ -21,6 +21,10 @@ EXPECTED = {
     'day-08.html': ['day8-names', 'day8-matrix', 'day8-counter', 'day8-evidence', 'day8-protocol', 'day8-pitch', 'day8-freeze', 'day8-exam', 'day8-score'],
     'day-09.html': ['day9-chain', 'day9-latency', 'day9-states', 'day9-timeline', 'day9-races', 'day9-epoch', 'day9-companion', 'day9-verify', 'day9-exam', 'day9-score'],
     'day-10.html': ['day10-reps', 'day10-matrix', 'day10-gs', 'day10-params', 'day10-timing', 'day10-failures', 'day10-scope', 'day10-exam', 'day10-score'],
+    'day-14.html': ['day14-intro', 'day14-claims', 'day14-check', 'day14-pack', 'day14-line', 'day14-timebox', 'day14-drill', 'day14-cards', 'day14-exam', 'day14-score'],
+    'day-13.html': ['day13-chain', 'day13-spaces', 'day13-comms', 'day13-latency', 'day13-drift', 'day13-schema', 'day13-haptics', 'day13-faults', 'day13-exam', 'day13-score'],
+    'day-12.html': ['day12-scale', 'day12-aperture', 'day12-side', 'day12-mechanism', 'day12-time', 'day12-evidence', 'day12-branches', 'day12-vote', 'day12-exam', 'day12-score'],
+    'day-11.html': ['day11-chain', 'day11-chirp', 'day11-fft', 'day11-phase', 'day11-doppler', 'day11-synth', 'day11-quality', 'day11-safety', 'day11-exam', 'day11-score'],
     'day-06.html': ['day6-roles', 'day6-geometry', 'day6-physics', 'day6-articulation', 'day6-observation', 'day6-time', 'day6-action', 'day6-reward', 'day6-reset', 'day6-seed', 'day6-audit', 'day6-counterexamples', 'day6-checker', 'day6-episode', 'day6-exam', 'day6-score'],
 }
 RECORDED_DATA = {
