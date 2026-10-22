@@ -2,13 +2,13 @@
 
 面向初学者的中文学习笔记。先通过交互观察空间变化，再解释概念、公式与适用条件。
 
-目前包含 [14plan 的 Day 1](https://github.com/venividici/14plan/blob/main/DAILY/day-01.md)、[Day 2](https://github.com/venividici/14plan/blob/main/DAILY/day-02.md) 和 [Day 3](https://github.com/venividici/14plan/blob/main/DAILY/day-03.md)。Day 1 从刚体与坐标变换建立空间直觉；Day 2 把空间要求写成 Z3 / SMT 约束；Day 3 再用“开门拿杯子”理解状态、动作顺序，以及任务与运动规划怎样配合。
+目前包含 Day 1–3 的连续基础教程，并新增 **Day 6 · 从可渲染场景到机器人训练环境**。Day 6 聚焦 UE → Isaac Sim / Isaac Lab：尺度、碰撞、质量、关节、传感、动作、奖励、终止、reset、seed 与评测证据。
 
 ## 打开教程
 
-- **Day 1 网页**：[index.html](index.html) · **Day 2 网页**：[day-02.html](day-02.html) · **Day 3 网页**：[day-03.html](day-03.html)。下载并解压完整仓库后，直接用浏览器打开对应文件；网页交互无须安装依赖。GitHub 文件页显示源码，要操作可视化请打开本地网页，或启用下述 Pages。
+- **Day 1 网页**：[index.html](index.html) · **Day 2 网页**：[day-02.html](day-02.html) · **Day 3 网页**：[day-03.html](day-03.html) · **Day 6 网页**：[day-06.html](day-06.html)。下载并解压完整仓库后，直接用浏览器打开对应文件；网页交互无须安装依赖。GitHub 文件页显示源码，要操作可视化请打开本地网页，或启用下述 Pages。
 - GitHub Pages 预定地址：<https://venividici.github.io/-Modern-Robotics/>。需要在仓库 **Settings → Pages** 选择 **Deploy from a branch → main → /(root)** 并保存后才会发布。
-- **完整文字版**：[Day 01 教程](notes/day-01-tutorial.md) · [Day 02 教程](notes/day-02-tutorial.md) · [Day 03 教程](notes/day-03-tutorial.md)。
+- **完整文字版**：[Day 01 教程](notes/day-01-tutorial.md) · [Day 02 教程](notes/day-02-tutorial.md) · [Day 03 教程](notes/day-03-tutorial.md) · [Day 06 教程](notes/day-06-tutorial.md)。
 - 课程对应表：[Day 01](notes/day-01-course-map.md) · [Day 02](notes/day-02-course-map.md) · [Day 03](notes/day-03-course-map.md)。
 - 配套材料：[2.1 刚体自由度专题](notes/day-01-2-1-rigid-body-dof.md) · [Day 2 Python / Z3 实验](examples/day-02/README.md) · [Day 3 PDDL / MiniLab 实验](examples/day-03/README.md)。
 
@@ -156,3 +156,15 @@ Day 2 的几何与区间检查覆盖贴边、碰角、缝隙、门洞端点、�
 Day 3 的 173 项符号检查包括状态不变量、失败动作不变更状态、去重与最少步数，并逐例对照全部 9 个 PDDL 实际记录的完整前置、效果和状态。93 项几何检查覆盖门宽与中心偏移、给定折线最小距离、两支 IK 正向恢复、边界和世界版本反馈。记录查看器还核对 18 条记录的 schema、零步与无计划、原始结果和错误数据拒绝。
 
 目前尚未完成三篇网页在浏览器中的整页视觉与交互实测。原对话中的三个自由度演示曾单独检查过，但这不替代新页面的整体浏览器测试。
+
+
+## Day 6 · 从可渲染场景到机器人训练环境
+
+Day 6 面向 UE / PCG 已有基础，重点不是安装平台，而是建立可执行的 **robot task contract**。自包含网页包含 11 个交互学习区，依次覆盖渲染几何与物理几何、动力学参数、门 Articulation、Observation、公平性、时间同步、Action、Reward vs Success、Reset、Seed 划分、UE→物理仿真审计与完整 Episode 时间线。
+
+- 网页：[day-06.html](day-06.html)
+- 文字版：[notes/day-06-tutorial.md](notes/day-06-tutorial.md)
+- 验证范围：[notes/day-06-validation.md](notes/day-06-validation.md)
+- 可复现实验：[examples/day-06/README.md](examples/day-06/README.md)
+
+配套标准库 Python 脚本实际运行 **26 个教学案例、139/139 项检查通过**。这些结果只验证本教程的受限数学/任务合同模型；Isaac Sim、Isaac Lab、ROS 与实体机器人执行均明确标记为未运行。
